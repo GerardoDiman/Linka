@@ -1,5 +1,6 @@
 const { Client } = require('@notionhq/client');
 
+// Función para Vercel: /api/test-connection
 module.exports = async function handler(req, res) {
   // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
