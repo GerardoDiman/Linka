@@ -122,7 +122,7 @@ export class NotionApiClient {
 
   async getDatabase(databaseId: string): Promise<any> {
     console.log(`📖 Getting database: ${databaseId}`)
-    return this.makeRequest(`/databases/${databaseId}`)
+    return this.makeRequest(`/database?id=${databaseId}`)
   }
 
   async testConnection(): Promise<boolean> {

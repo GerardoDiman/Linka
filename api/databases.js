@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
     const databaseId = urlParts[urlParts.length - 1];
 
     // Si hay un ID específico, obtener esa base de datos
-    if (databaseId && databaseId !== 'databases') {
+    if (databaseId && databaseId !== 'databases' && databaseId.length > 20) {
       console.log(`🔍 Obteniendo base de datos específica: ${databaseId}`);
       
       try {
