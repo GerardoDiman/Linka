@@ -1,0 +1,65 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Eres un desarrollador experto en React, TypeScript, ReactFlow, TailwindCSS y la API de Notion. Tu tarea es crear la estructura inicial de una aplicación web para visualizar bases de datos de Notion como un diagrama de nodos interconectados.
+
+1. Objetivo General del Proyecto
+Desarrollar una aplicación web que se conecte a Notion a través de un token de integración. La aplicación debe obtener las bases de datos de un workspace y representarlas visualmente como nodos en un área de trabajo interactiva creada con ReactFlow.
+
+2. Pila Tecnológica
+Framework: React con Vite
+
+Lenguaje: TypeScript
+
+Diagramas: ReactFlow
+
+Estilos: TailwindCSS
+
+API: Cliente oficial de Notion (@notionhq/client)
+
+3. Componentes y Funcionalidades Clave
+a) Área del Diagrama (DiagramCanvas.tsx)
+Layout Automático: Utiliza un algoritmo de layout (como Dagre) para distribuir los nodos (bloques) de manera organizada en el espacio, evitando solapamientos. La distribución debe ser clara incluso si se extiende más allá de la pantalla visible.
+
+Nodos Personalizados (DatabaseNode.tsx):
+
+Cada nodo representa una base de datos de Notion.
+
+Implementa una función para asignar un color de fondo único y distintivo a cada nodo.
+
+El nodo debe mostrar el título de la base de datos.
+
+Conexiones Personalizadas (CustomEdge.tsx):
+
+Las interconexiones entre bases de datos deben ser flechas.
+
+El color de la flecha (edge) debe coincidir con el color del nodo de origen.
+
+Controles de UI:
+
+Integra un Minimapa (MiniMap de ReactFlow) para facilitar la navegación.
+
+Añade los controles básicos de zoom y paneo (Controls de ReactFlow).
+
+b) Panel Lateral (SidePanel.tsx)
+Visibilidad: Debe ser un panel ubicado a la derecha que se pueda contraer y expandir con un botón.
+
+Listado de Bases de Datos:
+
+Muestra una lista de todas las bases de datos obtenidas de la API de Notion.
+
+Cada elemento de la lista debe tener un checkbox. Al desmarcarlo, el nodo y sus conexiones correspondientes deben ocultarse del DiagramCanvas.tsx.
+
+Filtrado: Incluye un campo de texto en la parte superior del panel para filtrar la lista de bases de datos por su nombre en tiempo real.
+
+4. Flujo de Datos Inicial
+El componente principal App.tsx será responsable de solicitar el token de integración de Notion al usuario.
+
+Con el token, App.tsx llamará a la API de Notion para obtener la lista de bases de datos.
+
+Esta lista se pasará como props tanto al DiagramCanvas.tsx (para renderizar los nodos) como al SidePanel.tsx (para renderizar la lista con checkboxes).
+
+
+El estado de visibilidad de cada base de datos (controlado por los checkboxes en SidePanel.tsx) debe ser gestionado en el componente App.tsx para mantener la sincronización entre el panel y el diagrama.

@@ -1,0 +1,794 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables de colores primarios */
+:root {
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+}
+
+/* Animations for Radix UI tooltips */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scaleOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.9); }
+}
+
+.animate-in {
+  animation: fadeIn 200ms ease-out, scaleIn 200ms ease-out;
+}
+
+.animate-out {
+  animation: fadeOut 200ms ease-in, scaleOut 200ms ease-in;
+}
+
+.fade-in-0 {
+  animation: fadeIn 200ms ease-out;
+}
+
+.zoom-in-95 {
+  animation: scaleIn 200ms ease-out;
+}
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+  
+  /* Export-friendly styles - avoid external font dependencies */
+  .export-safe {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  
+  /* Hide problematic elements during export */
+  .export-mode .external-image {
+    display: none !important;
+  }
+  
+  .export-mode .fallback-icon {
+    display: block !important;
+  }
+}
+
+@layer components {
+  .reactflow-wrapper {
+    background: #fafafa;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .custom-node {
+    @apply bg-white border-2 border-gray-200 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow;
+  }
+  
+  .custom-node.selected {
+    @apply border-primary-500 shadow-lg;
+  }
+  
+  .custom-edge {
+    stroke: #6b7280;
+    stroke-width: 2;
+  }
+  
+  .custom-edge.selected {
+    stroke: #3b82f6;
+    stroke-width: 3;
+  }
+  
+  /* Search highlighting styles */
+  mark {
+    background-color: #fef3c7;
+    color: #92400e;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    animation: highlight-pulse 0.3s ease-in-out;
+  }
+  
+  .match-badge {
+    animation: slide-in 0.2s ease-out;
+  }
+  
+  .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+  }
+}
+
+/* Search animations */
+@keyframes highlight-pulse {
+  0% { background-color: #fbbf24; }
+  100% { background-color: #fef3c7; }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Ocultar completamente la marca de agua de React Flow */
+.react-flow__attribution {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Estilos personalizados para React Flow */
+.reactflow-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.react-flow .react-flow__node-database {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.react-flow .react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+}
+
+.react-flow .react-flow__handle-top {
+  top: -4px;
+}
+
+.react-flow .react-flow__handle-bottom {
+  bottom: -4px;
+}
+
+.react-flow .react-flow__handle-left {
+  left: -4px;
+}
+
+.react-flow .react-flow__handle-right {
+  right: -4px;
+}
+
+/* Optimizaciones de rendimiento para nodos */
+.react-flow__node {
+  pointer-events: all;
+}
+
+.react-flow__edge {
+  pointer-events: all;
+}
+
+/* Mejorar la selección de nodos */
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Estilos para el modo oscuro en React Flow */
+.dark .react-flow {
+  background: #111827;
+}
+
+.dark .react-flow__handle {
+  background: #60a5fa;
+  border-color: #1f2937;
+}
+
+.dark .react-flow__edge-path {
+  stroke: #6b7280;
+}
+
+.dark .react-flow__edge.selected .react-flow__edge-path {
+  stroke: #60a5fa;
+}
+
+/* Asegurar que no aparezca ninguna marca de agua o attribution */
+.react-flow__attribution,
+.react-flow__attribution a,
+.react-flow__attribution div,
+[class*="attribution"],
+[data-testid*="attribution"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Nodos personalizados */
+.react-flow__node {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.react-flow__node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.react-flow__node.selected {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Handles más visibles */
+.react-flow__handle {
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  width: 8px;
+  height: 8px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.react-flow__handle:hover {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+/* Handles específicos para modo oscuro */
+html[data-theme="dark"] .react-flow__handle {
+  background: #60a5fa;
+  border-color: #1f2937;
+}
+
+/* Controles de React Flow */
+.react-flow__controls {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+html[data-theme="dark"] .react-flow__controls {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: #374151;
+}
+
+.react-flow__controls button {
+  background: transparent;
+  border: none;
+  color: #374151;
+  padding: 8px;
+  transition: all 0.2s ease;
+}
+
+.react-flow__controls button:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+html[data-theme="dark"] .react-flow__controls button {
+  color: #d1d5db;
+}
+
+html[data-theme="dark"] .react-flow__controls button:hover {
+  background: rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+}
+
+/* Minimap */
+.react-flow__minimap {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+html[data-theme="dark"] .react-flow__minimap {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: #374151;
+}
+
+/* Edges con mejor visibilidad */
+.react-flow__edge-path {
+  stroke-width: 2;
+  opacity: 0.8;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  opacity: 1;
+  stroke-width: 3;
+}
+
+/* Eliminación completa de attribution */
+.react-flow__attribution {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Asegurarse que no aparezca en ningún lado */
+.react-flow__panel,
+.react-flow__panel-bottom,
+.react-flow__panel-top,
+.react-flow__panel-left,
+.react-flow__panel-right {
+  pointer-events: none;
+}
+
+.react-flow__panel > * {
+  pointer-events: all;
+}
+
+/* Ocultar cualquier texto de atribución */
+.react-flow__renderer::after,
+.react-flow__renderer::before {
+  display: none !important;
+}
+
+/* Navegación - Estilos específicos */
+.navigation-bar {
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  animation: fadeIn 0.15s ease-out;
+  will-change: transform, opacity;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optimización específica para evitar parpadeo del theme toggle */
+.dropdown-menu [data-theme-toggle] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+/* Mejoras en las transiciones para evitar conflictos */
+.dropdown-menu button {
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.dropdown-menu [data-theme-toggle] {
+  transition: none !important;
+}
+
+.dropdown-menu [data-theme-toggle] * {
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+/* Prevenir layout shifts durante cambios de tema */
+[data-theme-toggle] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Estabilizar el componente durante transiciones */
+.dropdown-menu [data-theme-toggle] {
+  width: fit-content;
+  height: fit-content;
+  opacity: 1 !important;
+}
+
+/* Eliminar completamente cualquier transición durante montaje */
+.dropdown-menu [data-theme-toggle] * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Restaurar transiciones solo para hover después de estabilización */
+.dropdown-menu [data-theme-toggle]:hover * {
+  transition: background-color 0.1s ease !important;
+}
+
+/* Barra de navegación responsive */
+@media (max-width: 768px) {
+  .navigation-bar h1 {
+    font-size: 1rem;
+  }
+  
+  .navigation-bar p {
+    display: none;
+  }
+  
+  .navigation-bar .space-x-3 {
+    gap: 0.5rem;
+  }
+  
+  .navigation-bar .space-x-1 {
+    gap: 0.25rem;
+  }
+  
+  .navigation-bar button span {
+    display: none;
+  }
+  
+  .navigation-bar button {
+    padding: 0.5rem;
+  }
+}
+
+/* Tooltips mejorados */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1000;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animaciones sutiles */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gradientes para el logo */
+.bg-gradient-to-br {
+  background: linear-gradient(to bottom right, var(--primary-500), var(--primary-600));
+}
+
+html[data-theme="dark"] .bg-gradient-to-br {
+  background: linear-gradient(to bottom right, var(--primary-400), var(--primary-500));
+}
+
+/* Efectos de hover mejorados */
+.hover-lift {
+  transition: all 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Backdrop blur mejor soporte */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Transiciones suaves para el tema */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Excluir elementos específicos de las transiciones automáticas */
+[data-theme-toggle],
+[data-theme-toggle] * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+/* Botones con estados mejorados */
+.btn-primary {
+  background: var(--primary-600);
+  color: white;
+  border: 1px solid var(--primary-700);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-700);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Estados de focus mejorados */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+html[data-theme="dark"] .loading-shimmer {
+  background: linear-gradient(90deg, #374151 25%, transparent 37%, #374151 63%);
+  background-size: 400% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+/* Mejoras específicas para el layout */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.workspace-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Overlays con mejor jerarquía visual */
+.stats-overlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="dark"] .stats-overlay {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: rgba(55, 65, 81, 0.8);
+}
+
+/* Mejoras responsive */
+@media (max-width: 1024px) {
+  .stats-overlay {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-overlay {
+    position: fixed;
+    top: 4rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+  }
+}
+
+/* Keyboard shortcuts indicators */
+kbd {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+html[data-theme="dark"] kbd {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+/* Mejoras en la accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible para navegación por teclado */
+.focus-visible:focus {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .navigation-bar,
+  .stats-overlay,
+  .react-flow__controls,
+  .react-flow__minimap {
+    display: none !important;
+  }
+  
+  .react-flow__viewport {
+    transform: none !important;
+  }
+}
+
+/* Custom scrollbar styles for DatabaseVisibilityManager - ALTA ESPECIFICIDAD */
+.db-visibility-scroll::-webkit-scrollbar {
+  width: 100px !important;
+}
+
+.db-visibility-scroll::-webkit-scrollbar-track {
+  background: #f8fafc !important;
+  border-radius: 5px !important;
+  margin: 4px 200px 1006px 2px !important;
+}
+
+.db-visibility-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%) !important;
+  border-radius: 5px !important;
+  border: 1px solid #f8fafc !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+.db-visibility-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+.db-visibility-scroll::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #64748b 0%, #475569 100%) !important;
+}
+
+/* Dark mode scrollbar */
+.dark .db-visibility-scroll::-webkit-scrollbar-track {
+  background: #1e293b !important;
+  border-radius: 5px !important;
+  margin: 4px 2px 16px 2px !important;
+}
+
+.dark .db-visibility-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #475569 0%, #334155 100%) !important;
+  border-color: #1e293b !important;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .db-visibility-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #64748b 0%, #475569 100%) !important;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .db-visibility-scroll::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%) !important;
+}
+
+/* Firefox scrollbar */
+.db-visibility-scroll {
+  scrollbar-width: thin !important;
+  scrollbar-color: #cbd5e1 #f8fafc !important;
+}
+
+.dark .db-visibility-scroll {
+  scrollbar-color: #475569 #1e293b !important;
+}
+
+/* Asegurar que el contenedor tenga scroll cuando sea necesario */
+.db-visibility-scroll {
+  overflow-y: auto !important;
+  scrollbar-gutter: stable !important;
+}
+
+/* Estilos adicionales para mejor experiencia de scroll */
+.db-visibility-scroll {
+  scroll-behavior: smooth !important;
+  overscroll-behavior: contain !important;
+}
