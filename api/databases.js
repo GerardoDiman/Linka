@@ -43,7 +43,48 @@ module.exports = async function handler(req, res) {
       auth: token
     });
 
-    console.log('🔍 Buscando bases de datos con token del usuario...');
+    // Extraer el ID de la base de datos de la URL si existe
+    const urlParts = req.url.split('/');
+    const databaseId = urlParts[urlParts.length - 1];
+
+    // Si hay un ID específico, obtener esa base de datos
+    if (databaseId && databaseId !== 'databases') {
+      console.log(`🔍 Obteniendo base de datos específica: ${databaseId}`);
+      
+      try {
+        const database = await notion.databases.retrieve({
+          database_id: databaseId
+        });
+        
+        console.log(`✅ Base de datos obtenida: ${database.title?.[0]?.plain_text || databaseId}`);
+        
+        res.status(200).json(database);
+        return;
+      } catch (error) {
+        console.error(`❌ Error obteniendo base de datos ${databaseId}:`, error);
+        
+        if (error.code === 'object_not_found') {
+          res.status(404).json({
+            error: 'Base de datos no encontrada',
+            details: `No se pudo encontrar la base de datos con ID: ${databaseId}`
+          });
+        } else if (error.code === 'unauthorized') {
+          res.status(401).json({
+            error: 'Sin permisos para acceder a esta base de datos',
+            details: 'Asegúrate de haber compartido esta base de datos con tu integración'
+          });
+        } else {
+          res.status(500).json({
+            error: 'Error interno del servidor',
+            details: error.message || 'Error desconocido al obtener la base de datos'
+          });
+        }
+        return;
+      }
+    }
+
+    // Si no hay ID específico, obtener todas las bases de datos
+    console.log('🔍 Buscando todas las bases de datos...');
 
     // Buscar todas las bases de datos
     const response = await notion.search({
