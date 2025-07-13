@@ -2,8 +2,9 @@
   "name": "linkav2.0",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173",
     "dev:api": "node simple-server.js",
     "dev:full": "concurrently \"npm run dev:api\" \"npm run dev\"",
     "start": "start-dev.bat",
