@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Database, Zap, ArrowRight, CheckCircle } from 'lucide-react';
+import { Database, Zap, ArrowRight, CheckCircle, FileText, Layers, BarChart3 } from 'lucide-react';
 
 const HeroIllustration = () => (
   <svg width="400" height="280" viewBox="0 0 400 280" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto max-w-lg mx-auto md:mx-0">
@@ -60,12 +60,139 @@ const HeroSection = () => (
   </section>
 );
 
+const OfferSection = () => (
+  <section className="py-16 bg-white">
+    <div className="max-w-4xl mx-auto px-4 text-center">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Nuestra Oferta</h2>
+      <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
+        Te ayudamos a visualizar y entender la estructura de tus datos en Notion, facilitando la gestión y el análisis de tus bases de datos de manera profesional y sencilla.
+      </p>
+      <div className="flex flex-col md:flex-row justify-center gap-8">
+        <div className="flex-1">
+          <div className="flex flex-col items-center">
+            <FileText className="w-10 h-10 text-blue-500 mb-2" />
+            <h3 className="font-semibold text-lg text-gray-900 mb-1">Aprende</h3>
+            <p className="text-gray-500 text-sm">Descubre cómo se relacionan tus datos y aprende a optimizar tu workspace.</p>
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="flex flex-col items-center">
+            <Layers className="w-10 h-10 text-teal-500 mb-2" />
+            <h3 className="font-semibold text-lg text-gray-900 mb-1">Practica</h3>
+            <p className="text-gray-500 text-sm">Experimenta con filtros, búsquedas y visualizaciones interactivas.</p>
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="flex flex-col items-center">
+            <BarChart3 className="w-10 h-10 text-purple-500 mb-2" />
+            <h3 className="font-semibold text-lg text-gray-900 mb-1">Crece</h3>
+            <p className="text-gray-500 text-sm">Toma mejores decisiones y haz crecer tus proyectos con datos claros.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const FeaturesSection = () => (
+  <section className="py-16 bg-gray-50">
+    <div className="max-w-6xl mx-auto px-4">
+      <div className="text-center mb-12">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Características</h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Todo lo que necesitas para visualizar y entender tu workspace de Notion de manera profesional.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center text-center">
+          <Database className="w-10 h-10 text-blue-500 mb-4" />
+          <h3 className="font-semibold text-lg text-gray-900 mb-2">Visualización Interactiva</h3>
+          <p className="text-gray-500 text-sm">Explora tus bases de datos y relaciones con nodos y conexiones animadas.</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center text-center">
+          <Zap className="w-10 h-10 text-teal-500 mb-4" />
+          <h3 className="font-semibold text-lg text-gray-900 mb-2">Modo Demo Instantáneo</h3>
+          <p className="text-gray-500 text-sm">Prueba todas las funciones con datos de ejemplo, sin cuenta de Notion.</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center text-center">
+          <Layers className="w-10 h-10 text-purple-500 mb-4" />
+          <h3 className="font-semibold text-lg text-gray-900 mb-2">Filtros y Búsqueda</h3>
+          <p className="text-gray-500 text-sm">Encuentra lo que necesitas con potentes filtros y búsqueda en tiempo real.</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center text-center">
+          <BarChart3 className="w-10 h-10 text-pink-500 mb-4" />
+          <h3 className="font-semibold text-lg text-gray-900 mb-2">Estadísticas y Exportación</h3>
+          <p className="text-gray-500 text-sm">Obtén insights, estadísticas y exporta diagramas de alta calidad.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const BenefitsSection = () => (
+  <section className="py-16 bg-white">
+    <div className="max-w-6xl mx-auto px-4">
+      <div className="flex flex-col md:flex-row items-center gap-12">
+        <div className="flex-1">
+          <img src="https://storyset.com/illustration/goal/bro" alt="Beneficios" className="w-full max-w-md mx-auto md:mx-0 rounded-2xl shadow-md" style={{background:'#F0F9FF'}} />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Beneficios</h2>
+          <ul className="space-y-4 text-lg text-gray-700">
+            <li className="flex items-center"><CheckCircle className="w-6 h-6 text-green-500 mr-3" /> Visualización clara y profesional</li>
+            <li className="flex items-center"><CheckCircle className="w-6 h-6 text-green-500 mr-3" /> Ahorra tiempo en la gestión de datos</li>
+            <li className="flex items-center"><CheckCircle className="w-6 h-6 text-green-500 mr-3" /> Sin curva de aprendizaje</li>
+            <li className="flex items-center"><CheckCircle className="w-6 h-6 text-green-500 mr-3" /> Perfecto para equipos y freelancers</li>
+            <li className="flex items-center"><CheckCircle className="w-6 h-6 text-green-500 mr-3" /> 100% gratis y open source</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const FinalCTASection = () => (
+  <section className="py-16 bg-gradient-to-r from-blue-50 to-teal-100">
+    <div className="max-w-3xl mx-auto px-4 text-center">
+      <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">¿Listo para visualizar tus datos de Notion?</h2>
+      <p className="text-lg text-gray-700 mb-8">Empieza a explorar y entender tus bases de datos de manera profesional, gratis y sin complicaciones.</p>
+      <Link
+        to="/app"
+        className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-teal-400 text-white px-10 py-5 rounded-xl font-semibold text-xl shadow-md hover:from-blue-600 hover:to-teal-500 transition-all duration-200"
+      >
+        Probar Demo Ahora
+        <ArrowRight className="w-6 h-6 ml-2" />
+      </Link>
+    </div>
+  </section>
+);
+
+const Footer = () => (
+  <footer className="py-10 bg-white border-t border-gray-100 text-center text-gray-500 text-sm">
+    <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="flex items-center justify-center gap-2">
+        <Database className="w-6 h-6 text-blue-500" />
+        <span className="font-bold text-gray-700">Linka v2.0</span>
+      </div>
+      <div>
+        &copy; {new Date().getFullYear()} Linka. Visualiza Notion de forma profesional.
+      </div>
+      <div>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">GitHub</a>
+      </div>
+    </div>
+  </footer>
+);
+
 const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
       <HeroSection />
-      {/* Aquí puedes seguir agregando secciones: Oferta, Features, Beneficios, etc. */}
+      <OfferSection />
+      <FeaturesSection />
+      <BenefitsSection />
+      <FinalCTASection />
+      <Footer />
     </div>
   );
 };
