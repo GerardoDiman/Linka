@@ -28,6 +28,8 @@ interface NavigationBarProps {
   relationCount: number
   onShowFilters?: () => void
   className?: string
+  user?: { email?: string };
+  onLogout?: () => void;
 }
 
 export const NavigationBar: React.FC<NavigationBarProps> = memo(({
@@ -41,6 +43,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
   databaseCount,
   relationCount,
   onShowFilters,
+  user,
+  onLogout,
   className = ''
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
@@ -83,7 +87,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
         </div>
 
         {/* Menús principales */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 flex-1 justify-center">
           {/* Menú Archivo */}
           <div className="relative">
             <button
@@ -270,8 +274,25 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
             )}
           </div>
         </div>
-      </div>
 
+        {/* Usuario y logout alineados a la derecha */}
+        <div className="flex items-center space-x-3">
+          {user && (
+            <span className="text-xs text-gray-500 dark:text-gray-300">
+              Bienvenido, <span className="font-semibold text-blue-500 dark:text-blue-300">{user.email}</span>
+            </span>
+          )}
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="bg-red-100 text-red-700 px-3 py-1 rounded font-medium hover:bg-red-200 transition text-xs border border-red-200"
+              style={{ boxShadow: 'none' }}
+            >
+              Cerrar sesión
+            </button>
+          )}
+        </div>
+      </div>
       {/* Overlay para cerrar menús al hacer clic fuera */}
       {activeMenu && (
         <div

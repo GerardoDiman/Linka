@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const { Client } = require('@notionhq/client');
+import express from 'express';
+import cors from 'cors';
+import { Client } from '@notionhq/client';
 
 const app = express();
 const PORT = 3002;
@@ -189,4 +189,4 @@ app.listen(PORT, () => {
   console.log(`💡 [DEV] Este servidor simula las funciones serverless para desarrollo local`);
 });
 
-module.exports = app; 
+export default app; 

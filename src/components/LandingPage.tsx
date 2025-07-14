@@ -33,13 +33,13 @@ const HeroSection = () => (
           Explora relaciones, estadísticas y conexiones de tus bases de datos de Notion en un diagrama interactivo, intuitivo y hermoso. Sin configuración compleja.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-          <Link
-            to="/app"
-            className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-teal-400 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:from-blue-600 hover:to-teal-500 transition-all duration-200"
-          >
-            <ArrowRight className="w-5 h-5 mr-2" />
-            Probar Demo
-          </Link>
+                  <Link
+          to="/dashboard"
+          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-teal-400 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-md hover:from-blue-600 hover:to-teal-500 transition-all duration-200"
+        >
+          <ArrowRight className="w-5 h-5 mr-2" />
+          Probar Demo
+        </Link>
         </div>
         <div className="flex flex-wrap gap-4 mt-8 justify-center md:justify-start">
           <span className="inline-flex items-center bg-white border border-gray-200 px-4 py-2 rounded-full text-sm text-gray-700 shadow-sm">
@@ -157,7 +157,7 @@ const FinalCTASection = () => (
       <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">¿Listo para visualizar tus datos de Notion?</h2>
       <p className="text-lg text-gray-700 mb-8">Empieza a explorar y entender tus bases de datos de manera profesional, gratis y sin complicaciones.</p>
       <Link
-        to="/app"
+        to="/dashboard"
         className="inline-flex items-center justify-center bg-gradient-to-r from-blue-500 to-teal-400 text-white px-10 py-5 rounded-xl font-semibold text-xl shadow-md hover:from-blue-600 hover:to-teal-500 transition-all duration-200"
       >
         Probar Demo Ahora

@@ -3,22 +3,22 @@ import { ReactFlow, Background, Controls, MiniMap, addEdge, applyNodeChanges, ap
 import 'reactflow/dist/style.css'
 import { Toaster, toast } from 'react-hot-toast'
 
-import SidePanel from './components/SidePanel'
-import DatabaseNode from './components/DatabaseNode'
-import CustomEdge from './components/CustomEdge'
-import NotionSetup from './components/NotionSetup'
-import ExportPanel, { ExportOptions } from './components/ExportPanel'
-import { NavigationBar } from './components/NavigationBar'
-import { LoadingSpinner, FullPageLoader } from './components/LoadingSpinner'
-import { HelpPanel } from './components/HelpPanel'
-import { WorkspaceStats } from './components/WorkspaceStats'
-import { DatabaseVisibilityManager } from './components/DatabaseVisibilityManager'
-import { useNotionData } from './hooks/useNotionData'
-import { useTheme } from './hooks/useTheme'
-import { NotionDatabase } from './types/notion'
-import { RelationshipDetector, RelationshipMap } from './utils/relationshipDetector'
-import { SmartLayoutEngine } from './utils/smartLayout'
-import { exportDiagramSimple, validateSimpleExportOptions } from './utils/simpleExport'
+import SidePanel from './SidePanel'
+import DatabaseNode from './DatabaseNode'
+import CustomEdge from './CustomEdge'
+import NotionSetup from './NotionSetup'
+import ExportPanel, { ExportOptions } from './ExportPanel'
+import { NavigationBar } from './NavigationBar'
+import { LoadingSpinner, FullPageLoader } from './LoadingSpinner'
+import { HelpPanel } from './HelpPanel'
+import { WorkspaceStats } from './WorkspaceStats'
+import { DatabaseVisibilityManager } from './DatabaseVisibilityManager'
+import { useNotionData } from '../hooks/useNotionData'
+import { useTheme } from '../hooks/useTheme'
+import { NotionDatabase } from '../types/notion'
+import { RelationshipDetector, RelationshipMap } from '../utils/relationshipDetector'
+import { SmartLayoutEngine } from '../utils/smartLayout'
+import { exportDiagramSimple, validateSimpleExportOptions } from '../utils/simpleExport'
 
 const nodeTypes = {
   database: DatabaseNode,
@@ -174,7 +174,12 @@ const calculateOptimalConnectionPoints = (sourcePos: {x: number, y: number}, tar
   return { sourceHandle, targetHandle }
 }
 
-function App() {
+interface NotionVisualizerProps {
+  user?: { email?: string };
+  onLogout?: () => void;
+}
+
+const NotionVisualizer = ({ user, onLogout }: NotionVisualizerProps) => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
   const [selectedDatabase, setSelectedDatabase] = useState<NotionDatabase | null>(null)
@@ -676,6 +681,10 @@ function App() {
 
   const visibleDatabaseCount = getVisibleDatabaseCount()
 
+  if (loading) {
+    return <FullPageLoader />
+  }
+
   // Show setup screen if needed
   if (showSetup) {
     return (
@@ -716,6 +725,8 @@ function App() {
         isConnected={isConnected}
         databaseCount={visibleDatabaseCount}
         relationCount={edges.length}
+        user={user}
+        onLogout={onLogout}
       />
 
       {/* Main Content */}
@@ -844,4 +855,4 @@ function App() {
   )
 }
 
-export default App 
+export default NotionVisualizer 
