@@ -6,10 +6,12 @@ if (!global.users) {
 }
 
 export default async function handler(req, res) {
+  // Siempre agregar los headers de CORS
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Cambia '*' por tu dominio en producción si lo deseas
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') {
-    // Permitir preflight CORS
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
   if (req.method !== 'POST') {
