@@ -10,8 +10,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:3001',
+  'https://linka-nine.vercel.app'
+];
 app.use(cors({
-  origin: 'http://localhost:3001',
+  origin: function(origin, callback) {
+    // Permitir requests sin origin (como Postman) o si está en la lista
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
