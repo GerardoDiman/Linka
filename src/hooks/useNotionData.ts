@@ -243,8 +243,13 @@ export function useNotionData(): UseNotionDataReturn {
     let isMounted = true
     
     const loadInitialData = async () => {
-      if (isMounted) {
+      // Solo cargar datos si hay una conexión válida
+      if (isMounted && notionClient) {
         await fetchDatabases()
+      } else if (isMounted && !notionClient) {
+        // Si no hay conexión, no hacer nada automáticamente
+        // El usuario debe conectar manualmente o usar datos de demo
+        console.log('No hay conexión activa. El usuario debe conectar manualmente.')
       }
     }
     
@@ -253,7 +258,7 @@ export function useNotionData(): UseNotionDataReturn {
     return () => {
       isMounted = false
     }
-  }, [fetchDatabases])
+  }, [notionClient, fetchDatabases])
 
   return {
     databases,

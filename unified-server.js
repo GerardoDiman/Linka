@@ -12,10 +12,32 @@ const PORT = process.env.PORT || 3003;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3001',
-  credentials: true
+  origin: ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
+
+// Test endpoint to verify server is working
+app.get('/api/test', (req, res) => {
+  console.log('✅ Test endpoint called');
+  res.json({ 
+    message: 'Server is working!',
+    timestamp: new Date().toISOString(),
+    port: PORT
+  });
+});
+
+// Log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
 
 // Simular base de datos de usuarios
 const users = [];
@@ -299,4 +321,23 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor unificado corriendo en http://localhost:${PORT}`);
   console.log(`📱 API de autenticación: http://localhost:${PORT}/api/auth`);
   console.log(`🔗 API de Notion: http://localhost:${PORT}/notion`);
+});
+
+// Catch-all handler for unmatched routes
+app.use('*', (req, res) => {
+  console.log(`❌ Ruta no encontrada: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    error: 'Ruta no encontrada',
+    method: req.method,
+    path: req.originalUrl,
+    availableEndpoints: [
+      'GET /api/test',
+      'POST /api/auth/register',
+      'POST /api/auth/login', 
+      'POST /api/auth/logout',
+      'GET /notion/databases',
+      'GET /notion/database',
+      'GET /notion/test-connection'
+    ]
+  });
 }); 

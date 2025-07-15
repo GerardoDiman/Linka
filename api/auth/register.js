@@ -6,6 +6,8 @@ if (!global.users) {
 }
 
 export default async function handler(req, res) {
+  console.log("Método recibido:", req.method);
+  console.log("Body recibido:", req.body);
   // Siempre agregar los headers de CORS
   res.setHeader('Access-Control-Allow-Origin', '*'); // Cambia '*' por tu dominio en producción si lo deseas
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');

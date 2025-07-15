@@ -14,7 +14,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "vercel-build": "vite build"
+    "vercel-build": "vite build",
+    "test:api": "node test-server.js"
   },
   "engines": {
     "node": ">=20.x"

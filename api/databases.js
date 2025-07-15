@@ -1,6 +1,6 @@
-const { Client } = require('@notionhq/client');
+import { Client } from '@notionhq/client';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Configurar CORS para permitir requests desde cualquier origen
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
