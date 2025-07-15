@@ -7,10 +7,6 @@
       "config": {
         "distDir": "dist"
       }
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "rewrites": [
@@ -40,6 +36,5 @@
         }
       ]
     }
-  ],
-  "devCommand": "vite --port $PORT"
+  ]
 } 
