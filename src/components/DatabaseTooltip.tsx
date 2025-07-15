@@ -1,5 +1,4 @@
-import React from 'react'
-import * as Tooltip from '@radix-ui/react-tooltip'
+import React, { useState, useRef, useEffect } from 'react'
 import { Database, Link, Zap, Users, Calendar, Hash } from 'lucide-react'
 import { NotionDatabase } from '../types/notion'
 
@@ -20,6 +19,10 @@ export const DatabaseTooltip: React.FC<DatabaseTooltipProps> = ({
   cluster,
   children
 }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const tooltipRef = useRef<HTMLDivElement>(null)
+
   const propertyTypes = Object.values(database.properties).map(prop => prop.type)
   const uniqueTypes = [...new Set(propertyTypes)]
   const propertyCount = Object.keys(database.properties).length
@@ -40,114 +43,131 @@ export const DatabaseTooltip: React.FC<DatabaseTooltipProps> = ({
   const statusInfo = getStatusInfo()
   const StatusIcon = statusInfo.icon
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX
+    const y = e.clientY
+    
+    // Posicionar muy cerca del nodo
+    const tooltipWidth = 200 // Mucho más pequeño
+    const tooltipHeight = 120 // Mucho más pequeño
+    
+    let adjustedX = x + 5 // Muy cerca del cursor
+    let adjustedY = y - 10 // Justo arriba del cursor
+    
+    // Asegurar que no se salga de la pantalla
+    if (adjustedX + tooltipWidth > window.innerWidth) {
+      adjustedX = x - tooltipWidth - 5
+    }
+    
+    if (adjustedY < 0) {
+      adjustedY = y + 5
+    }
+    
+    if (adjustedY + tooltipHeight > window.innerHeight) {
+      adjustedY = window.innerHeight - tooltipHeight - 5
+    }
+    
+    setPosition({ x: adjustedX, y: adjustedY })
+    setIsOpen(true)
+  }
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
+      setIsOpen(false)
+    }
+  }
+
+  const handleEscape = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleEscape)
+      
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+        document.removeEventListener('keydown', handleEscape)
+      }
+    }
+  }, [isOpen])
+
   return (
-    <Tooltip.Provider delayDuration={300}>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          {children}
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content
-            className="bg-white border border-gray-200 rounded-lg p-4 shadow-xl max-w-sm z-50 animate-in fade-in-0 zoom-in-95"
-            sideOffset={8}
-          >
-            {/* Header */}
-            <div className="flex items-start space-x-3 mb-3">
+    <>
+      <div onContextMenu={handleContextMenu}>
+        {children}
+      </div>
+      
+      {isOpen && (
+        <div
+          ref={tooltipRef}
+          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 shadow-xl z-50 context-tooltip"
+          style={{
+            left: position.x,
+            top: position.y,
+            transform: 'translate(0, 0)',
+            width: '200px'
+          }}
+        >
+                      {/* Header */}
+            <div className="flex items-center space-x-2 mb-1">
               <div className="flex-shrink-0">
                 {database.icon?.emoji ? (
-                  <span className="text-2xl">{database.icon.emoji}</span>
+                  <span className="text-lg">{database.icon.emoji}</span>
                 ) : database.icon?.file?.url || database.icon?.external?.url ? (
                   <img 
                     src={database.icon.file?.url || database.icon.external?.url} 
                     alt="" 
-                    className="w-8 h-8 rounded"
+                    className="w-5 h-5 rounded"
                   />
                 ) : (
-                  <Database className="w-8 h-8 text-gray-400" />
+                  <Database className="w-5 h-5 text-gray-400" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 truncate">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate text-sm">
                   {database.title}
                 </h3>
-                <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                  <StatusIcon className="w-3 h-3" />
-                  <span>{statusInfo.text}</span>
-                </div>
               </div>
             </div>
 
-            {/* Description */}
+                      {/* Description */}
             {database.description && (
-              <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-3">
                 {database.description}
               </p>
             )}
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="flex items-center space-x-2">
-                <Hash className="w-4 h-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500">Properties</div>
-                  <div className="font-medium">{propertyCount}</div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Link className="w-4 h-4 text-gray-400" />
-                <div>
-                  <div className="text-xs text-gray-500">Relations</div>
-                  <div className="font-medium">{relationCount}</div>
-                </div>
-              </div>
+                                  {/* Status */}
+            <div className={`inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color} mb-1`}>
+              <StatusIcon className="w-3 h-3" />
+              <span>{statusInfo.text}</span>
             </div>
 
-            {/* Property Types */}
-            <div className="mb-3">
-              <div className="text-xs text-gray-500 mb-1">Property types:</div>
-              <div className="flex flex-wrap gap-1">
-                {uniqueTypes.slice(0, 4).map(type => (
-                  <span
-                    key={type}
-                    className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded"
-                  >
-                    {type}
-                  </span>
-                ))}
-                {uniqueTypes.length > 4 && (
-                  <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                    +{uniqueTypes.length - 4} more
-                  </span>
-                )}
-              </div>
+            {/* Quick stats */}
+            <div className="text-xs text-gray-500">
+              {propertyCount} props • {relationCount} relations
             </div>
 
-            {/* Cluster info */}
-            {cluster && cluster.centerDatabase !== database.id && (
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <Users className="w-3 h-3" />
-                <span>Part of cluster with {cluster.databases.length} databases</span>
-              </div>
-            )}
-
-            {/* Last modified */}
-            {database.lastEditedTime && (
-              <div className="flex items-center space-x-2 text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                <Calendar className="w-3 h-3" />
-                <span>
-                  Updated: {new Date(database.lastEditedTime).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                </span>
-              </div>
-            )}
-
-            <Tooltip.Arrow className="fill-white" />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
+          {/* Close button */}
+          <button
+            onClick={() => setIsOpen(false)}
+            className="absolute top-1 right-1 p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
+            title="Close"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </>
   )
 } 

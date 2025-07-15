@@ -1,7 +1,7 @@
 // Lógica base para llamadas a la API
 const API_URL =
   window.location.hostname === 'localhost'
-    ? 'http://localhost:3003/api'
+    ? 'http://localhost:3003'
     : '/api'; // En producción, usa rutas relativas (Vercel serverless o proxy)
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {

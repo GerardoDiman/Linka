@@ -572,6 +572,11 @@ function App() {
     }
   }, [databases])
 
+  // Handle click outside to deselect database
+  const onPaneClick = useCallback((_event: React.MouseEvent) => {
+    setSelectedDatabase(null)
+  }, [])
+
   // Handle connection/disconnection
   const handleConnect = useCallback(async (token: string) => {
     await connectWithToken(token)
@@ -745,6 +750,7 @@ function App() {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeClick={onNodeClick}
+            onPaneClick={onPaneClick}
             onNodeDrag={onNodeDrag}
             onNodeDragStop={onNodeDragStop}
             onInit={onInit}

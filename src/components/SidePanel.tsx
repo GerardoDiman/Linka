@@ -1,7 +1,7 @@
-import { Search, RefreshCw, Database, ExternalLink, AlertCircle, Loader2, ChevronLeft, Filter, X, Settings, Hash, FileText, Tag } from 'lucide-react'
+import { Search, RefreshCw, Database, ExternalLink, AlertCircle, Loader2, ChevronLeft, Filter, X, Settings, Hash, FileText, Tag, Link, ArrowLeft } from 'lucide-react'
 import { NotionDatabase } from '../types/notion'
 import { clsx } from 'clsx'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface SidePanelProps {
   databases: NotionDatabase[]
@@ -45,6 +45,7 @@ export default function SidePanel({
 }: SidePanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+  const [detailMode, setDetailMode] = useState(false)
   const [filters, setFilters] = useState<Filters>({
     hasRelations: null,
     propertyTypes: [],
@@ -257,6 +258,42 @@ export default function SidePanel({
     return <Database className="w-5 h-5 text-gray-400" />
   }
 
+  // Handle database selection
+  const handleDatabaseSelect = (database: NotionDatabase) => {
+    onSelectDatabase(database)
+    setDetailMode(true)
+  }
+
+  // Handle database selection without entering detail mode
+  const handleDatabaseSelectOnly = (database: NotionDatabase) => {
+    onSelectDatabase(database)
+    // Don't set detail mode - just select for workspace highlighting
+  }
+
+  // Handle back to list
+  const handleBackToList = () => {
+    setDetailMode(false)
+    onSelectDatabase(null as any)
+  }
+
+  // Auto-scroll to selected database in list mode
+  useEffect(() => {
+    if (selectedDatabase && !detailMode && !isCollapsed) {
+      // Find the selected database in the filtered list
+      const selectedIndex = filteredDatabases.findIndex(db => db.id === selectedDatabase.id)
+      if (selectedIndex !== -1) {
+        // Scroll to the selected database
+        const element = document.querySelector(`[data-database-id="${selectedDatabase.id}"]`)
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          })
+        }
+      }
+    }
+  }, [selectedDatabase, detailMode, isCollapsed, filteredDatabases])
+
   return (
     <div className={clsx(
       'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full transition-all duration-300',
@@ -267,11 +304,20 @@ export default function SidePanel({
         <div className="flex items-center justify-between mb-4">
           {!isCollapsed && (
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Notion Databases
+              {detailMode ? 'Database Details' : 'Notion Databases'}
             </h2>
           )}
           <div className="flex items-center space-x-2">
-            {!isCollapsed && (
+            {!isCollapsed && detailMode && (
+              <button
+                onClick={handleBackToList}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                title="Back to list"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            {!isCollapsed && !detailMode && (
               <>
                 <button
                   onClick={onRefresh}
@@ -305,66 +351,8 @@ export default function SidePanel({
           </div>
         </div>
 
-        {!isCollapsed && (
+        {!isCollapsed && !detailMode && (
           <>
-            {/* Connection Status & Action */}
-            {!isConnected && onConnectToNotion && (
-              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full" />
-                    <span className="text-sm text-blue-700 dark:text-blue-400">Demo data</span>
-                  </div>
-                  <button
-                    onClick={onConnectToNotion}
-                    className="flex items-center space-x-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <Settings className="w-3 h-3" />
-                    <span>Connect</span>
-                  </button>
-                </div>
-                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                  Connect your real Notion workspace
-                </p>
-              </div>
-            )}
-
-            {isConnected && (
-              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-sm text-green-700 dark:text-green-400">Connected to Notion</span>
-                  </div>
-                  {onConnectToNotion && (
-                    <button
-                      onClick={onConnectToNotion}
-                      className="text-xs text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-500 underline"
-                    >
-                      Configure
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Visibility Status */}
-            {hiddenDatabases.size > 0 && (
-              <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full" />
-                    <span className="text-sm text-amber-700 dark:text-amber-400">
-                      {hiddenDatabases.size} database{hiddenDatabases.size !== 1 ? 's' : ''} hidden
-                    </span>
-                  </div>
-                </div>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                  Not shown in sidebar or diagram
-                </p>
-              </div>
-            )}
-
             {/* Search */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -530,19 +518,10 @@ export default function SidePanel({
       <div className="flex-1 overflow-hidden">
         {isCollapsed ? (
           <div className="p-2 space-y-2">
-            {!isConnected && onConnectToNotion && (
-              <button
-                onClick={onConnectToNotion}
-                className="w-full p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors flex items-center justify-center"
-                title="Connect to Notion"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
-            )}
             {visibleDatabases.slice(0, 8).map((database) => (
               <button
                 key={database.id}
-                onClick={() => onSelectDatabase(database)}
+                onClick={() => handleDatabaseSelect(database)}
                 className={clsx(
                   'w-full p-2 rounded-lg transition-colors flex items-center justify-center',
                   selectedDatabase?.id === database.id
@@ -554,6 +533,114 @@ export default function SidePanel({
                 {renderDatabaseIcon(database)}
               </button>
             ))}
+          </div>
+        ) : detailMode && selectedDatabase ? (
+          // Detail Mode - Full database details
+          <div className="overflow-y-auto h-full p-4">
+            {/* Header */}
+            <div className="flex items-start space-x-4 mb-6">
+              <div className="flex-shrink-0">
+                {renderDatabaseIcon(selectedDatabase)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  {selectedDatabase.title}
+                </h3>
+                {selectedDatabase.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
+                    {selectedDatabase.description}
+                  </p>
+                )}
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <Database className="w-4 h-4" />
+                    <span>{Object.keys(selectedDatabase.properties).length} properties</span>
+                  </div>
+                  {selectedDatabase.relations && selectedDatabase.relations.length > 0 && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Link className="w-4 h-4" />
+                      <span>{selectedDatabase.relations.length} relations</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => window.open(selectedDatabase.url, '_blank')}
+                    className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-md hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                    title="Open in Notion"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    <span>Open</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Properties */}
+            <div className="mb-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                <Database className="w-5 h-5 mr-2" />
+                Properties ({Object.keys(selectedDatabase.properties).length})
+              </h4>
+              <div className="grid gap-3">
+                {Object.entries(selectedDatabase.properties).map(([key, property]) => (
+                  <div key={property.id} className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <h5 className="font-medium text-gray-900 dark:text-gray-100">
+                        {property.name}
+                      </h5>
+                      <span className="text-xs bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full font-medium capitalize">
+                        {property.type}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      ID: {property.id}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Relations */}
+            {selectedDatabase.relations && selectedDatabase.relations.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                  <Link className="w-5 h-5 mr-2" />
+                  Relations ({selectedDatabase.relations.length})
+                </h4>
+                <div className="grid gap-3">
+                  {selectedDatabase.relations.map((relation, index) => (
+                    <div key={index} className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-medium text-gray-900 dark:text-gray-100">
+                          Relation {index + 1}
+                        </h5>
+                        <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">
+                          Connected
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {relation}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Last Modified */}
+            {selectedDatabase.lastEditedTime && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-600 pt-4">
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">Last updated:</span>
+                  <span>{new Date(selectedDatabase.lastEditedTime).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</span>
+                </div>
+              </div>
+            )}
           </div>
         ) : error ? (
           <div className="p-4">
@@ -577,6 +664,7 @@ export default function SidePanel({
             </div>
           </div>
         ) : (
+          // List Mode - Database list
           <div className="overflow-y-auto h-full">
             {filteredDatabases.length === 0 ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -616,18 +704,20 @@ export default function SidePanel({
                 {filteredDatabases.map((database) => {
                   const matchInfo = getMatchInfo(database)
                   const MatchIcon = getMatchIcon(matchInfo.matchType)
+                  const isSelected = selectedDatabase?.id === database.id
                   
                   return (
                     <div
                       key={database.id}
+                      data-database-id={database.id}
                       className={clsx(
                         'p-3 rounded-lg cursor-pointer transition-colors mb-2',
                         'hover:bg-gray-50 dark:hover:bg-gray-700',
-                        selectedDatabase?.id === database.id
-                          ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
+                        isSelected
+                          ? 'bg-transparent border-2 border-primary-300 dark:border-primary-600 shadow-sm'
                           : 'border border-transparent'
                       )}
-                      onClick={() => onSelectDatabase(database)}
+                      onClick={() => handleDatabaseSelectOnly(database)}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0 mt-0.5">
@@ -638,15 +728,22 @@ export default function SidePanel({
                             <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">
                               {highlightMatch(database.title, searchQuery)}
                             </h3>
-                            {searchQuery && matchInfo.matchType !== 'all' && (
-                              <div className={clsx(
-                                'match-badge flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium',
-                                getMatchColor(matchInfo.matchType)
-                              )}>
-                                <MatchIcon className="w-3 h-3" />
-                                <span className="capitalize">{matchInfo.matchType}</span>
-                              </div>
-                            )}
+                            <div className="flex items-center space-x-2">
+                              {isSelected && (
+                                <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2 py-1 rounded-full font-medium">
+                                  Selected
+                                </span>
+                              )}
+                              {searchQuery && matchInfo.matchType !== 'all' && (
+                                <div className={clsx(
+                                  'match-badge flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium',
+                                  getMatchColor(matchInfo.matchType)
+                                )}>
+                                  <MatchIcon className="w-3 h-3" />
+                                  <span className="capitalize">{matchInfo.matchType}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           {database.description && (
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
@@ -670,16 +767,28 @@ export default function SidePanel({
                                 <span>{database.relations.length} relations</span>
                               )}
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                window.open(database.url, '_blank')
-                              }}
-                              className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded transition-colors"
-                              title="Open in Notion"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                            </button>
+                            <div className="flex items-center space-x-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDatabaseSelect(database)
+                                }}
+                                className="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded transition-colors"
+                                title="View details"
+                              >
+                                <Database className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  window.open(database.url, '_blank')
+                                }}
+                                className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded transition-colors"
+                                title="Open in Notion"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -691,23 +800,6 @@ export default function SidePanel({
           </div>
         )}
       </div>
-
-      {/* Selected Database Details */}
-      {selectedDatabase && !isCollapsed && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800">
-          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Properties</h4>
-          <div className="space-y-1 max-h-32 overflow-y-auto">
-            {Object.entries(selectedDatabase.properties).map(([key, property]) => (
-              <div key={property.id} className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400 truncate">{property.name}</span>
-                <span className="text-xs bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-1 rounded">
-                  {property.type}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 } 

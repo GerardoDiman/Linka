@@ -12,7 +12,9 @@ import {
   ExternalLink,
   Filter,
   Zap,
-  Info
+  Info,
+  User,
+  LogOut
 } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -200,29 +202,12 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
             {activeMenu === 'settings' && (
               <div className="absolute top-full left-0 mt-1 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 dropdown-menu">
                 <div className="py-1">
-                  <button
-                    onClick={handleShowSetup}
-                    className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
-                  >
-                    <Zap className="w-4 h-4" />
-                    <span>Configure Notion</span>
-                  </button>
-                  <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
                   <div className="px-4 py-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-700 dark:text-gray-300">Theme</span>
                       <div className="ml-2 flex-shrink-0">
                         <ThemeToggle isInDropdown={true} />
                       </div>
-                    </div>
-                  </div>
-                  <div className="px-4 py-2">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Status: {isConnected ? (
-                        <span className="text-green-600 dark:text-green-400">🟢 Connected</span>
-                      ) : (
-                        <span className="text-gray-600 dark:text-gray-400">🔴 Demo</span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -277,19 +262,93 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
 
         {/* Usuario y logout alineados a la derecha */}
         <div className="flex items-center space-x-3">
+          {/* Menú Profile */}
           {user && (
-            <span className="text-xs text-gray-500 dark:text-gray-300">
-              Bienvenido, <span className="font-semibold text-blue-500 dark:text-blue-300">{user.email}</span>
-            </span>
-          )}
-          {onLogout && (
-            <button
-              onClick={onLogout}
-              className="bg-red-100 text-red-700 px-3 py-1 rounded font-medium hover:bg-red-200 transition text-xs border border-red-200"
-              style={{ boxShadow: 'none' }}
-            >
-              Cerrar sesión
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => handleMenuClick('profile')}
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+              >
+                <User className="w-4 h-4" />
+                <span className="font-medium">{user.email?.split('@')[0] || 'User'}</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+
+              {activeMenu === 'profile' && (
+                <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 dropdown-menu">
+                  <div className="py-1">
+                    {/* Header del perfil */}
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {user.email?.split('@')[0] || 'Usuario'}
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Opciones del perfil */}
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          // Aquí podrías agregar navegación a la página de perfil
+                          closeMenu()
+                        }}
+                        className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Account Settings</span>
+                      </button>
+                      
+                      <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                      
+                      <button
+                        onClick={() => {
+                          handleShowSetup()
+                          closeMenu()
+                        }}
+                        className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
+                      >
+                        <Zap className="w-4 h-4" />
+                        <span>Configure Notion</span>
+                      </button>
+                      
+                      <div className="px-4 py-2">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Notion Status: {isConnected ? (
+                            <span className="text-green-600 dark:text-green-400">🟢 Connected</span>
+                          ) : (
+                            <span className="text-gray-600 dark:text-gray-400">🔴 Demo</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                      
+                      <button
+                        onClick={() => {
+                          if (onLogout) {
+                            onLogout()
+                            closeMenu()
+                          }
+                        }}
+                        className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

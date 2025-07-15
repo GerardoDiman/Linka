@@ -91,6 +91,7 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ className = '' }) => {
           
           <div className="font-medium text-gray-700 dark:text-gray-300 mt-3 mb-1">🎮 Controls:</div>
           <div>• Click nodes to select databases</div>
+          <div>• <span className="text-primary-600 dark:text-primary-400">Right-click</span> nodes/edges for detailed info</div>
           <div>• Toggle isolated DBs with "Mostrar" button</div>
           <div>• Drag to rearrange layout</div>
           <div>• Mouse wheel to zoom in/out (0.05x to 3x)</div>

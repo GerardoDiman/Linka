@@ -2,7 +2,7 @@ import { memo, useState } from 'react'
 import { Handle, Position, NodeProps } from 'reactflow'
 import { Database, ExternalLink, Eye, Zap, Users, Unlink } from 'lucide-react'
 import { DatabaseNodeData } from '../types/notion'
-import { DatabaseTooltip } from './DatabaseTooltip'
+
 import { clsx } from 'clsx'
 
 const DatabaseNode = memo(({ data, selected }: NodeProps<DatabaseNodeData>) => {
@@ -56,22 +56,15 @@ const DatabaseNode = memo(({ data, selected }: NodeProps<DatabaseNodeData>) => {
   }
 
   return (
-    <DatabaseTooltip
-      database={database}
-      relationCount={relationCount}
-      isIsolated={isIsolated || false}
-      isStronglyConnected={isStronglyConnected || false}
-      cluster={cluster}
+    <div 
+      className={clsx(
+        'custom-node cursor-pointer transition-all duration-200',
+        'min-w-[250px] max-w-[300px] border-2',
+        getNodeStyle(),
+        selected && 'selected ring-2 ring-primary-400'
+      )}
+      onClick={handleClick}
     >
-      <div 
-        className={clsx(
-          'custom-node cursor-pointer transition-all duration-200',
-          'min-w-[250px] max-w-[300px] border-2',
-          getNodeStyle(),
-          selected && 'selected ring-2 ring-primary-400'
-        )}
-        onClick={handleClick}
-      >
       {/* 24 Puntos de Conexión Híbridos - Cada posición tiene source Y target */}
       
       {/* Left side - source y target en cada posición */}
@@ -182,8 +175,7 @@ const DatabaseNode = memo(({ data, selected }: NodeProps<DatabaseNodeData>) => {
           </span>
         )}
       </div>
-    </div>
-    </DatabaseTooltip>
+          </div>
   )
 })
 

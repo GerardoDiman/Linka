@@ -1,8 +1,8 @@
 # 🚀 Inicio Rápido - Linka v2.0
 
-## ⚡ Solución al Problema de Backend
+## ⚡ Configuración de Desarrollo Local
 
-Si estás viendo errores de conexión, es porque necesitas ejecutar ambos servidores (frontend + proxy API).
+Para desarrollo local, tienes varias opciones para ejecutar la aplicación:
 
 ### 🔧 Opción 1: Script Automático (Windows)
 ```bash
@@ -63,12 +63,30 @@ npm run dev:full
 - **Causa**: No has compartido bases de datos con la integración
 - **Solución**: En Notion, comparte las bases de datos con tu integración
 
-## 💡 ¿Por Qué Necesito Dos Servidores?
+### Error: "405 Method Not Allowed" (en Vercel)
+- **Causa**: Problema con las funciones serverless
+- **Solución**: Verifica los logs de Vercel y asegúrate de que las funciones estén correctamente configuradas
+
+## 💡 ¿Por Qué Necesito Dos Servidores en Desarrollo?
 
 - **Frontend (Puerto 5173)**: La aplicación React
 - **Proxy API (Puerto 3002)**: Maneja la comunicación con Notion (evita problemas de CORS)
 
 En producción solo necesitas uno porque usamos funciones serverless de Vercel.
+
+## 🚀 Despliegue en Vercel
+
+Para desplegar en Vercel:
+
+1. **Conecta tu repositorio** a Vercel
+2. **Configura las variables de entorno** si es necesario
+3. **Deploy automático** - Vercel detectará la configuración
+4. **¡Listo!** Tu app estará disponible en `https://tu-proyecto.vercel.app`
+
+### Archivos de Configuración Importantes
+- `vercel.json` - Configuración de funciones serverless
+- `api/` - Funciones serverless para el backend
+- `package.json` - Scripts y dependencias
 
 ---
 

@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { EdgeProps, getBezierPath, EdgeLabelRenderer } from 'reactflow'
 import { CustomEdgeData } from '../types/notion'
-import { RelationTooltip } from './RelationTooltip'
+
 
 const CustomEdge = memo(({
   id,
@@ -27,27 +27,16 @@ const CustomEdge = memo(({
   return (
     <>
       {data ? (
-        <RelationTooltip
-          sourceDb={data.sourceDb || 'Source'}
-          targetDb={data.targetDb || 'Target'}
-          sourceProperty={data.label?.split(' ↔ ')[0] || 'Property'}
-          targetProperty={data.label?.includes(' ↔ ') ? data.label.split(' ↔ ')[1] : undefined}
-          strength={data.strength || 5}
-          relationType={data.relationType || 'relation'}
-          isReciprocal={data.isReciprocal || false}
-          isStrong={data.isStrong || false}
-        >
-          <path
-            id={id}
-            style={style}
-            className={`react-flow__edge-path cursor-pointer ${selected ? 'custom-edge selected' : 'custom-edge'}`}
-            d={edgePath}
-            strokeWidth={selected ? 3 : 2}
-            stroke={selected ? '#3b82f6' : '#6b7280'}
-            fill="none"
-            markerEnd="url(#arrowhead)"
-          />
-        </RelationTooltip>
+        <path
+          id={id}
+          style={style}
+          className={`react-flow__edge-path cursor-pointer ${selected ? 'custom-edge selected' : 'custom-edge'}`}
+          d={edgePath}
+          strokeWidth={selected ? 3 : 2}
+          stroke={selected ? '#3b82f6' : '#6b7280'}
+          fill="none"
+          markerEnd="url(#arrowhead)"
+        />
       ) : (
         <path
           id={id}
