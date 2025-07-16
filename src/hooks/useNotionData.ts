@@ -75,6 +75,7 @@ export function useNotionData(): UseNotionDataReturn {
       
       toast.success('Modo demo activado - Mostrando datos de demostración')
       console.log('✅ Demo mode activated with', transformedDatabases.length, 'databases')
+      console.log('📊 Bases de datos cargadas:', transformedDatabases.map(db => db.title))
     } catch (err) {
       console.error('❌ Error cargando datos de demo:', err)
       setError('Error cargando datos de demostración')
@@ -145,22 +146,27 @@ export function useNotionData(): UseNotionDataReturn {
 
   // Desconectar
   const disconnect = useCallback(() => {
-    // Limpiar token del localStorage
-    notionAuth.removeToken()
+    console.log('🔒 Iniciando proceso de desconexión...')
     
-    // Limpiar todo el estado
+    // 1. Limpiar token del localStorage (PRÁCTICA DE SEGURIDAD)
+    notionAuth.removeToken()
+    console.log('🗑️ Token removido del localStorage')
+    
+    // 2. Limpiar todo el estado de manera síncrona
     setNotionClient(null)
     setIsConnected(false)
     setIsDemoMode(false)
     setDatabases([])
     setError(null)
+    console.log('🧹 Estado limpiado')
     
-    toast.success('Desconectado de Notion')
+    toast.success('Desconectado de Notion - Volviendo al modo demo')
     
-    // Cargar demo después de limpiar el estado
+    // 3. Cargar demo después de un breve delay para asegurar limpieza
     setTimeout(() => {
+      console.log('🎭 Cargando datos de demo después de desconexión...')
       loadDemoData()
-    }, 100)
+    }, 200)
   }, [loadDemoData])
 
   // Buscar bases de datos con un cliente específico
