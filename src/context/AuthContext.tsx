@@ -25,18 +25,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user]);
 
   const login = async (email: string, password: string) => {
-    const res = await authService.login(email, password);
-    setUser(res.user || res);
+    try {
+      const res = await authService.login(email, password);
+      setUser(res.user || res);
+      console.log('✅ Login exitoso:', res);
+    } catch (error) {
+      console.error('❌ Error en login:', error);
+      throw error;
+    }
   };
 
   const register = async (email: string, password: string) => {
-    const res = await authService.register(email, password);
-    setUser(res.user || res);
+    try {
+      const res = await authService.register(email, password);
+      setUser(res.user || res);
+      console.log('✅ Registro exitoso:', res);
+    } catch (error) {
+      console.error('❌ Error en registro:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    await authService.logout();
-    setUser(null);
+    try {
+      await authService.logout();
+      setUser(null);
+      console.log('✅ Logout exitoso');
+    } catch (error) {
+      console.error('❌ Error en logout:', error);
+      // Aún así, limpiar el usuario local
+      setUser(null);
+    }
   };
 
   return (
