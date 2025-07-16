@@ -16,7 +16,7 @@ const Login = () => {
     setTesting(true);
     setError('');
     try {
-      const result = await apiFetch('/api/test-auth');
+      const result = await apiFetch('/test-auth');
       console.log('✅ API Test successful:', result);
       setError('✅ API funcionando correctamente');
     } catch (err: any) {

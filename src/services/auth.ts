@@ -1,7 +1,7 @@
 import { apiFetch } from './api';
 
 export async function login(email: string, password: string) {
-  return apiFetch('/api/auth/login', {
+  return apiFetch('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -9,7 +9,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(email: string, password: string) {
-  return apiFetch('/api/auth/register', {
+  return apiFetch('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -17,5 +17,5 @@ export async function register(email: string, password: string) {
 }
 
 export async function logout() {
-  return apiFetch('/api/auth/logout', { method: 'POST' });
+  return apiFetch('/auth/logout', { method: 'POST' });
 } 
