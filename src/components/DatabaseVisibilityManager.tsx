@@ -56,6 +56,21 @@ export const DatabaseVisibilityManager: React.FC<DatabaseVisibilityManagerProps>
   const reallyVisibleCount = databases.filter(db => isReallyVisible(db.id)).length
   const reallyHiddenCount = databases.length - reallyVisibleCount
 
+  // Debug logs
+  console.log('🔍 DatabaseVisibilityManager Debug:', {
+    totalDatabases: databases.length,
+    visibleCount: reallyVisibleCount,
+    hiddenCount: reallyHiddenCount,
+    isolatedDatabases: isolatedDatabases.length,
+    hiddenDatabases: hiddenDatabases.size,
+    explicitlyShown: explicitlyShownDatabases.size,
+    showIsolatedNodes,
+    databaseIds: databases.map(db => db.id),
+    isolatedIds: isolatedDatabases,
+    hiddenIds: Array.from(hiddenDatabases),
+    explicitlyShownIds: Array.from(explicitlyShownDatabases)
+  })
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
