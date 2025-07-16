@@ -99,6 +99,72 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ success: true, message: 'Logout exitoso' });
 });
 
+// ===== RUTAS SIN PREFIJO /api PARA DESARROLLO LOCAL =====
+app.post('/auth/register', (req, res) => {
+  const { email, password, name } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+  }
+  
+  const existingUser = users.find(u => u.email === email);
+  if (existingUser) {
+    return res.status(400).json({ error: 'El usuario ya existe' });
+  }
+  
+  const user = { 
+    id: Date.now(), 
+    email, 
+    name: name || email.split('@')[0],
+    createdAt: new Date().toISOString()
+  };
+  
+  users.push(user);
+  
+  console.log(`✅ Usuario registrado (local): ${user.email}`);
+  
+  res.json({ 
+    success: true, 
+    user,
+    message: 'Usuario registrado exitosamente' 
+  });
+});
+
+app.post('/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+  }
+  
+  const user = users.find(u => u.email === email);
+  if (!user) {
+    return res.status(400).json({ error: 'Usuario no encontrado' });
+  }
+  
+  console.log(`✅ Usuario logueado (local): ${user.email}`);
+  
+  res.json({ 
+    success: true, 
+    user,
+    message: 'Login exitoso' 
+  });
+});
+
+app.post('/auth/logout', (req, res) => {
+  console.log('✅ Usuario deslogueado (local)');
+  res.json({ success: true, message: 'Logout exitoso' });
+});
+
+app.get('/test-auth', (req, res) => {
+  console.log('✅ Test auth endpoint called (local)');
+  res.json({ 
+    message: 'Auth API is working!',
+    timestamp: new Date().toISOString(),
+    environment: 'local'
+  });
+});
+
 // ===== RUTAS DE NOTION =====
 app.get('/notion/databases', async (req, res) => {
   try {
