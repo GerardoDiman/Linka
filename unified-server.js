@@ -40,7 +40,29 @@ app.use((req, res, next) => {
 });
 
 // Simular base de datos de usuarios
-const users = [];
+const users = [
+  // Usuarios de demo para facilitar las pruebas
+  {
+    id: 1,
+    email: 'demo@example.com',
+    name: 'Usuario Demo',
+    createdAt: '2024-01-01T00:00:00.000Z'
+  },
+  {
+    id: 2,
+    email: 'test@example.com',
+    name: 'Usuario Test',
+    createdAt: '2024-01-01T00:00:00.000Z'
+  },
+  {
+    id: 3,
+    email: 'admin@example.com',
+    name: 'Administrador',
+    createdAt: '2024-01-01T00:00:00.000Z'
+  }
+];
+
+console.log('👥 Usuarios de demo cargados:', users.map(u => u.email).join(', '));
 
 // ===== RUTAS DE AUTENTICACIÓN =====
 app.post('/api/auth/register', (req, res) => {
@@ -103,13 +125,19 @@ app.post('/api/auth/logout', (req, res) => {
 app.post('/auth/register', (req, res) => {
   const { email, password, name } = req.body;
   
+  console.log('📝 Intento de registro:', { email, name, hasPassword: !!password });
+  
   if (!email || !password) {
     return res.status(400).json({ error: 'Email y contraseña son requeridos' });
   }
   
   const existingUser = users.find(u => u.email === email);
   if (existingUser) {
-    return res.status(400).json({ error: 'El usuario ya existe' });
+    console.log('❌ Usuario ya existe:', email);
+    return res.status(400).json({ 
+      error: 'El usuario ya existe',
+      hint: 'Usa: demo@example.com, test@example.com, o admin@example.com'
+    });
   }
   
   const user = { 
@@ -122,6 +150,7 @@ app.post('/auth/register', (req, res) => {
   users.push(user);
   
   console.log(`✅ Usuario registrado (local): ${user.email}`);
+  console.log('👥 Total de usuarios:', users.length);
   
   res.json({ 
     success: true, 
@@ -133,13 +162,20 @@ app.post('/auth/register', (req, res) => {
 app.post('/auth/login', (req, res) => {
   const { email, password } = req.body;
   
+  console.log('🔐 Intento de login:', { email, hasPassword: !!password });
+  
   if (!email || !password) {
     return res.status(400).json({ error: 'Email y contraseña son requeridos' });
   }
   
   const user = users.find(u => u.email === email);
   if (!user) {
-    return res.status(400).json({ error: 'Usuario no encontrado' });
+    console.log('❌ Usuario no encontrado:', email);
+    console.log('👥 Usuarios disponibles:', users.map(u => u.email));
+    return res.status(400).json({ 
+      error: 'Usuario no encontrado',
+      hint: 'Usa: demo@example.com, test@example.com, o admin@example.com'
+    });
   }
   
   console.log(`✅ Usuario logueado (local): ${user.email}`);
