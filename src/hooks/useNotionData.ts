@@ -59,6 +59,7 @@ export function useNotionData(): UseNotionDataReturn {
 
   // Cargar datos de demo
   const loadDemoData = useCallback(() => {
+    console.log('🎭 Iniciando carga de datos de demo...')
     setLoading(true)
     setError(null)
     
@@ -66,14 +67,16 @@ export function useNotionData(): UseNotionDataReturn {
       const demoData = getDemoData()
       const transformedDatabases = demoData.databases.map(transformDemoDatabase)
       
+      // Asegurar que el estado esté limpio antes de cargar demo
       setDatabases(transformedDatabases)
       setIsDemoMode(true)
       setIsConnected(false)
       setNotionClient(null)
       
       toast.success('Modo demo activado - Mostrando datos de demostración')
-      console.log('🎭 Demo mode activated with', transformedDatabases.length, 'databases')
+      console.log('✅ Demo mode activated with', transformedDatabases.length, 'databases')
     } catch (err) {
+      console.error('❌ Error cargando datos de demo:', err)
       setError('Error cargando datos de demostración')
       toast.error('Error cargando datos de demostración')
     } finally {
@@ -85,12 +88,15 @@ export function useNotionData(): UseNotionDataReturn {
   useEffect(() => {
     const savedToken = notionAuth.getToken()
     if (savedToken && notionAuth.isValidTokenFormat(savedToken)) {
+      // Si hay un token válido guardado, intentar conectar
       const client = new NotionApiClient(savedToken)
       setNotionClient(client)
       setIsConnected(true)
       setIsDemoMode(false)
+      console.log('🔑 Token encontrado, intentando conectar...')
     } else {
-      // Si no hay token, cargar demo automáticamente
+      // Si no hay token válido, cargar demo automáticamente
+      console.log('🎭 No hay token válido, cargando demo...')
       loadDemoData()
     }
   }, [loadDemoData])
@@ -139,16 +145,22 @@ export function useNotionData(): UseNotionDataReturn {
 
   // Desconectar
   const disconnect = useCallback(() => {
+    // Limpiar token del localStorage
     notionAuth.removeToken()
+    
+    // Limpiar todo el estado
     setNotionClient(null)
     setIsConnected(false)
     setIsDemoMode(false)
     setDatabases([])
     setError(null)
+    
     toast.success('Desconectado de Notion')
     
-    // Volver al modo demo
-    loadDemoData()
+    // Cargar demo después de limpiar el estado
+    setTimeout(() => {
+      loadDemoData()
+    }, 100)
   }, [loadDemoData])
 
   // Buscar bases de datos con un cliente específico
@@ -221,12 +233,18 @@ export function useNotionData(): UseNotionDataReturn {
     let isMounted = true
     
     const loadInitialData = async () => {
+      console.log('🔄 Iniciando carga de datos iniciales...')
+      
       // Solo cargar datos si hay una conexión válida
-      if (isMounted && notionClient) {
+      if (isMounted && notionClient && isConnected) {
+        console.log('🔗 Cliente Notion disponible, cargando datos reales...')
         await fetchDatabases()
-      } else if (isMounted && !notionClient && !isDemoMode) {
+      } else if (isMounted && !notionClient && !isDemoMode && !isConnected) {
         // Si no hay conexión y no está en demo, cargar demo
+        console.log('🎭 No hay conexión activa, cargando demo...')
         loadDemoData()
+      } else if (isMounted && isDemoMode) {
+        console.log('🎭 Ya está en modo demo, no hacer nada')
       }
     }
     
@@ -235,7 +253,7 @@ export function useNotionData(): UseNotionDataReturn {
     return () => {
       isMounted = false
     }
-  }, [notionClient, fetchDatabases, isDemoMode, loadDemoData])
+  }, [notionClient, isConnected, isDemoMode, fetchDatabases, loadDemoData])
 
   return {
     databases,
