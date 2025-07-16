@@ -148,9 +148,9 @@ export function useNotionData(): UseNotionDataReturn {
   const disconnect = useCallback(() => {
     console.log('🔒 Iniciando proceso de desconexión...')
     
-    // 1. Limpiar token del localStorage (PRÁCTICA DE SEGURIDAD)
-    notionAuth.removeToken()
-    console.log('🗑️ Token removido del localStorage')
+    // 1. MANTENER token en localStorage para reconexión automática
+    // notionAuth.removeToken() // COMENTADO: Mantener token para reconexión automática
+    console.log('💾 Token mantenido en localStorage para reconexión automática')
     
     // 2. Limpiar todo el estado de manera síncrona
     setNotionClient(null)
