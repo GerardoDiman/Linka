@@ -4,101 +4,81 @@ import { NotionDatabase } from '../types/notion'
 import { notionAuth } from '../utils/notionAuth'
 import { transformNotionDatabase, transformNotionError, validateNotionResponse } from '../utils/notionTransformers'
 import { NotionApiClient } from '../utils/notionApi'
+import { getDemoData } from '../utils/demoData'
 
 interface UseNotionDataReturn {
   databases: NotionDatabase[]
   loading: boolean
   error: string | null
   isConnected: boolean
+  isDemoMode: boolean
   fetchDatabases: () => Promise<void>
   connectWithToken: (token: string) => Promise<void>
   disconnect: () => void
+  loadDemoData: () => void
 }
 
-// Datos mock para desarrollo (movidos fuera del componente para evitar recreación)
-const MOCK_DATABASES: NotionDatabase[] = [
-  {
-    id: '1',
-    title: 'Projects',
-    description: 'Main projects database',
-    url: 'https://notion.so/projects',
-    properties: {
-      'Name': { id: '1', name: 'Name', type: 'title' },
-      'Status': { id: '2', name: 'Status', type: 'select' },
-      'Team': { id: '3', name: 'Team', type: 'relation' }
-    },
-    relations: ['2', '3'],
-    createdTime: '2024-01-01T00:00:00.000Z',
-    lastEditedTime: '2024-01-02T00:00:00.000Z'
-  },
-  {
-    id: '2',
-    title: 'Team Members',
-    description: 'Team members and roles',
-    url: 'https://notion.so/team',
-    icon: { type: 'emoji', emoji: '👥' },
-    properties: {
-      'Name': { id: '1', name: 'Name', type: 'title' },
-      'Role': { id: '2', name: 'Role', type: 'select' },
-      'Projects': { id: '3', name: 'Projects', type: 'relation' }
-    },
-    relations: ['1'],
-    createdTime: '2024-01-01T00:00:00.000Z',
-    lastEditedTime: '2024-01-02T00:00:00.000Z'
-  },
-  {
-    id: '3',
-    title: 'Tasks',
-    description: 'Project tasks and assignments',
-    url: 'https://notion.so/tasks',
-    icon: { type: 'emoji', emoji: '✅' },
-    properties: {
-      'Name': { id: '1', name: 'Name', type: 'title' },
-      'Status': { id: '2', name: 'Status', type: 'select' },
-      'Project': { id: '3', name: 'Project', type: 'relation' },
-      'Assignee': { id: '4', name: 'Assignee', type: 'relation' }
-    },
-    relations: ['1', '2'],
-    createdTime: '2024-01-01T00:00:00.000Z',
-    lastEditedTime: '2024-01-02T00:00:00.000Z'
-  },
-  {
-    id: '4',
-    title: 'Resources',
-    description: 'Project resources and documents',
-    url: 'https://notion.so/resources',
-    icon: { type: 'emoji', emoji: '📚' },
-    properties: {
-      'Name': { id: '1', name: 'Name', type: 'title' },
-      'Type': { id: '2', name: 'Type', type: 'select' },
-      'URL': { id: '3', name: 'URL', type: 'url' }
-    },
-    createdTime: '2024-01-01T00:00:00.000Z',
-    lastEditedTime: '2024-01-02T00:00:00.000Z'
-  },
-  {
-    id: '5',
-    title: 'Meetings',
-    description: 'Meeting notes and schedules',
-    url: 'https://notion.so/meetings',
-    icon: { type: 'emoji', emoji: '📅' },
-    properties: {
-      'Name': { id: '1', name: 'Name', type: 'title' },
-      'Date': { id: '2', name: 'Date', type: 'date' },
-      'Attendees': { id: '3', name: 'Attendees', type: 'relation' }
-    },
-    relations: ['2'],
-    createdTime: '2024-01-01T00:00:00.000Z',
-    lastEditedTime: '2024-01-02T00:00:00.000Z'
-  }
-]
+// Transformar datos de demo al formato de NotionDatabase
+const transformDemoDatabase = (demoDb: any): NotionDatabase => {
+  const relations = Object.entries(demoDb.properties)
+    .filter(([_, prop]: [string, any]) => prop.type === 'relation')
+    .map(([name, prop]: [string, any]) => prop.relation?.database_id)
+    .filter(Boolean);
+
+  return {
+    id: demoDb.id,
+    title: demoDb.title?.[0]?.plain_text || 'Sin título',
+    description: demoDb.description?.[0]?.plain_text || '',
+    url: `https://notion.so/${demoDb.id}`,
+    icon: demoDb.icon,
+    cover: demoDb.cover,
+    properties: Object.entries(demoDb.properties).reduce((acc, [name, prop]: [string, any]) => {
+      acc[name] = {
+        id: name.toLowerCase().replace(/\s+/g, '_'),
+        name,
+        type: prop.type,
+        options: prop.select?.options || prop.multi_select?.options || []
+      };
+      return acc;
+    }, {} as any),
+    relations,
+    createdTime: demoDb.created_time,
+    lastEditedTime: demoDb.last_edited_time,
+    isHidden: demoDb.isHidden || false
+  };
+};
 
 export function useNotionData(): UseNotionDataReturn {
   const [databases, setDatabases] = useState<NotionDatabase[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [isDemoMode, setIsDemoMode] = useState(false)
   const [notionClient, setNotionClient] = useState<NotionApiClient | null>(null)
+
+  // Cargar datos de demo
+  const loadDemoData = useCallback(() => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const demoData = getDemoData()
+      const transformedDatabases = demoData.databases.map(transformDemoDatabase)
+      
+      setDatabases(transformedDatabases)
+      setIsDemoMode(true)
+      setIsConnected(false)
+      setNotionClient(null)
+      
+      toast.success('Modo demo activado - Mostrando datos de demostración')
+      console.log('🎭 Demo mode activated with', transformedDatabases.length, 'databases')
+    } catch (err) {
+      setError('Error cargando datos de demostración')
+      toast.error('Error cargando datos de demostración')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   // Inicializar conexión si hay token guardado
   useEffect(() => {
@@ -107,8 +87,12 @@ export function useNotionData(): UseNotionDataReturn {
       const client = new NotionApiClient(savedToken)
       setNotionClient(client)
       setIsConnected(true)
+      setIsDemoMode(false)
+    } else {
+      // Si no hay token, cargar demo automáticamente
+      loadDemoData()
     }
-  }, [])
+  }, [loadDemoData])
 
   // Conectar con token
   const connectWithToken = useCallback(async (token: string) => {
@@ -135,6 +119,7 @@ export function useNotionData(): UseNotionDataReturn {
       notionAuth.saveToken(token)
       setNotionClient(client)
       setIsConnected(true)
+      setIsDemoMode(false)
       
       toast.success('¡Conectado exitosamente a Notion!')
       
@@ -156,10 +141,14 @@ export function useNotionData(): UseNotionDataReturn {
     notionAuth.removeToken()
     setNotionClient(null)
     setIsConnected(false)
+    setIsDemoMode(false)
     setDatabases([])
     setError(null)
     toast.success('Desconectado de Notion')
-  }, [])
+    
+    // Volver al modo demo
+    loadDemoData()
+  }, [loadDemoData])
 
   // Buscar bases de datos con un cliente específico
   const fetchDatabasesWithClient = useCallback(async (client: NotionApiClient) => {
@@ -211,20 +200,8 @@ export function useNotionData(): UseNotionDataReturn {
   // Buscar bases de datos
   const fetchDatabases = useCallback(async () => {
     if (!notionClient) {
-      // Usar datos mock si no hay conexión
-      setLoading(true)
-      setError(null)
-      
-      try {
-        // Simular delay de API
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        setDatabases(MOCK_DATABASES)
-        toast.success('Usando datos de demostración')
-      } catch (err) {
-        setError('Error cargando datos de demostración')
-      } finally {
-        setLoading(false)
-      }
+      // Si no hay cliente, cargar demo
+      loadDemoData()
       return
     }
 
@@ -236,7 +213,7 @@ export function useNotionData(): UseNotionDataReturn {
     } finally {
       setLoading(false)
     }
-  }, [notionClient, fetchDatabasesWithClient])
+  }, [notionClient, fetchDatabasesWithClient, loadDemoData])
 
   // Cargar datos iniciales solo una vez
   useEffect(() => {
@@ -246,10 +223,9 @@ export function useNotionData(): UseNotionDataReturn {
       // Solo cargar datos si hay una conexión válida
       if (isMounted && notionClient) {
         await fetchDatabases()
-      } else if (isMounted && !notionClient) {
-        // Si no hay conexión, no hacer nada automáticamente
-        // El usuario debe conectar manualmente o usar datos de demo
-        console.log('No hay conexión activa. El usuario debe conectar manualmente.')
+      } else if (isMounted && !notionClient && !isDemoMode) {
+        // Si no hay conexión y no está en demo, cargar demo
+        loadDemoData()
       }
     }
     
@@ -258,15 +234,17 @@ export function useNotionData(): UseNotionDataReturn {
     return () => {
       isMounted = false
     }
-  }, [notionClient, fetchDatabases])
+  }, [notionClient, fetchDatabases, isDemoMode, loadDemoData])
 
   return {
     databases,
     loading,
     error,
     isConnected,
+    isDemoMode,
     fetchDatabases,
     connectWithToken,
-    disconnect
+    disconnect,
+    loadDemoData
   }
 } 

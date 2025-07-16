@@ -8,6 +8,7 @@ interface DatabaseVisibilityManagerProps {
   isolatedDatabases: string[]
   showIsolatedNodes: boolean
   explicitlyShownDatabases: Set<string>
+  isDemoMode?: boolean
   onToggleDatabaseVisibility: (databaseId: string) => void
   onShowAllDatabases: () => void
   onHideAllDatabases: () => void
@@ -21,6 +22,7 @@ export const DatabaseVisibilityManager: React.FC<DatabaseVisibilityManagerProps>
   isolatedDatabases,
   showIsolatedNodes,
   explicitlyShownDatabases,
+  isDemoMode = false,
   onToggleDatabaseVisibility,
   onShowAllDatabases,
   onHideAllDatabases,
@@ -62,9 +64,16 @@ export const DatabaseVisibilityManager: React.FC<DatabaseVisibilityManagerProps>
         <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                Manage Visibility
-              </h2>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  Manage Visibility
+                </h2>
+                {isDemoMode && (
+                  <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full font-medium">
+                    🎭 Demo
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 {reallyVisibleCount} visible • {reallyHiddenCount} hidden of {databases.length} total
               </p>

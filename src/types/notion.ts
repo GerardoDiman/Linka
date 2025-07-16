@@ -18,6 +18,7 @@ export interface NotionDatabase {
   relations?: string[]
   createdTime: string
   lastEditedTime: string
+  isHidden?: boolean
 }
 
 export interface NotionProperty {

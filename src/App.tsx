@@ -202,6 +202,7 @@ function App() {
     loading, 
     error, 
     isConnected, 
+    isDemoMode,
     fetchDatabases, 
     connectWithToken, 
     disconnect 
@@ -828,6 +829,7 @@ function App() {
           isolatedDatabases={relationshipMap ? relationshipMap.isolatedDatabases : []}
           showIsolatedNodes={showIsolatedNodes}
           explicitlyShownDatabases={explicitlyShownDatabases}
+          isDemoMode={isDemoMode}
           onToggleDatabaseVisibility={toggleDatabaseVisibility}
           onShowAllDatabases={showAllDatabases}
           onHideAllDatabases={hideAllDatabases}
