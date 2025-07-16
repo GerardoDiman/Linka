@@ -1,8 +1,7 @@
 import { apiFetch } from './api';
 
 export async function login(email: string, password: string) {
-  // En local: /auth/login, en producción: /api/auth/login
-  const endpoint = window.location.hostname === 'localhost' ? '/auth/login' : '/auth/login';
+  const endpoint = '/auth/login';
   return apiFetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -11,8 +10,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(email: string, password: string) {
-  // En local: /auth/register, en producción: /api/auth/register
-  const endpoint = window.location.hostname === 'localhost' ? '/auth/register' : '/auth/register';
+  const endpoint = '/auth/register';
   return apiFetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -21,7 +19,6 @@ export async function register(email: string, password: string) {
 }
 
 export async function logout() {
-  // En local: /auth/logout, en producción: /api/auth/logout
-  const endpoint = window.location.hostname === 'localhost' ? '/auth/logout' : '/auth/logout';
+  const endpoint = '/auth/logout';
   return apiFetch(endpoint, { method: 'POST' });
 } 

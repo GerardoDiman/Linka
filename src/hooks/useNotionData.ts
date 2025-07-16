@@ -38,7 +38,7 @@ const transformDemoDatabase = (demoDb: any): NotionDatabase => {
         name,
         type: prop.type,
         options: prop.select?.options || prop.multi_select?.options || [],
-        relation: prop.relation // Mantener la información de relación para el detector
+        relation: prop.relation
       };
       return acc;
     }, {} as any),
@@ -56,6 +56,7 @@ export function useNotionData(): UseNotionDataReturn {
   const [isConnected, setIsConnected] = useState(false)
   const [isDemoMode, setIsDemoMode] = useState(false)
   const [notionClient, setNotionClient] = useState<NotionApiClient | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Cargar datos de demo
   const loadDemoData = useCallback(() => {
@@ -67,7 +68,6 @@ export function useNotionData(): UseNotionDataReturn {
       const demoData = getDemoData()
       const transformedDatabases = demoData.databases.map(transformDemoDatabase)
       
-      // Asegurar que el estado esté limpio antes de cargar demo
       setDatabases(transformedDatabases)
       setIsDemoMode(true)
       setIsConnected(false)
@@ -75,7 +75,6 @@ export function useNotionData(): UseNotionDataReturn {
       
       toast.success('Modo demo activado - Mostrando datos de demostración')
       console.log('✅ Demo mode activated with', transformedDatabases.length, 'databases')
-      console.log('📊 Bases de datos cargadas:', transformedDatabases.map(db => db.title))
     } catch (err) {
       console.error('❌ Error cargando datos de demo:', err)
       setError('Error cargando datos de demostración')
@@ -85,115 +84,11 @@ export function useNotionData(): UseNotionDataReturn {
     }
   }, [])
 
-  // Inicializar conexión si hay token guardado
-  useEffect(() => {
-    const savedToken = notionAuth.getToken()
-    if (savedToken && notionAuth.isValidTokenFormat(savedToken)) {
-      // Si hay un token válido guardado, probar la conexión
-      console.log('🔑 Token encontrado, probando conexión...')
-      
-      const testConnection = async () => {
-        try {
-          const client = new NotionApiClient(savedToken)
-          const isValid = await client.testConnection()
-          
-          if (isValid) {
-            console.log('✅ Conexión exitosa con token guardado')
-            setNotionClient(client)
-            setIsConnected(true)
-            setIsDemoMode(false)
-            // Cargar datos automáticamente
-            await fetchDatabasesWithClient(client)
-          } else {
-            console.log('❌ Token guardado inválido, cargando demo...')
-            notionAuth.removeToken() // Remover token inválido
-            loadDemoData()
-          }
-        } catch (error) {
-          console.log('❌ Error probando conexión con token guardado:', error)
-          notionAuth.removeToken() // Remover token inválido
-          loadDemoData()
-        }
-      }
-      
-      testConnection()
-    } else {
-      // Si no hay token válido, cargar demo automáticamente
-      console.log('🎭 No hay token válido, cargando demo...')
-      loadDemoData()
-    }
-  }, [loadDemoData, fetchDatabasesWithClient])
-
-  // Conectar con token
-  const connectWithToken = useCallback(async (token: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      // Validar formato del token
-      if (!notionAuth.isValidTokenFormat(token)) {
-        throw new Error('Formato de token inválido. Debe tener 50 caracteres en total comenzando con "ntn_" o 47 caracteres comenzando con "secret_".')
-      }
-
-      // Crear cliente de Notion
-      const client = new NotionApiClient(token)
-
-      // Probar la conexión
-      const isValid = await client.testConnection()
-      
-      if (!isValid) {
-        throw new Error('No se pudo conectar con Notion. Verifica que el token sea válido y que hayas compartido bases de datos con tu integración.')
-      }
-
-      // Guardar token y configurar cliente
-      notionAuth.saveToken(token)
-      setNotionClient(client)
-      setIsConnected(true)
-      setIsDemoMode(false)
-      
-      toast.success('¡Conectado exitosamente a Notion!')
-      
-      // Cargar bases de datos automáticamente
-      await fetchDatabasesWithClient(client)
-
-    } catch (err: any) {
-      const errorMessage = transformNotionError(err)
-      setError(errorMessage)
-      toast.error(errorMessage)
-      console.error('Error connecting to Notion:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  // Desconectar
-  const disconnect = useCallback(() => {
-    console.log('🔒 Iniciando proceso de desconexión...')
-    
-    // 1. MANTENER token en localStorage para reconexión automática
-    // notionAuth.removeToken() // COMENTADO: Mantener token para reconexión automática
-    console.log('💾 Token mantenido en localStorage para reconexión automática')
-    
-    // 2. Limpiar solo el estado de conexión (mantener token)
-    setNotionClient(null)
-    setIsConnected(false)
-    setIsDemoMode(false)
-    setDatabases([])
-    setError(null)
-    console.log('🧹 Estado de conexión limpiado')
-    
-    toast.success('Desconectado de Notion')
-    
-    // 3. NO cargar demo inmediatamente - dejar que la lógica de inicialización maneje la reconexión
-    // El token está guardado, así que al refrescar o volver, se reconectará automáticamente
-  }, [])
-
   // Buscar bases de datos con un cliente específico
   const fetchDatabasesWithClient = useCallback(async (client: NotionApiClient) => {
     try {
       setError(null)
 
-      // Buscar todas las bases de datos
       const searchResponse = await client.search({
         filter: {
           value: 'database',
@@ -206,7 +101,6 @@ export function useNotionData(): UseNotionDataReturn {
         throw new Error('Respuesta inválida de la API de Notion')
       }
 
-      // Obtener detalles completos de cada base de datos
       const databasePromises = searchResponse.results.map(async (db: any) => {
         try {
           const databaseDetails = await client.getDatabase(db.id)
@@ -235,10 +129,62 @@ export function useNotionData(): UseNotionDataReturn {
     }
   }, [])
 
+  // Conectar con token
+  const connectWithToken = useCallback(async (token: string) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      if (!notionAuth.isValidTokenFormat(token)) {
+        throw new Error('Formato de token inválido. Debe tener 50 caracteres en total comenzando con "ntn_" o 47 caracteres comenzando con "secret_".')
+      }
+
+      const client = new NotionApiClient(token)
+      const isValid = await client.testConnection()
+      
+      if (!isValid) {
+        throw new Error('No se pudo conectar con Notion. Verifica que el token sea válido y que hayas compartido bases de datos con tu integración.')
+      }
+
+      notionAuth.saveToken(token)
+      setNotionClient(client)
+      setIsConnected(true)
+      setIsDemoMode(false)
+      
+      toast.success('¡Conectado exitosamente a Notion!')
+      
+      await fetchDatabasesWithClient(client)
+
+    } catch (err: any) {
+      const errorMessage = transformNotionError(err)
+      setError(errorMessage)
+      toast.error(errorMessage)
+      console.error('Error connecting to Notion:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [fetchDatabasesWithClient])
+
+  // Desconectar
+  const disconnect = useCallback(() => {
+    console.log('🔒 Iniciando proceso de desconexión...')
+    
+    // Mantener token en localStorage para reconexión automática
+    console.log('💾 Token mantenido en localStorage para reconexión automática')
+    
+    setNotionClient(null)
+    setIsConnected(false)
+    setIsDemoMode(false)
+    setDatabases([])
+    setError(null)
+    console.log('🧹 Estado de conexión limpiado')
+    
+    toast.success('Desconectado de Notion')
+  }, [])
+
   // Buscar bases de datos
   const fetchDatabases = useCallback(async () => {
     if (!notionClient) {
-      // Si no hay cliente, cargar demo
       loadDemoData()
       return
     }
@@ -253,32 +199,51 @@ export function useNotionData(): UseNotionDataReturn {
     }
   }, [notionClient, fetchDatabasesWithClient, loadDemoData])
 
-  // Cargar datos iniciales solo una vez
+  // Inicialización única
   useEffect(() => {
-    let isMounted = true
-    
-    const loadInitialData = async () => {
-      console.log('🔄 Iniciando carga de datos iniciales...')
+    if (isInitialized) return
+
+    const initializeApp = async () => {
+      console.log('🚀 Iniciando aplicación...')
+      setLoading(true)
+      setError(null)
       
-      // Solo cargar datos si hay una conexión válida
-      if (isMounted && notionClient && isConnected) {
-        console.log('🔗 Cliente Notion disponible, cargando datos reales...')
-        await fetchDatabases()
-      } else if (isMounted && !notionClient && !isDemoMode && !isConnected) {
-        // Si no hay conexión y no está en demo, cargar demo
-        console.log('🎭 No hay conexión activa, cargando demo...')
+      const savedToken = notionAuth.getToken()
+      
+      if (savedToken && notionAuth.isValidTokenFormat(savedToken)) {
+        console.log('🔑 Token encontrado, probando conexión...')
+        
+        try {
+          const client = new NotionApiClient(savedToken)
+          const isValid = await client.testConnection()
+          
+          if (isValid) {
+            console.log('✅ Conexión exitosa con token guardado')
+            setNotionClient(client)
+            setIsConnected(true)
+            setIsDemoMode(false)
+            await fetchDatabasesWithClient(client)
+          } else {
+            console.log('❌ Token guardado inválido, cargando demo...')
+            notionAuth.removeToken()
+            loadDemoData()
+          }
+        } catch (error) {
+          console.log('❌ Error probando conexión con token guardado:', error)
+          notionAuth.removeToken()
+          loadDemoData()
+        }
+      } else {
+        console.log('🎭 No hay token válido, cargando demo...')
         loadDemoData()
-      } else if (isMounted && isDemoMode) {
-        console.log('🎭 Ya está en modo demo, no hacer nada')
       }
+      
+      setIsInitialized(true)
+      setLoading(false)
     }
     
-    loadInitialData()
-    
-    return () => {
-      isMounted = false
-    }
-  }, [notionClient, isConnected, isDemoMode, fetchDatabases, loadDemoData])
+    initializeApp()
+  }, [isInitialized, loadDemoData, fetchDatabasesWithClient])
 
   return {
     databases,

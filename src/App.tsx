@@ -682,6 +682,26 @@ function App() {
 
   const visibleDatabaseCount = getVisibleDatabaseCount()
 
+  // Show loading screen when loading databases
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+        <FullPageLoader message="Cargando bases de datos..." />
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: isDark ? '#1f2937' : '#fff',
+              color: isDark ? '#f9fafb' : '#374151',
+              border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
+            },
+          }}
+        />
+      </div>
+    )
+  }
+
   // Show setup screen if needed
   if (showSetup) {
     return (
