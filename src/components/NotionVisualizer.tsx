@@ -746,6 +746,7 @@ const NotionVisualizer = ({ user, onLogout }: NotionVisualizerProps) => {
           isolatedDatabases={relationshipMap ? relationshipMap.isolatedDatabases : []}
           explicitlyShownDatabases={explicitlyShownDatabases}
           showIsolatedNodes={showIsolatedNodes}
+          relationshipMap={relationshipMap}
         />
         
         <div className="flex-1 relative">

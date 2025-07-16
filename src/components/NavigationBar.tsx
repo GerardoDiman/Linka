@@ -89,12 +89,12 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
         </div>
 
         {/* Menús principales */}
-        <div className="flex items-center space-x-1 flex-1 justify-center">
+        <div className="flex items-center space-x-0">
           {/* Menú Archivo */}
           <div className="relative">
             <button
               onClick={() => handleMenuClick('file')}
-              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 border-r border-gray-200 dark:border-gray-600"
             >
               <File className="w-4 h-4" />
               <span>File</span>
@@ -135,7 +135,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
           <div className="relative">
             <button
               onClick={() => handleMenuClick('view')}
-              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 border-r border-gray-200 dark:border-gray-600"
             >
               <Eye className="w-4 h-4" />
               <span>View</span>
@@ -192,7 +192,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
           <div className="relative">
             <button
               onClick={() => handleMenuClick('settings')}
-              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 border-r border-gray-200 dark:border-gray-600"
             >
               <Settings className="w-4 h-4" />
               <span>Settings</span>
@@ -219,7 +219,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
           <div className="relative">
             <button
               onClick={() => handleMenuClick('help')}
-              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 border-r border-gray-200 dark:border-gray-600"
             >
               <HelpCircle className="w-4 h-4" />
               <span>Help</span>
@@ -258,16 +258,13 @@ export const NavigationBar: React.FC<NavigationBarProps> = memo(({
               </div>
             )}
           </div>
-        </div>
 
-        {/* Usuario y logout alineados a la derecha */}
-        <div className="flex items-center space-x-3">
           {/* Menú Profile */}
           {user && (
             <div className="relative">
               <button
                 onClick={() => handleMenuClick('profile')}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-200"
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 <User className="w-4 h-4" />
                 <span className="font-medium">{user.email?.split('@')[0] || 'User'}</span>

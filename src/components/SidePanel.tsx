@@ -1,5 +1,6 @@
-import { Search, RefreshCw, Database, ExternalLink, AlertCircle, Loader2, ChevronLeft, Filter, X, Settings, Hash, FileText, Tag, Link, ArrowLeft } from 'lucide-react'
+import { Search, RefreshCw, Database, ExternalLink, AlertCircle, Loader2, ChevronLeft, Filter, X, Settings, Hash, FileText, Tag, Link, ArrowLeft, ArrowUpDown, SortAsc, SortDesc, Info, Calendar, Hash as HashIcon, Clock } from 'lucide-react'
 import { NotionDatabase } from '../types/notion'
+import { RelationshipMap, DatabaseRelation } from '../utils/relationshipDetector'
 import { clsx } from 'clsx'
 import { useState, useEffect } from 'react'
 
@@ -18,6 +19,7 @@ interface SidePanelProps {
   isolatedDatabases?: string[]
   explicitlyShownDatabases?: Set<string>
   showIsolatedNodes?: boolean
+  relationshipMap?: RelationshipMap | null
 }
 
 interface Filters {
@@ -25,6 +27,13 @@ interface Filters {
   propertyTypes: string[]
   minProperties: number
   maxProperties: number
+}
+
+interface PropertyFilters {
+  searchQuery: string
+  propertyTypes: string[]
+  sortBy: 'name' | 'type' | 'id'
+  sortOrder: 'asc' | 'desc'
 }
 
 export default function SidePanel({
@@ -41,16 +50,25 @@ export default function SidePanel({
   hiddenDatabases = new Set(),
   isolatedDatabases = [],
   explicitlyShownDatabases = new Set(),
-  showIsolatedNodes = false
+  showIsolatedNodes = false,
+  relationshipMap = null
 }: SidePanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [detailMode, setDetailMode] = useState(false)
+  const [showPropertyFilters, setShowPropertyFilters] = useState(false)
+  const [showDatabaseInfo, setShowDatabaseInfo] = useState(false)
   const [filters, setFilters] = useState<Filters>({
     hasRelations: null,
     propertyTypes: [],
     minProperties: 0,
     maxProperties: 100
+  })
+  const [propertyFilters, setPropertyFilters] = useState<PropertyFilters>({
+    searchQuery: '',
+    propertyTypes: [],
+    sortBy: 'name',
+    sortOrder: 'asc'
   })
 
   // Shared visibility logic (synchronized with DatabaseVisibilityManager)
@@ -228,6 +246,97 @@ export default function SidePanel({
     filters.propertyTypes.length > 0 || 
     filters.minProperties > 0 || 
     filters.maxProperties < 100
+
+  const hasActivePropertyFilters = propertyFilters.searchQuery.trim() !== '' || 
+    propertyFilters.propertyTypes.length > 0
+
+  // Get all unique property types from selected database
+  const getSelectedDatabasePropertyTypes = () => {
+    if (!selectedDatabase) return []
+    return [...new Set(
+      Object.values(selectedDatabase.properties).map(prop => prop.type)
+    )].sort()
+  }
+
+  // Filter and sort properties
+  const getFilteredAndSortedProperties = () => {
+    if (!selectedDatabase) return []
+    
+    let properties = Object.entries(selectedDatabase.properties)
+    
+    // Apply search filter
+    if (propertyFilters.searchQuery.trim()) {
+      const query = propertyFilters.searchQuery.toLowerCase().trim()
+      properties = properties.filter(([key, property]) => 
+        property.name.toLowerCase().includes(query) ||
+        property.type.toLowerCase().includes(query) ||
+        property.id.toLowerCase().includes(query)
+      )
+    }
+    
+    // Apply type filter
+    if (propertyFilters.propertyTypes.length > 0) {
+      properties = properties.filter(([key, property]) => 
+        propertyFilters.propertyTypes.includes(property.type)
+      )
+    }
+    
+    // Apply sorting
+    properties.sort(([keyA, propertyA], [keyB, propertyB]) => {
+      let comparison = 0
+      
+      switch (propertyFilters.sortBy) {
+        case 'name':
+          comparison = propertyA.name.localeCompare(propertyB.name)
+          break
+        case 'type':
+          comparison = propertyA.type.localeCompare(propertyB.type)
+          break
+        case 'id':
+          comparison = propertyA.id.localeCompare(propertyB.id)
+          break
+        default:
+          comparison = propertyA.name.localeCompare(propertyB.name)
+      }
+      
+      return propertyFilters.sortOrder === 'asc' ? comparison : -comparison
+    })
+    
+    return properties
+  }
+
+  const clearPropertyFilters = () => {
+    setPropertyFilters({
+      searchQuery: '',
+      propertyTypes: [],
+      sortBy: 'name',
+      sortOrder: 'asc'
+    })
+  }
+
+  // Get detailed relations for selected database
+  const getSelectedDatabaseRelations = (): DatabaseRelation[] => {
+    if (!selectedDatabase || !relationshipMap) return []
+    
+    return relationshipMap.relations.filter(relation => 
+      relation.sourceId === selectedDatabase.id || relation.targetId === selectedDatabase.id
+    )
+  }
+
+  // Get target database for a relation
+  const getTargetDatabase = (relation: DatabaseRelation): NotionDatabase | null => {
+    const targetId = relation.sourceId === selectedDatabase?.id ? relation.targetId : relation.sourceId
+    return databases.find(db => db.id === targetId) || null
+  }
+
+  // Get relation display name
+  const getRelationDisplayName = (relation: DatabaseRelation): string => {
+    if (relation.sourceId === selectedDatabase?.id) {
+      return relation.sourceProperty
+    } else {
+      return relation.targetProperty || relation.sourceProperty
+    }
+  }
 
   const renderDatabaseIcon = (database: NotionDatabase) => {
     if (database.icon?.emoji) {
@@ -538,33 +647,33 @@ export default function SidePanel({
           // Detail Mode - Full database details
           <div className="overflow-y-auto h-full p-4">
             {/* Header */}
-            <div className="flex items-start space-x-4 mb-6">
+            <div className="flex items-start space-x-3 mb-4">
               <div className="flex-shrink-0">
                 {renderDatabaseIcon(selectedDatabase)}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                   {selectedDatabase.title}
                 </h3>
                 {selectedDatabase.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 leading-relaxed">
                     {selectedDatabase.description}
                   </p>
                 )}
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <Database className="w-4 h-4" />
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="flex items-center space-x-1 text-xs text-gray-500">
+                    <Database className="w-3 h-3" />
                     <span>{Object.keys(selectedDatabase.properties).length} properties</span>
                   </div>
-                  {selectedDatabase.relations && selectedDatabase.relations.length > 0 && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                      <Link className="w-4 h-4" />
-                      <span>{selectedDatabase.relations.length} relations</span>
+                  {getSelectedDatabaseRelations().length > 0 && (
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <Link className="w-3 h-3" />
+                      <span>{getSelectedDatabaseRelations().length} relations</span>
                     </div>
                   )}
                   <button
                     onClick={() => window.open(selectedDatabase.url, '_blank')}
-                    className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-md hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                    className="flex items-center space-x-1 px-2 py-1 text-xs bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                     title="Open in Notion"
                   >
                     <ExternalLink className="w-3 h-3" />
@@ -574,20 +683,133 @@ export default function SidePanel({
               </div>
             </div>
 
+            {/* Database Info Button */}
+            <div className="mb-4 flex justify-end">
+              <button
+                onClick={() => setShowDatabaseInfo(true)}
+                className="flex items-center space-x-2 px-3 py-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                title="View database information"
+              >
+                <Info className="w-4 h-4" />
+                <span>Database Info</span>
+              </button>
+            </div>
+
             {/* Properties */}
-            <div className="mb-6">
-              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                <Database className="w-5 h-5 mr-2" />
-                Properties ({Object.keys(selectedDatabase.properties).length})
-              </h4>
-              <div className="grid gap-3">
-                {Object.entries(selectedDatabase.properties).map(([key, property]) => (
-                  <div key={property.id} className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <h5 className="font-medium text-gray-900 dark:text-gray-100">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                  <Database className="w-4 h-4 mr-2" />
+                  Properties ({getFilteredAndSortedProperties().length} of {Object.keys(selectedDatabase.properties).length})
+                </h4>
+                <div className="flex items-center space-x-2">
+                  {hasActivePropertyFilters && (
+                    <button
+                      onClick={clearPropertyFilters}
+                      className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      title="Clear filters"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowPropertyFilters(!showPropertyFilters)}
+                    className="text-xs text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 flex items-center space-x-1"
+                    title="Filter and sort properties"
+                  >
+                    <Filter className="w-3 h-3" />
+                    <span>Filter</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Property Filters Panel */}
+              {showPropertyFilters && (
+                <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600">
+                  <div className="space-y-3">
+                    {/* Search */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Search Properties
+                      </label>
+                      <input
+                        type="text"
+                        value={propertyFilters.searchQuery}
+                        onChange={(e) => setPropertyFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
+                        placeholder="Search by name, type, or ID..."
+                        className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
+
+                    {/* Sort Controls */}
+                    <div className="flex items-center space-x-2">
+                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                        Sort by:
+                      </label>
+                      <select
+                        value={propertyFilters.sortBy}
+                        onChange={(e) => setPropertyFilters(prev => ({ ...prev, sortBy: e.target.value as 'name' | 'type' | 'id' }))}
+                        className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="name">Name</option>
+                        <option value="type">Type</option>
+                        <option value="id">ID</option>
+                      </select>
+                      <button
+                        onClick={() => setPropertyFilters(prev => ({ 
+                          ...prev, 
+                          sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc' 
+                        }))}
+                        className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        title={`Sort ${propertyFilters.sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                      >
+                        {propertyFilters.sortOrder === 'asc' ? <SortAsc className="w-3 h-3" /> : <SortDesc className="w-3 h-3" />}
+                      </button>
+                    </div>
+
+                    {/* Property Type Filter */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Filter by Type
+                      </label>
+                      <div className="max-h-20 overflow-y-auto space-y-1">
+                        {getSelectedDatabasePropertyTypes().map(type => (
+                          <label key={type} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={propertyFilters.propertyTypes.includes(type)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setPropertyFilters(prev => ({
+                                    ...prev,
+                                    propertyTypes: [...prev.propertyTypes, type]
+                                  }))
+                                } else {
+                                  setPropertyFilters(prev => ({
+                                    ...prev,
+                                    propertyTypes: prev.propertyTypes.filter(t => t !== type)
+                                  }))
+                                }
+                              }}
+                              className="mr-2"
+                            />
+                            <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">{type}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-2">
+                {getFilteredAndSortedProperties().map(([key, property]) => (
+                  <div key={property.id} className="p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {property.name}
                       </h5>
-                      <span className="text-xs bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full font-medium capitalize">
+                      <span className="text-xs bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded font-medium capitalize">
                         {property.type}
                       </span>
                     </div>
@@ -597,50 +819,74 @@ export default function SidePanel({
                   </div>
                 ))}
               </div>
+
+              {/* No properties found message */}
+              {getFilteredAndSortedProperties().length === 0 && hasActivePropertyFilters && (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <p className="text-xs">No properties match your filters</p>
+                  <button
+                    onClick={clearPropertyFilters}
+                    className="mt-1 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Relations */}
-            {selectedDatabase.relations && selectedDatabase.relations.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                  <Link className="w-5 h-5 mr-2" />
-                  Relations ({selectedDatabase.relations.length})
-                </h4>
-                <div className="grid gap-3">
-                  {selectedDatabase.relations.map((relation, index) => (
-                    <div key={index} className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-medium text-gray-900 dark:text-gray-100">
-                          Relation {index + 1}
-                        </h5>
-                        <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-medium">
-                          Connected
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {relation}
-                      </div>
-                    </div>
-                  ))}
+            {(() => {
+              const relations = getSelectedDatabaseRelations()
+              return relations.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                    <Link className="w-4 h-4 mr-2" />
+                    Relations ({relations.length})
+                  </h4>
+                  <div className="grid gap-2">
+                    {relations.map((relation, index) => {
+                      const targetDb = getTargetDatabase(relation)
+                      const relationName = getRelationDisplayName(relation)
+                      
+                      return (
+                        <div key={`${relation.sourceId}-${relation.targetId}`} className="p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                          <div className="flex items-center justify-between mb-1">
+                            <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              {relationName}
+                            </h5>
+                            <div className="flex items-center space-x-1">
+                              <span className="text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded font-medium">
+                                {relation.isReciprocal ? 'Bidirectional' : 'Unidirectional'}
+                              </span>
+                              <span className="text-xs bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded font-medium capitalize">
+                                {relation.relationType}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            {targetDb && (
+                              <div className="text-xs text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">Connected to:</span> {targetDb.title}
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="font-medium">Strength:</span> {relation.strength}/10
+                            </div>
+                            {relation.isReciprocal && (
+                              <div className="text-xs text-green-600 dark:text-green-400">
+                                ✓ Reciprocal connection
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
 
-            {/* Last Modified */}
-            {selectedDatabase.lastEditedTime && (
-              <div className="text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-600 pt-4">
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium">Last updated:</span>
-                  <span>{new Date(selectedDatabase.lastEditedTime).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}</span>
-                </div>
-              </div>
-            )}
+
           </div>
         ) : error ? (
           <div className="p-4">
@@ -800,6 +1046,154 @@ export default function SidePanel({
           </div>
         )}
       </div>
+
+      {/* Database Info Modal */}
+      {showDatabaseInfo && selectedDatabase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowDatabaseInfo(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center space-x-3">
+                {renderDatabaseIcon(selectedDatabase)}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Database Information
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {selectedDatabase.title}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDatabaseInfo(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 space-y-4">
+              {/* Basic Info */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <HashIcon className="w-4 h-4" />
+                  <span className="font-medium">Database ID:</span>
+                  <span className="font-mono text-gray-900 dark:text-gray-100">{selectedDatabase.id}</span>
+                </div>
+                
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Calendar className="w-4 h-4" />
+                  <span className="font-medium">Created:</span>
+                  <span className="text-gray-900 dark:text-gray-100">
+                    {new Date(selectedDatabase.createdTime).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+                
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-medium">Last updated:</span>
+                  <span className="text-gray-900 dark:text-gray-100">
+                    {new Date(selectedDatabase.lastEditedTime).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Statistics */}
+              <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {Object.keys(selectedDatabase.properties).length}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Properties
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {getSelectedDatabaseRelations().length}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Relations
+                  </div>
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  Features
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Cover image</span>
+                    <span className={selectedDatabase.cover ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}>
+                      {selectedDatabase.cover ? "✓ Yes" : "✗ No"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Custom icon</span>
+                    <span className={selectedDatabase.icon ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}>
+                      {selectedDatabase.icon ? "✓ Yes" : "✗ No"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Description</span>
+                    <span className={selectedDatabase.description ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}>
+                      {selectedDatabase.description ? "✓ Yes" : "✗ No"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              {selectedDatabase.description && (
+                <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                    Description
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {selectedDatabase.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => {
+                    window.open(selectedDatabase.url, '_blank')
+                    setShowDatabaseInfo(false)
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Open in Notion</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
