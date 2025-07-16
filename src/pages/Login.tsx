@@ -16,7 +16,9 @@ const Login = () => {
     setTesting(true);
     setError('');
     try {
-      const result = await apiFetch('/test-auth');
+      // En local: /test-auth, en producción: /api/test-auth
+      const endpoint = window.location.hostname === 'localhost' ? '/test-auth' : '/test-auth';
+      const result = await apiFetch(endpoint);
       console.log('✅ API Test successful:', result);
       setError('✅ API funcionando correctamente');
     } catch (err: any) {
