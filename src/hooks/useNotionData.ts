@@ -89,18 +89,40 @@ export function useNotionData(): UseNotionDataReturn {
   useEffect(() => {
     const savedToken = notionAuth.getToken()
     if (savedToken && notionAuth.isValidTokenFormat(savedToken)) {
-      // Si hay un token válido guardado, intentar conectar
-      const client = new NotionApiClient(savedToken)
-      setNotionClient(client)
-      setIsConnected(true)
-      setIsDemoMode(false)
-      console.log('🔑 Token encontrado, intentando conectar...')
+      // Si hay un token válido guardado, probar la conexión
+      console.log('🔑 Token encontrado, probando conexión...')
+      
+      const testConnection = async () => {
+        try {
+          const client = new NotionApiClient(savedToken)
+          const isValid = await client.testConnection()
+          
+          if (isValid) {
+            console.log('✅ Conexión exitosa con token guardado')
+            setNotionClient(client)
+            setIsConnected(true)
+            setIsDemoMode(false)
+            // Cargar datos automáticamente
+            await fetchDatabasesWithClient(client)
+          } else {
+            console.log('❌ Token guardado inválido, cargando demo...')
+            notionAuth.removeToken() // Remover token inválido
+            loadDemoData()
+          }
+        } catch (error) {
+          console.log('❌ Error probando conexión con token guardado:', error)
+          notionAuth.removeToken() // Remover token inválido
+          loadDemoData()
+        }
+      }
+      
+      testConnection()
     } else {
       // Si no hay token válido, cargar demo automáticamente
       console.log('🎭 No hay token válido, cargando demo...')
       loadDemoData()
     }
-  }, [loadDemoData])
+  }, [loadDemoData, fetchDatabasesWithClient])
 
   // Conectar con token
   const connectWithToken = useCallback(async (token: string) => {
@@ -152,22 +174,19 @@ export function useNotionData(): UseNotionDataReturn {
     // notionAuth.removeToken() // COMENTADO: Mantener token para reconexión automática
     console.log('💾 Token mantenido en localStorage para reconexión automática')
     
-    // 2. Limpiar todo el estado de manera síncrona
+    // 2. Limpiar solo el estado de conexión (mantener token)
     setNotionClient(null)
     setIsConnected(false)
     setIsDemoMode(false)
     setDatabases([])
     setError(null)
-    console.log('🧹 Estado limpiado')
+    console.log('🧹 Estado de conexión limpiado')
     
-    toast.success('Desconectado de Notion - Volviendo al modo demo')
+    toast.success('Desconectado de Notion')
     
-    // 3. Cargar demo después de un breve delay para asegurar limpieza
-    setTimeout(() => {
-      console.log('🎭 Cargando datos de demo después de desconexión...')
-      loadDemoData()
-    }, 200)
-  }, [loadDemoData])
+    // 3. NO cargar demo inmediatamente - dejar que la lógica de inicialización maneje la reconexión
+    // El token está guardado, así que al refrescar o volver, se reconectará automáticamente
+  }, [])
 
   // Buscar bases de datos con un cliente específico
   const fetchDatabasesWithClient = useCallback(async (client: NotionApiClient) => {
