@@ -57,8 +57,21 @@ export class RelationshipDetector {
 
     this.databases.forEach(sourceDb => {
       Object.entries(sourceDb.properties).forEach(([propName, property]) => {
-        if (property.type === 'relation' && property.relation?.database_id) {
-          const targetId = property.relation.database_id
+        // Manejar tanto el formato real de Notion como el formato de demo
+        let targetId: string | null = null
+        
+        if (property.type === 'relation') {
+          // Formato real de Notion
+          if (property.relation?.database_id) {
+            targetId = property.relation.database_id
+          }
+          // Formato de demo (cuando la propiedad tiene un ID que corresponde a otra base de datos)
+          else if (property.id && this.isValidDatabaseId(property.id)) {
+            targetId = property.id
+          }
+        }
+        
+        if (targetId) {
           const targetDb = this.databases.find(db => db.id === targetId)
           
           if (targetDb) {
@@ -80,6 +93,19 @@ export class RelationshipDetector {
     })
 
     return relations
+  }
+
+  /**
+   * Verifica si un ID podría ser un ID de base de datos válido
+   */
+  private isValidDatabaseId(id: string): boolean {
+    // En demo, los IDs tienen el formato 'demo-*'
+    if (id.startsWith('demo-')) {
+      return this.databases.some(db => db.id === id)
+    }
+    
+    // Para IDs reales de Notion, verificar que existe en las bases de datos
+    return this.databases.some(db => db.id === id)
   }
 
   /**
@@ -126,8 +152,14 @@ export class RelationshipDetector {
    */
   private findReciprocalProperty(targetDb: NotionDatabase, sourceDbId: string): { name: string, property: NotionProperty } | null {
     for (const [propName, property] of Object.entries(targetDb.properties)) {
-      if (property.type === 'relation' && property.relation?.database_id === sourceDbId) {
-        return { name: propName, property }
+      if (property.type === 'relation') {
+        // Verificar tanto el formato real como el de demo
+        const hasRelation = property.relation?.database_id === sourceDbId || 
+                           (property.id && property.id === sourceDbId)
+        
+        if (hasRelation) {
+          return { name: propName, property }
+        }
       }
     }
     return null
@@ -158,13 +190,19 @@ export class RelationshipDetector {
     let strength = 1
 
     // Factor 1: Número de propiedades de relación entre estas bases de datos
-    const relationCount = Object.values(sourceDb.properties).filter(
-      prop => prop.type === 'relation' && prop.relation?.database_id === targetDb.id
-    ).length
+    const relationCount = Object.values(sourceDb.properties).filter(prop => {
+      if (prop.type === 'relation') {
+        return prop.relation?.database_id === targetDb.id || prop.id === targetDb.id
+      }
+      return false
+    }).length
 
-    const reverseRelationCount = Object.values(targetDb.properties).filter(
-      prop => prop.type === 'relation' && prop.relation?.database_id === sourceDb.id
-    ).length
+    const reverseRelationCount = Object.values(targetDb.properties).filter(prop => {
+      if (prop.type === 'relation') {
+        return prop.relation?.database_id === sourceDb.id || prop.id === sourceDb.id
+      }
+      return false
+    }).length
 
     strength += (relationCount + reverseRelationCount) * 2
 

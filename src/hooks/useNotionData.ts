@@ -34,10 +34,11 @@ const transformDemoDatabase = (demoDb: any): NotionDatabase => {
     cover: demoDb.cover,
     properties: Object.entries(demoDb.properties).reduce((acc, [name, prop]: [string, any]) => {
       acc[name] = {
-        id: name.toLowerCase().replace(/\s+/g, '_'),
+        id: prop.type === 'relation' ? prop.relation?.database_id : name.toLowerCase().replace(/\s+/g, '_'),
         name,
         type: prop.type,
-        options: prop.select?.options || prop.multi_select?.options || []
+        options: prop.select?.options || prop.multi_select?.options || [],
+        relation: prop.relation // Mantener la información de relación para el detector
       };
       return acc;
     }, {} as any),
