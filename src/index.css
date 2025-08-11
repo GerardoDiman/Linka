@@ -120,6 +120,47 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     border-color: #3b82f6;
   }
+  
+  /* Animaciones nuevas para landing */
+  .fade-up {
+    animation: fadeUp 600ms ease-out both;
+  }
+  .fade-up-delay-1 { animation-delay: 120ms; }
+  .fade-up-delay-2 { animation-delay: 240ms; }
+  .fade-up-delay-3 { animation-delay: 360ms; }
+  
+  .float-y {
+    animation: floatY 6s ease-in-out infinite;
+  }
+  
+  .tilt-on-hover {
+    transition: transform 200ms ease;
+  }
+  .tilt-on-hover:hover { transform: rotate(-1.5deg) scale(1.01); }
+
+  /* Scroll reveal system */
+  .reveal { opacity: 0; transform: translateY(14px); transition: transform 600ms ease, opacity 600ms ease; will-change: transform, opacity; }
+  .reveal.up { transform: translateY(18px); }
+  .reveal.left { transform: translateX(-18px); }
+  .reveal.right { transform: translateX(18px); }
+  .reveal.zoom { transform: scale(0.96); }
+  .reveal.show { opacity: 1; transform: translateX(0) translateY(0) scale(1); }
+
+  /* Stagger helpers */
+  .stagger > .reveal { transition-delay: 0ms; }
+  .stagger > .reveal:nth-child(1) { transition-delay: 60ms; }
+  .stagger > .reveal:nth-child(2) { transition-delay: 120ms; }
+  .stagger > .reveal:nth-child(3) { transition-delay: 180ms; }
+  .stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
+  .stagger > .reveal:nth-child(5) { transition-delay: 300ms; }
+  .stagger > .reveal:nth-child(6) { transition-delay: 360ms; }
+
+  /* CTA button microinteractions */
+  .btn-cta { position: relative; overflow: hidden; isolation: isolate; }
+  .btn-cta::after { content: ""; position: absolute; inset: -150% -50%; background: radial-gradient(ellipse at center, rgba(255,255,255,.35), rgba(255,255,255,0) 55%); transform: translateY(100%) rotate(12deg); transition: transform 700ms ease; pointer-events: none; z-index: -1; }
+  .btn-cta:hover::after { transform: translateY(0) rotate(12deg); }
+  .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(16, 185, 129, 0.25), 0 8px 16px rgba(59, 130, 246, 0.22); }
+  .btn-cta:active { transform: translateY(0); }
 }
 
 /* Search animations */
@@ -137,6 +178,16 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 /* Ocultar completamente la marca de agua de React Flow */
@@ -589,6 +640,12 @@ html[data-theme="dark"] .bg-gradient-to-br {
 [data-theme-toggle],
 [data-theme-toggle] * {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+/* Desactivar transiciones durante el primer paint para evitar flash */
+.no-theme-transition *,
+.no-theme-transition {
+  transition: none !important;
 }
 
 /* Botones con estados mejorados */

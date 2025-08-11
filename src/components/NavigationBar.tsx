@@ -21,6 +21,7 @@ import {
   User
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import Logo from './Logo';
 
 interface NavigationBarProps {
   // Props del sistema de roles
@@ -104,9 +105,7 @@ const NavigationBar: React.FC<NavigationBarProps> = memo(({
           {/* Logo/Brand */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Linka v2.0
-              </h1>
+              <Logo className="h-7" />
             </div>
           </div>
 

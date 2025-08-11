@@ -2,7 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" href="/brand/favicon.png" />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('theme') || 'light';
+          var theme = (saved === 'dark' || saved === 'light') ? saved : 'light';
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+          document.documentElement.classList.add('no-theme-transition');
+          setTimeout(function(){ document.documentElement.classList.remove('no-theme-transition'); }, 50);
+        } catch (e) {}
+      })();
+    </script>
+    <meta property="og:title" content="Linka – Visualiza Notion de forma profesional" />
+    <meta property="og:description" content="Explora relaciones y estadísticas de tus bases de datos de Notion en un diagrama interactivo." />
+    <meta property="og:image" content="/og.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Linka v2.0 - Notion Database Visualizer</title>
     <meta name="description" content="Visualize your Notion databases as interactive node diagrams" />
