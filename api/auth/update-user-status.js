@@ -63,14 +63,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Preparar las propiedades a actualizar
-    const propertiesToUpdate = {
-      'Estado': {
-        select: {
-          name: newStatus.charAt(0).toUpperCase() + newStatus.slice(1) // Capitalizar primera letra
-        }
-      }
+    // Detectar clave real y opciones del select de estado
+    const db = await notion.databases.retrieve({ database_id: databaseId });
+    const props = db.properties || {};
+    const statusKey = Object.prototype.hasOwnProperty.call(props, 'Estado') ? 'Estado' : (Object.prototype.hasOwnProperty.call(props, 'Status') ? 'Status' : 'Estado');
+    const options = props[statusKey]?.select?.options?.map(o => o.name) || [];
+    const mapDesired = (val) => {
+      const candidates = { approved: ['Approved','Aprobado'], pending: ['Pending','Pendiente'], rejected: ['Rejected','Rechazado'], admin: ['Admin','Administrador'] }[val] || [];
+      for (const c of candidates) if (options.includes(c)) return c;
+      return options[0] || val.charAt(0).toUpperCase() + val.slice(1);
     };
+    const notionStatus = mapDesired(newStatus);
+
+    const propertiesToUpdate = { [statusKey]: { select: { name: notionStatus } } };
 
     // Agregar notas del administrador si se proporcionan
     if (adminNotes) {
