@@ -109,3 +109,18 @@ test-results/
 playwright-report/
 
 .vercel
+
+
+
+api/**
+!api/auth
+!api/auth/**
+!api/leads
+!api/leads/submit.js
+api/test*
+api/*test*.js
+api/debug.js
+api/hello.js
+api/database.js
+api/databases.js
+api/databases/**
