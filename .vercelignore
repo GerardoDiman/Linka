@@ -44,3 +44,6 @@ api/**
 !api/invitations
 !api/invitations/create.js
 !api/invitations/verify.js
+!api/sync
+!api/sync/notion.js
+!api/sync/stats.js
