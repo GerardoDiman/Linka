@@ -32,3 +32,10 @@ playwright-report
 
 # Local development
 *.local 
+
+
+api/**
+!api/auth
+!api/auth/**
+!api/leads
+!api/leads/submit.js
