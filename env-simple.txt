@@ -1,0 +1,21 @@
+# Notion Configuration
+NOTION_TOKEN=ntn_b95379985338PMlwGFogXzIAk8Yevds1HnShNm6Kk8mf8M
+NOTION_LEADS_DATABASE_ID=232238824ec580e6a88dcd94b34846e2
+
+# n8n Webhook Configuration
+N8N_WEBHOOK_URL=https://n8n.srv858616.hstgr.cloud/webhook/webhook/linka
+N8N_WEBHOOK_SECRET=8e723900-53ba-4198-a303-fef0224f2d0a
+
+# Server Configuration
+PORT=3000
+VITE_API_BASE_URL=http://localhost:3000/api
+FRONTEND_URL=http://localhost:3000
+
+# Database Configuration
+DATABASE_URL=postgresql://postgres:password@localhost:5432/linka
+
+# JWT Configuration
+JWT_SECRET=tu-jwt-secret-super-seguro-cambiar-en-produccion
+
+# Environment
+NODE_ENV=development 

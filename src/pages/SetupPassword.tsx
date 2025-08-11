@@ -1,47 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as authService from '../services/auth';
-import { apiFetch } from '../services/api';
 
-const Register = () => {
+const SetupPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: searchParams.get('email') || '',
     password: '',
-    confirmPassword: '',
-    name: searchParams.get('name') || ''
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [invitation, setInvitation] = useState(null);
-  const [verifyingInvitation, setVerifyingInvitation] = useState(false);
 
-  // Verificar invitación al cargar la página
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      verifyInvitation(token);
+    // Si no hay email en la URL, redirigir al login
+    if (!formData.email) {
+      navigate('/login');
     }
-  }, [searchParams]);
-
-  const verifyInvitation = async (token: string) => {
-    setVerifyingInvitation(true);
-    try {
-      const response = await apiFetch(`/invitations/verify/${token}`);
-      setInvitation(response.invitation);
-      setFormData(prev => ({
-        ...prev,
-        email: response.invitation.email
-      }));
-    } catch (err: any) {
-      console.error('❌ Error verificando invitación:', err);
-      setError('Invitación inválida o expirada');
-    } finally {
-      setVerifyingInvitation(false);
-    }
-  };
+  }, [formData.email, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,23 +48,19 @@ const Register = () => {
     }
 
     try {
-      const response = await authService.register(
-        formData.email, 
-        formData.password, 
-        formData.name
-      );
-
-      console.log('✅ Registro exitoso:', response);
+      const response = await authService.setupPassword(formData.email, formData.password);
+      
+      console.log('✅ Contraseña configurada exitosamente:', response);
       setSuccess(true);
       
       // Redirigir después de 3 segundos
       setTimeout(() => {
-        navigate('/login');
+        navigate('/dashboard');
       }, 3000);
 
     } catch (err: any) {
-      console.error('❌ Error en registro:', err);
-      setError(err.message || 'Error al registrar. Por favor, intenta de nuevo.');
+      console.error('❌ Error configurando contraseña:', err);
+      setError(err.message || 'Error configurando contraseña. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -103,14 +77,14 @@ const Register = () => {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              ¡Cuenta creada exitosamente!
+              ¡Contraseña configurada!
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Ya puedes iniciar sesión con tu email y contraseña.
+              Tu cuenta está lista. Ya puedes acceder a Linka v2.0.
             </p>
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Redirigiendo al login...
+            Redirigiendo al dashboard...
           </div>
         </div>
       </div>
@@ -122,24 +96,14 @@ const Register = () => {
       <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            {invitation ? 'Aceptar Invitación' : 'Crear Cuenta'}
+            Configurar Contraseña
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {invitation 
-              ? `Has sido invitado por ${invitation.invitedBy}`
-              : 'Crea tu cuenta para acceder a Linka v2.0'
-            }
+            Crea tu contraseña para acceder a Linka v2.0
           </p>
-          {invitation && (
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <p className="text-sm text-blue-600 dark:text-blue-400">
-                📧 Email: {invitation.email}
-              </p>
-              <p className="text-xs text-blue-500 dark:text-blue-300 mt-1">
-                La invitación expira el {new Date(invitation.expiresAt).toLocaleDateString()}
-              </p>
-            </div>
-          )}
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Email: {formData.email}
+          </p>
         </div>
 
         {error && (
@@ -150,38 +114,8 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Nombre completo *
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email *
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Contraseña *
+              Nueva contraseña *
             </label>
             <input
               id="password"
@@ -222,17 +156,17 @@ const Register = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Creando cuenta...
+                Configurando...
               </>
             ) : (
-              'Crear cuenta'
+              'Configurar contraseña'
             )}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-600 dark:text-gray-400">
-            ¿Ya tienes cuenta?{' '}
+            ¿Ya tienes contraseña?{' '}
             <button
               onClick={() => navigate('/login')}
               className="text-blue-600 hover:text-blue-500 font-medium"
@@ -246,4 +180,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default SetupPassword; 

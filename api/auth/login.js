@@ -20,13 +20,48 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Email y contraseña requeridos' });
   }
 
-  // Simulación de usuario autenticado
-  const user = { 
-    id: Date.now(),
-    email,
-    name: email.split('@')[0],
-    createdAt: new Date().toISOString()
-  };
+  // Base de datos simulada de usuarios con roles
+  const users = [
+    {
+      id: 1,
+      email: 'demo@example.com',
+      name: 'Usuario Demo',
+      role: 'approved',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      leadId: 'demo-lead-1'
+    },
+    {
+      id: 2,
+      email: 'test@example.com',
+      name: 'Usuario Test',
+      role: 'pending',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      leadId: 'test-lead-1'
+    },
+    {
+      id: 3,
+      email: 'admin@example.com',
+      name: 'Administrador',
+      role: 'admin',
+      createdAt: '2024-01-01T00:00:00.000Z'
+    },
+    {
+      id: 4,
+      email: 'rejected@example.com',
+      name: 'Usuario Rechazado',
+      role: 'rejected',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      leadId: 'rejected-lead-1'
+    }
+  ];
+
+  // Buscar usuario
+  const user = users.find(u => u.email === email);
+  if (!user) {
+    return res.status(400).json({ error: 'Usuario no encontrado' });
+  }
+
+  console.log(`✅ Usuario logueado: ${user.email} (role: ${user.role})`);
 
   return res.status(200).json({ 
     success: true,

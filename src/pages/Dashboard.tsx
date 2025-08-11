@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import NotionVisualizer from '../components/NotionVisualizer';
-import React from 'react';
+
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -21,10 +21,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Contenido principal - Visualizador de Notion */}
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* Contenido principal - Visualizador de Notion con navegación integrada */}
       <div className="flex-1">
-        <NotionVisualizer user={user} onLogout={handleLogout} />
+        <NotionVisualizer 
+          user={user ? { email: user.email, name: user.name, role: user.role } : undefined} 
+          onLogout={handleLogout} 
+        />
       </div>
     </div>
   );

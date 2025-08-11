@@ -8,7 +8,7 @@ import DatabaseNode from './DatabaseNode'
 import CustomEdge from './CustomEdge'
 import NotionSetup from './NotionSetup'
 import ExportPanel, { ExportOptions } from './ExportPanel'
-import { NavigationBar } from './NavigationBar'
+import NavigationBar from './NavigationBar'
 import { LoadingSpinner, FullPageLoader } from './LoadingSpinner'
 import { HelpPanel } from './HelpPanel'
 import { WorkspaceStats } from './WorkspaceStats'
@@ -175,7 +175,11 @@ const calculateOptimalConnectionPoints = (sourcePos: {x: number, y: number}, tar
 }
 
 interface NotionVisualizerProps {
-  user?: { email?: string };
+  user?: { 
+    email?: string;
+    name?: string;
+    role?: string;
+  };
   onLogout?: () => void;
 }
 

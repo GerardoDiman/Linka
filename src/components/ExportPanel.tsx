@@ -12,6 +12,21 @@ interface ExportPanelProps {
 export interface ExportOptions {
   format: 'png' | 'svg' | 'jpg' | 'json' | 'mermaid'
   filename: string
+  // Opciones adicionales para watermark
+  includeWatermark?: boolean
+  watermarkText?: string
+  watermarkOpacity?: number
+  watermarkPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
+  // Opciones adicionales para resolución
+  resolution?: 'standard' | 'high' | 'custom'
+  customWidth?: number
+  customHeight?: number
+  quality?: number
+  pixelRatio?: number
+  padding?: number
+  // Opciones adicionales para exportación
+  includeBackground?: boolean
+  scale?: number
 }
 
 const BACKGROUND_COLORS = [

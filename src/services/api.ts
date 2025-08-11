@@ -1,19 +1,41 @@
 // Lógica base para llamadas a la API
-const API_URL = '/api'; // Siempre usar /api como prefijo
+import { config } from '../config/environment';
+
+const API_URL = config.apiUrl;
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_URL}${endpoint}`;
+  const token = localStorage.getItem('authToken');
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const url = `${API_URL}${endpoint}${token ? `${separator}token=${encodeURIComponent(token)}` : ''}`;
+  
+  // Obtener token del localStorage
+  // token ya calculado arriba
   
   console.log('🔗 API Request:', {
     url,
     method: options.method || 'GET',
     body: options.body,
-    environment: window.location.hostname === 'localhost' ? 'local' : 'production'
+    environment: config.isDevelopment ? 'development' : 'production',
+    hostname: window.location.hostname,
+    apiUrl: API_URL
   });
   
+  console.log('🔑 Token en localStorage:', token ? 'Presente' : 'Ausente');
+  
   try {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...(token && { 'X-Auth-Token': token }), // Fallback por si algún proxy elimina Authorization
+      ...options.headers,
+    } as Record<string, string>;
+    
+    console.log('📋 Headers enviados:', headers);
+    console.log('🔑 Token incluido:', token ? 'Sí' : 'No');
+    
     const res = await fetch(url, {
-      credentials: 'include',
+      credentials: 'include', // envía cookies si las hay
+      headers,
       ...options,
     });
     

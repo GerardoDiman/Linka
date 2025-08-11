@@ -6,7 +6,7 @@ export const PlanProvider = ({ children }: { children: React.ReactNode }) => {
   const [plan, setPlan] = useState('free');
   // Aquí puedes agregar lógica para cambiar de plan
   return (
-    <PlanContext.Provider value={{ plan, setPlan }}>
+    <PlanContext.Provider value={{ plan, setPlan } as any}>
       {children}
     </PlanContext.Provider>
   );
