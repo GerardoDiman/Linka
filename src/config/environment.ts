@@ -17,7 +17,7 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 // Configuración por defecto
 const defaultConfig: EnvironmentConfig = {
   isDevelopment,
-  apiUrl: isDevelopment ? '/api' : 'https://linkav2-0.vercel.app/api',
+  apiUrl: isDevelopment ? '/api' : `${window.location.origin}/api`,
   webhookUrl: 'https://n8n.srv858616.hstgr.cloud/webhook/linka',
   webhookSecret: '8e723900-53ba-4198-a303-fef0224f2d0a',
   // Configuración específica para n8n
