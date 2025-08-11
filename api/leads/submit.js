@@ -40,63 +40,48 @@ export default async function handler(req, res) {
       });
     }
 
-    // Crear entrada en Notion
+    // Detectar nombres reales de propiedades en la DB (variantes: 'Rol / Cargo' vs 'Rol/Cargo', 'Estado' vs 'Status', etc.)
+    const db = await notion.databases.retrieve({ database_id: databaseId });
+    const props = db.properties || {};
+
+    const pickProp = (...candidates) => candidates.find(k => Object.prototype.hasOwnProperty.call(props, k));
+
+    const nameKey = pickProp('Nombre', 'Name') || 'Nombre';
+    const emailKey = pickProp('Email', 'Correo', 'E-mail') || 'Email';
+    const companyKey = pickProp('Empresa', 'Company') || 'Empresa';
+    const roleKey = pickProp('Rol / Cargo', 'Rol/Cargo', 'Cargo', 'Rol');
+    const descriptionKey = pickProp('Descripción', 'Descripcion', 'Description') || 'Descripción';
+    const statusKey = pickProp('Estado', 'Status') || 'Estado';
+    const dateKey = pickProp('Fecha de Registro', 'Fecha', 'Fecha registro') || 'Fecha de Registro';
+    const sourceKey = pickProp('Fuente', 'Source') || 'Fuente';
+
+    // Determinar valores válidos para selects
+    const statusOptions = props[statusKey]?.select?.options?.map(o => o.name) || [];
+    const pendingValue = statusOptions.includes('Pending')
+      ? 'Pending'
+      : (statusOptions.includes('Pendiente') ? 'Pendiente' : (statusOptions[0] || 'Pending'));
+
+    const roleOptions = props[roleKey]?.select?.options?.map(o => o.name) || [];
+    const roleValue = roleOptions.includes(role) ? role : (roleOptions[0] || 'No especificado');
+
+    // Crear entrada en Notion con los nombres detectados
+    const properties = {};
+    properties[nameKey] = {
+      title: [{ text: { content: `${firstName} ${lastName}` } }]
+    };
+    properties[emailKey] = { email };
+    properties[companyKey] = { rich_text: [{ text: { content: company || 'No especificada' } }] };
+    if (roleKey) {
+      properties[roleKey] = { select: { name: roleValue } };
+    }
+    properties[descriptionKey] = { rich_text: [{ text: { content: description } }] };
+    properties[statusKey] = { select: { name: pendingValue } };
+    properties[dateKey] = { date: { start: new Date().toISOString() } };
+    properties[sourceKey] = { select: { name: source || 'Landing Page' } };
+
     const response = await notion.pages.create({
-      parent: {
-        database_id: databaseId,
-      },
-      properties: {
-        'Nombre': {
-          title: [
-            {
-              text: {
-                content: `${firstName} ${lastName}`,
-              },
-            },
-          ],
-        },
-        'Email': {
-          email: email,
-        },
-        'Empresa': {
-          rich_text: [
-            {
-              text: {
-                content: company || 'No especificada',
-              },
-            },
-          ],
-        },
-        'Rol/Cargo': {
-          select: {
-            name: role,
-          },
-        },
-        'Descripción': {
-          rich_text: [
-            {
-              text: {
-                content: description,
-              },
-            },
-          ],
-        },
-        'Estado': {
-          select: {
-            name: 'Pendiente',
-          },
-        },
-        'Fecha de Registro': {
-          date: {
-            start: new Date().toISOString(),
-          },
-        },
-        'Fuente': {
-          select: {
-            name: source || 'Landing Page',
-          },
-        },
-      },
+      parent: { database_id: databaseId },
+      properties
     });
 
     console.log('✅ Lead creado en Notion:', {
