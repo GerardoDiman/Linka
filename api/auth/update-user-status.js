@@ -1,15 +1,20 @@
 // api/auth/update-user-status.js
 
 import { Client } from '@notionhq/client';
+import { initDatabase, getPool } from '../_lib/database.js';
+import { verifyUserToken } from '../_lib/auth.js';
+import { sendWebhook } from '../_lib/webhook.js';
 
 export default async function handler(req, res) {
   console.log("Método recibido:", req.method);
   console.log("Body recibido:", req.body);
   
-  // Siempre agregar los headers de CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -18,6 +23,18 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
+
+  await initDatabase();
+  const pool = getPool();
+
+  const authHeader = req.headers['authorization'];
+  let token = authHeader && authHeader.split(' ')[1];
+  if (!token) token = req.query.token;
+  if (!token && req.body && typeof req.body.token === 'string') token = req.body.token;
+  if (!token) return res.status(401).json({ error: 'Token requerido' });
+
+  const authUser = await verifyUserToken(token);
+  if (!authUser || authUser.role !== 'admin') return res.status(403).json({ error: 'No autorizado' });
 
   const { leadId, newStatus, adminNotes } = req.body;
 
@@ -75,6 +92,21 @@ export default async function handler(req, res) {
     });
 
     console.log(`✅ Estado actualizado en Notion: ${leadId} → ${newStatus}`);
+
+    // Sincronizar en Neon (si existe el usuario)
+    await pool.query(
+      `UPDATE users SET role=$1, updated_at=NOW() WHERE notion_lead_id=$2`,
+      [newStatus, leadId]
+    );
+
+    await sendWebhook('user_status_changed', {
+      email: userData.email,
+      name: userData.name,
+      oldStatus: 'pending',
+      newStatus,
+      adminNotes,
+      notionId: leadId
+    });
 
     // Obtener la información actualizada del usuario
     const updatedPage = await notion.pages.retrieve({

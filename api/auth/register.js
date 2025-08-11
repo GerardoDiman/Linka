@@ -37,51 +37,49 @@ if (!global.users) {
   ];
 }
 
+import { initDatabase, getPool } from '../_lib/database.js';
+import { hashPassword, generateToken } from '../_lib/auth.js';
+import { sendWebhook } from '../_lib/webhook.js';
+
 export default async function handler(req, res) {
-  console.log("Método recibido:", req.method);
-  console.log("Body recibido:", req.body);
-  
-  // Siempre agregar los headers de CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-  const { email, password, name } = req.body;
+  await initDatabase();
+  const pool = getPool();
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email y contraseña son requeridos' });
-  }
+  const { email, password, name } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Email y contraseña son requeridos' });
 
-  // Verificar si el usuario ya existe
-  const existingUser = global.users.find(u => u.email === email);
-  if (existingUser) {
-    return res.status(400).json({ error: 'El usuario ya existe' });
-  }
+  const existing = await pool.query('SELECT id FROM users WHERE email=$1', [email]);
+  if (existing.rowCount > 0) return res.status(400).json({ error: 'El usuario ya existe' });
 
-  // Simular creación de usuario con rol pending por defecto
+  const passwordHash = await hashPassword(password);
+  const ins = await pool.query(
+    `INSERT INTO users (email, password_hash, name, role, source)
+     VALUES ($1,$2,$3,$4,$5) RETURNING id, email, name, role, created_at`,
+    [email, passwordHash, name || email.split('@')[0], 'pending', 'Landing Page']
+  );
+
   const user = {
-    id: Date.now(),
-    email,
-    name: name || email.split('@')[0],
-    role: 'pending', // Por defecto, todos los nuevos usuarios son pending
-    createdAt: new Date().toISOString()
+    id: ins.rows[0].id,
+    email: ins.rows[0].email,
+    name: ins.rows[0].name,
+    role: ins.rows[0].role,
+    createdAt: ins.rows[0].created_at
   };
-  
-  global.users.push(user);
 
-  console.log(`✅ Usuario registrado: ${user.email} (role: ${user.role})`);
+  const token = generateToken(user.id, user.email, user.role);
+  await pool.query('INSERT INTO sessions (user_id, token, expires_at) VALUES ($1,$2,$3)', [user.id, token, new Date(Date.now() + 7*24*60*60*1000)]);
 
-  return res.status(200).json({
-    success: true,
-    user,
-    message: 'Usuario registrado exitosamente. Tu solicitud está en revisión.'
-  });
+  await sendWebhook('user_registered', { email: user.email, name: user.name, role: user.role, userId: user.id });
+
+  return res.status(200).json({ success: true, user, token, message: 'Usuario registrado exitosamente' });
 }

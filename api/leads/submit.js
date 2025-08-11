@@ -1,4 +1,5 @@
 import { Client } from '@notionhq/client';
+import { sendWebhook } from '../_lib/webhook.js';
 
 export default async function handler(req, res) {
   // Configurar CORS
@@ -90,6 +91,17 @@ export default async function handler(req, res) {
       email: email,
       company: company,
       role: role
+    });
+
+    // Disparar webhook a n8n
+    await sendWebhook('new_lead', {
+      email,
+      name: `${firstName} ${lastName}`,
+      company,
+      role: roleValue,
+      description,
+      source: source || 'Landing Page',
+      notionId: response.id
     });
 
     return res.status(200).json({
