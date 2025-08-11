@@ -1,4 +1,5 @@
-import jwt from 'jsonwebtoken';
+import { initDatabase, getPool } from '../_lib/database.js';
+import { hashPassword, generateToken } from '../_lib/auth.js';
 
 export default async function handler(req, res) {
   // CORS básico (mismo dominio o explícito si es cross-origin)
@@ -21,9 +22,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Email y contraseña requeridos' });
   }
 
+  await initDatabase();
+  const pool = getPool();
+
   // Password robusta por entorno (configurable en Vercel)
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'L1nk@Admin_2025!';
-  const JWT_SECRET = process.env.JWT_SECRET || 'linka-secret-change-in-prod';
 
   // Usuarios demo + admin real
   const users = [
@@ -52,12 +55,28 @@ export default async function handler(req, res) {
     }
   }
 
-  // Emitir token compatible con el frontend
-  const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
-    { expiresIn: '7d' }
-  );
+  // Si es admin@linka.com, asegúrate de que exista en DB
+  if (email === 'admin@linka.com') {
+    const existing = await pool.query('SELECT id FROM users WHERE email=$1', [email]);
+    if (existing.rowCount === 0) {
+      const passwordHash = await hashPassword(ADMIN_PASSWORD);
+      await pool.query(
+        `INSERT INTO users (email, password_hash, name, role, source, notes)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [email, passwordHash, 'Administrador', 'admin', 'Sistema', 'Admin creado en login serverless']
+      );
+    }
+    const row = await pool.query('SELECT id, email, name, role FROM users WHERE email=$1', [email]);
+    const u = row.rows[0];
+    const token = generateToken(u.id, u.email, u.role);
+    await pool.query('DELETE FROM sessions WHERE user_id=$1', [u.id]);
+    await pool.query('INSERT INTO sessions (user_id, token, expires_at) VALUES ($1,$2,$3)', [u.id, token, new Date(Date.now() + 7*24*60*60*1000)]);
+    console.log(`✅ Usuario logueado: ${u.email} (role: ${u.role})`);
+    return res.status(200).json({ success: true, user: u, token, message: 'Login exitoso' });
+  }
+
+  // Usuarios demo: emitir token simulado sin DB
+  const token = generateToken(user.id, user.email, user.role);
 
   console.log(`✅ Usuario logueado: ${user.email} (role: ${user.role})`);
 

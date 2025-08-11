@@ -35,7 +35,12 @@ playwright-report
 
 
 api/**
+!api/_lib
+!api/_lib/**
 !api/auth
 !api/auth/**
 !api/leads
 !api/leads/submit.js
+!api/invitations
+!api/invitations/create.js
+!api/invitations/verify.js
