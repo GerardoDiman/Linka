@@ -104,15 +104,6 @@ export default async function handler(req, res) {
       [newStatus, leadId]
     );
 
-    await sendWebhook('user_status_changed', {
-      email: userData.email,
-      name: userData.name,
-      oldStatus: 'pending',
-      newStatus,
-      adminNotes,
-      notionId: leadId
-    });
-
     // Obtener la información actualizada del usuario
     const updatedPage = await notion.pages.retrieve({
       page_id: leadId
@@ -130,6 +121,16 @@ export default async function handler(req, res) {
       roleTitle: properties['Rol/Cargo']?.select?.name || '',
       description: properties.Descripción?.rich_text?.[0]?.plain_text || ''
     };
+
+    // Enviar webhook después de construir userData
+    await sendWebhook('user_status_changed', {
+      email: userData.email,
+      name: userData.name,
+      oldStatus: 'pending',
+      newStatus,
+      adminNotes,
+      notionId: leadId
+    });
 
     return res.status(200).json({
       success: true,
