@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
-export type Theme = 'light' | 'dark' | 'system'
+export type Theme = 'light' | 'dark'
 
 interface UseThemeReturn {
   theme: Theme
@@ -19,51 +19,24 @@ export function useTheme(): UseThemeReturn {
     
     // Intentar obtener tema guardado del localStorage
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('linkav2-theme') as Theme
+      const saved = (localStorage.getItem('linka-theme') || localStorage.getItem('linkav2-theme')) as Theme
       if (saved && ['light', 'dark', 'system'].includes(saved)) {
         globalTheme = saved
         return saved
       }
     }
-    globalTheme = 'system'
-    return 'system'
+    globalTheme = 'light'
+    return 'light'
   })
 
   // Determinar si debe usar modo oscuro
   const [isDark, setIsDark] = useState(() => globalIsDark)
 
   useEffect(() => {
-    const updateDarkMode = () => {
-      let newIsDark = false
-      
-      if (theme === 'system') {
-        newIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      } else {
-        newIsDark = theme === 'dark'
-      }
-      
-      if (newIsDark !== globalIsDark) {
-        globalIsDark = newIsDark
-        setIsDark(newIsDark)
-      }
-    }
-
-    // Actualizar inmediatamente
-    updateDarkMode()
-
-    // Escuchar cambios en preferencias del sistema
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      
-      // Usar addEventListener si está disponible, sino usar el método deprecated
-      if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener('change', updateDarkMode)
-        return () => mediaQuery.removeEventListener('change', updateDarkMode)
-      } else {
-        // Fallback para navegadores más antiguos
-        mediaQuery.addListener(updateDarkMode)
-        return () => mediaQuery.removeListener(updateDarkMode)
-      }
+    const newIsDark = theme === 'dark'
+    if (newIsDark !== globalIsDark) {
+      globalIsDark = newIsDark
+      setIsDark(newIsDark)
     }
   }, [theme])
 
@@ -88,7 +61,10 @@ export function useTheme(): UseThemeReturn {
     setThemeState(newTheme)
     
     if (typeof window !== 'undefined') {
+      localStorage.setItem('linka-theme', newTheme)
       localStorage.setItem('linkav2-theme', newTheme)
+      document.documentElement.dataset.theme = newTheme
+      document.documentElement.style.colorScheme = newTheme === 'dark' ? 'dark' : 'light'
     }
   }, [])
 

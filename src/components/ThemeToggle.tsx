@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useRef, useEffect } from 'react'
-import { Sun, Moon, Monitor } from 'lucide-react'
+import { Sun, Moon } from 'lucide-react'
 import { useTheme, Theme } from '../hooks/useTheme'
 
 interface ThemeToggleProps {
@@ -12,8 +12,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = memo(({ isInDropdown = fa
 
   const themes: { value: Theme; icon: React.ComponentType<any>; label: string }[] = [
     { value: 'light', icon: Sun, label: 'Claro' },
-    { value: 'dark', icon: Moon, label: 'Oscuro' },
-    { value: 'system', icon: Monitor, label: 'Sistema' }
+    { value: 'dark', icon: Moon, label: 'Oscuro' }
   ]
 
   const handleThemeChange = useCallback((newTheme: Theme) => {

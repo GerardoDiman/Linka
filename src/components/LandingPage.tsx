@@ -4,14 +4,14 @@ import { Database, Zap, ArrowRight, CheckCircle, FileText, Layers, BarChart3 } f
 import Logo from './Logo';
 
 const HeroIllustration = () => (
-  <div className="relative w-full max-w-xl md:max-w-2xl lg:max-w-3xl">
+  <div className="relative w-full max-w-xl md:max-w-2xl lg:max-w-3xl parallax-med" data-parallax>
     {/* Glow */}
     <div className="absolute -inset-6 rounded-[28px] bg-gradient-to-tr from-blue-300/40 via-teal-200/20 to-purple-300/30 blur-2xl" />
     <div className="relative rounded-3xl bg-white/80 backdrop-blur border border-gray-200 shadow-xl p-6 md:p-8 flex items-center justify-center">
       <img
         src="/brand/linka_logo.svg"
         alt="Linka"
-        className="w-full h-auto max-h-56 md:max-h-72 lg:max-h-80 object-contain"
+        className="w-full h-auto max-h-56 md:max-h-72 lg:max-h-80 object-contain reveal zoom strong"
       />
     </div>
   </div>
@@ -140,9 +140,22 @@ const BenefitsSection = () => (
     <div className="max-w-6xl mx-auto px-4">
       <div className="flex flex-col md:flex-row items-center gap-12">
         <div className="flex-1 reveal left">
-          <img src="https://storyset.com/illustration/goal/bro" alt="Beneficios" className="w-full max-w-md mx-auto md:mx-0 rounded-2xl shadow-md" style={{background:'#F0F9FF'}} />
+          <div
+            className="relative w-full max-w-xl mx-auto md:mx-0 rounded-2xl shadow-md overflow-hidden bg-[#F0F9FF]"
+            style={{ aspectRatio: '16 / 9' }}
+          >
+            <video
+              className="absolute inset-0 w-full h-full object-cover"
+              src="/brand/benefits.mp4"
+              poster="/brand/benefits-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
+          </div>
         </div>
-        <div className="flex-1 reveal right">
+        <div className="flex-1 reveal right strong">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Beneficios</h2>
           <ul className="space-y-4 text-lg text-gray-700">
             <li className="flex items-center"><CheckCircle className="w-6 h-6 text-green-500 mr-3" /> Visualización clara y profesional</li>
@@ -200,8 +213,19 @@ const LandingPage: React.FC = () => {
           (entry.target as HTMLElement).classList.add('show');
         }
       });
-    }, { threshold: 0.15 });
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: [0.15, 0.35, 0.65] });
     root.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+    // Parallax simple para elementos con data-parallax
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
+      root.querySelectorAll('[data-parallax]').forEach((el) => {
+        const speed = parseFloat(getComputedStyle(el).getPropertyValue('--parallax-speed')) || 0.2;
+        (el as HTMLElement).style.setProperty('--py', `${y * speed * -0.15}px`);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => observer.disconnect();
   }, []);
 
