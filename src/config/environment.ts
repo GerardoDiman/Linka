@@ -19,10 +19,10 @@ const defaultConfig: EnvironmentConfig = {
   isDevelopment,
   apiUrl: isDevelopment ? '/api' : `${window.location.origin}/api`,
   webhookUrl: 'https://n8n.srv858616.hstgr.cloud/webhook/linka',
-  webhookSecret: '8e723900-53ba-4198-a303-fef0224f2d0a',
+  webhookSecret: process.env.N8N_WEBHOOK_SECRET || '',
   // Configuración específica para n8n
-  n8nWebhookUrl: 'https://n8n.srv858616.hstgr.cloud/webhook/linka',
-  n8nWebhookSecret: '8e723900-53ba-4198-a303-fef0224f2d0a'
+  n8nWebhookUrl: process.env.N8N_WEBHOOK_URL || 'https://n8n.srv858616.hstgr.cloud/webhook/linka',
+  n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET || ''
 };
 
 // Función para obtener la configuración

@@ -18,6 +18,16 @@ out/
 .env.test.local
 .env.production.local
 
+# Configuration files with secrets (DO NOT COMMIT THESE)
+env-*.txt
+env-*.js
+env-*.json
+config-*.txt
+config-*.js
+config-*.json
+secrets.*
+*.secret
+
 # IDE and editor files
 .vscode/
 .idea/

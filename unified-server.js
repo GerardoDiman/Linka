@@ -51,9 +51,9 @@ const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || 'your-webhook-secret';
 
 // Función para enviar webhook a n8n (siempre activa)
 async function sendWebhook(event, data) {
-  // URL de n8n siempre activa
-  const n8nWebhookUrl = 'https://n8n.srv858616.hstgr.cloud/webhook/linka';
-  const n8nWebhookSecret = '8e723900-53ba-4198-a303-fef0224f2d0a';
+  // URL de n8n desde variables de entorno
+  const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || 'https://n8n.srv858616.hstgr.cloud/webhook/linka';
+  const n8nWebhookSecret = process.env.N8N_WEBHOOK_SECRET || '';
 
   try {
     const payload = {

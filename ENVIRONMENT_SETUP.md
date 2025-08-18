@@ -1,52 +1,71 @@
 # Configuración de Variables de Entorno
 
-## 🔧 Variables necesarias para el sistema de leads
+## Archivo `.env` requerido
 
-### Para desarrollo local (.env.local):
-```env
-# Token de integración de Notion (el mismo que usas para la app)
-NOTION_TOKEN=secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```bash
+# ========================================
+# CONFIGURACION DE NOTION
+# ========================================
+# Token de integracion de Notion (obtener desde https://www.notion.so/my-integrations)
+NOTION_TOKEN=your_notion_token_here
 
 # ID de la base de datos de leads en Notion
-NOTION_LEADS_DATABASE_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+NOTION_LEADS_DATABASE_ID=your_notion_database_id_here
+
+# ========================================
+# CONFIGURACION DE n8n WEBHOOKS
+# ========================================
+# URL del webhook de n8n
+N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/linka
+
+# Secret para verificar webhooks de n8n
+N8N_WEBHOOK_SECRET=your_webhook_secret_here
+
+# ========================================
+# CONFIGURACION DEL SERVIDOR
+# ========================================
+# Puerto del servidor
+PORT=3000
+
+# URL base de la API para el frontend
+VITE_API_BASE_URL=http://localhost:3000/api
+
+# URL del frontend (para enlaces de invitacion)
+FRONTEND_URL=http://localhost:3000
+
+# ========================================
+# CONFIGURACION DE BASE DE DATOS
+# ========================================
+# URL de conexion a PostgreSQL
+DATABASE_URL=postgresql://username:password@localhost:5432/database_name
+
+# ========================================
+# CONFIGURACION DE JWT
+# ========================================
+# Secret para firmar tokens JWT (cambiar en produccion)
+JWT_SECRET=your_super_secure_jwt_secret_here
+
+# ========================================
+# CONFIGURACION DE ENTORNO
+# ========================================
+# Entorno de ejecucion
+NODE_ENV=development
 ```
 
-### Para Vercel (Variables de entorno):
-1. Ve a tu proyecto en Vercel
-2. Settings → Environment Variables
-3. Agrega las mismas variables que arriba
+## Variables para Vercel (Producción)
 
-## 📋 Pasos para configurar:
+En Vercel, configura estas variables de entorno:
 
-### 1. Crear base de datos de leads en Notion
-- Sigue la guía en `NOTION_LEADS_SETUP.md`
-- Copia el ID de la base de datos de la URL
+- `NOTION_TOKEN`
+- `NOTION_LEADS_DATABASE_ID`
+- `N8N_WEBHOOK_URL`
+- `N8N_WEBHOOK_SECRET`
+- `DATABASE_URL` (URL de Neon)
+- `JWT_SECRET`
+- `ADMIN_PASSWORD`
 
-### 2. Configurar variables de entorno
-- **Desarrollo local**: Crear archivo `.env.local` en la raíz del proyecto
-- **Vercel**: Agregar en el dashboard de Vercel
+## Seguridad
 
-### 3. Verificar permisos
-- Asegúrate de que tu integración de Notion tenga acceso a la base de datos de leads
-- El token debe tener permisos de escritura
-
-## 🔍 Cómo obtener el Database ID:
-
-1. Abre la base de datos en Notion
-2. Copia la URL completa
-3. El ID está en la URL: `https://notion.so/workspace/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX?v=...`
-4. Copia solo la parte del ID: `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`
-
-## 🧪 Probar la configuración:
-
-1. Reinicia el servidor de desarrollo
-2. Ve a `http://localhost:3001/interest`
-3. Llena el formulario y envía
-4. Verifica en la consola del servidor que se procese correctamente
-5. Verifica en Notion que se cree la entrada
-
-## 🚀 Para producción:
-
-- Las variables se configuran automáticamente en Vercel
-- El endpoint `/api/leads/submit` usará las variables de entorno de Vercel
-- Los leads se guardarán en la base de datos real de Notion 
+⚠️ **IMPORTANTE**: Nunca subas archivos `.env` al repositorio. Ya están incluidos en `.gitignore`. 
