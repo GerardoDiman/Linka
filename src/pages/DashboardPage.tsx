@@ -492,12 +492,12 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
     }, [session.user.id])
 
     const handleResetLayout = useCallback(() => {
-        const simulationData = transformToGraphData(syncedDbs, syncedRelations, {}, customColors)
-        setNodes(simulationData.nodes)
-        setEdges(simulationData.edges)
-        saveAllPositions(session.user.id, simulationData.nodes)
-        setTimeout(() => fitView({ duration: 800 }), 100)
-    }, [syncedDbs, syncedRelations, customColors, setNodes, setEdges, fitView, session.user.id])
+        // Clear saved positions in localStorage for this user
+        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS))
+
+        // Re-run the force-directed layout simulation instead of just random positions
+        runForceLayout(nodes, edges, searchQuery)
+    }, [nodes, edges, searchQuery, runForceLayout, session.user.id])
 
     const handleSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: Node[] }) => {
         setSelectedNodeIds(new Set(selectedNodes.map(n => n.id)))
