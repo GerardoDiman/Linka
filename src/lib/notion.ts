@@ -22,10 +22,15 @@ export async function fetchNotionData(token: string): Promise<{ databases: RawDa
         })
 
         if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            console.error("Notion API error details:", errorData)
+
             if (response.status === 401) {
                 throw new Error("Token inválido. Por favor verifica tu token de integración.")
             }
-            throw new Error(`Error de Notion (${response.status}): ${response.statusText}`)
+
+            const message = errorData.message || response.statusText
+            throw new Error(`Error de Notion (${response.status}): ${message}`)
         }
 
         const data = await response.json()
