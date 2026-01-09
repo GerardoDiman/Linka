@@ -451,20 +451,10 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
 
             setSyncedDbs(data.databases)
             setSyncedRelations(data.relations)
-            setSelectedPropertyTypes(new Set())
-            setHiddenDbIds(new Set())
-            setHideIsolated(false)
             setEdges(newEdges)
 
             // Save token on success
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN), token)
-
-            // Reset persistence on new sync
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify([]))
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify([]))
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED), 'false')
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify({}))
-            setCustomColors({})
 
             const hasAllPositions = newNodes.every(n => saved[n.id])
             if (!hasAllPositions) {
