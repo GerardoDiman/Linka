@@ -12,32 +12,35 @@ serve(async (req) => {
     }
 
     try {
-        // Initialize Supabase Client to verify the user
-        const supabase = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-            {
-                global: { headers: { Authorization: req.headers.get('Authorization')! } },
+        const body = await req.json()
+        const publicActions = ['waitlist_request', 'password_recovery']
+
+        // Only require authentication for non-public actions
+        let user = null
+        if (!publicActions.includes(body.action)) {
+            const supabase = createClient(
+                Deno.env.get('SUPABASE_URL') ?? '',
+                Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+                {
+                    global: { headers: { Authorization: req.headers.get('Authorization')! } },
+                }
+            )
+
+            const { data: { user: authUser } } = await supabase.auth.getUser()
+            user = authUser
+
+            if (!user) {
+                return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 401,
+                })
             }
-        )
-
-        // Get the user from the JWT provided in the header
-        const {
-            data: { user },
-        } = await supabase.auth.getUser()
-
-        if (!user) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 401,
-            })
         }
 
         const n8nUrl = "https://n8n-n8n.fxkgvm.easypanel.host/webhook/7ab667dd-f501-4b8e-8924-a666e7202fae"
-        const body = await req.json()
 
-        // Include user ID in the payload for auditing in n8n
-        const payload = { ...body, userId: user.id }
+        // Include user ID in the payload for auditing if authenticated
+        const payload = { ...body, userId: user?.id || 'anonymous' }
 
         const response = await fetch(n8nUrl, {
             method: 'POST',
@@ -53,7 +56,7 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })
-    } catch (error) {
+    } catch (error: any) {
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
