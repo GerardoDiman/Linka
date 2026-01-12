@@ -19,22 +19,20 @@ import {
     Maximize, ZoomIn, ZoomOut
 } from "lucide-react"
 import { supabase } from "../lib/supabase"
-import type { Session } from "@supabase/supabase-js"
+import { useAuth } from "../context/AuthContext"
 
 import { Sidebar } from "../components/dashboard/Sidebar"
 import { DatabaseNode } from "../components/dashboard/DatabaseNode"
 import { Navbar } from "../components/dashboard/Navbar"
 import { OnboardingTour } from "../components/dashboard/OnboardingTour"
 import { SelectionActionBar } from "../components/dashboard/SelectionActionBar"
+import { ExportButton } from "../components/dashboard/ExportButton"
 import { Tooltip } from "../components/ui/Tooltip"
 import { fetchNotionData } from "../lib/notion"
 import { transformToGraphData, type RawDatabase, type RawRelation } from "../lib/graph"
 import { NODE_COLORS } from "../lib/colors"
 import { useTheme } from "../context/ThemeContext"
 
-const nodeTypes = {
-    database: DatabaseNode,
-}
 
 // Raw Demo Data (Template)
 const demoDatabases: RawDatabase[] = [
@@ -155,15 +153,6 @@ const demoRelations: RawRelation[] = [
     { source: '8', target: '1' },
 ]
 
-const LEGACY_KEYS = [
-    'linka-node-positions',
-    'linka-property-filters',
-    'linka-hidden-dbs',
-    'linka-hide-isolated',
-    'linka-notion-token',
-    'linka-onboarding-seen',
-    'linka-custom-colors'
-]
 
 const getScopedKey = (userId: string, key: string) => `linka_${userId}_${key}`
 
@@ -177,13 +166,6 @@ const STORAGE_KEYS = {
     CUSTOM_COLORS: 'custom-colors'
 }
 
-const cleanupLegacySettings = () => {
-    try {
-        LEGACY_KEYS.forEach(key => localStorage.removeItem(key))
-    } catch (e) {
-        console.error("Error during legacy cleanup:", e)
-    }
-}
 
 const getSavedPositions = (userId: string): Record<string, { x: number; y: number }> => {
     try {
@@ -251,40 +233,278 @@ const getSavedCustomColors = (userId: string): Record<string, string> => {
     }
 }
 
-// Generate initial graph data helper moved inside component to support fresh localStorage
+// Move nodeTypes OUTSIDE the component to ensure referential stability and fix React Flow warning
+const NODE_TYPES = {
+    database: DatabaseNode,
+}
+
+// Help functions for cloud sync
+// Reliable sync using direct fetch as fallback
+const syncViaFetch = async (payload: any, token: string) => {
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_graph_data`
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+    const activeToken = token || key
+
+    const sendRequest = async (tokenToSend: string) => {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'apikey': key,
+                'Authorization': `Bearer ${tokenToSend}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify(payload)
+        })
+    }
+
+    let response = await sendRequest(activeToken)
+
+    // Handle Expired JWT
+    if (response.status === 401) {
+        const errorData = await response.json().catch(() => ({}))
+        if (errorData.message?.includes('expired') || errorData.code === 'PGRST303') {
+            console.warn("🔐 JWT Expired detected. Attempting emergency refresh...")
+
+            try {
+                // Try to refresh using the client (even if it hangs, we might get lucky or it might be a quick call)
+                const { data: { session } } = await Promise.race([
+                    supabase.auth.refreshSession(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
+                ]) as any
+
+                if (session?.access_token) {
+                    console.log("🔓 Emergency refresh success! Retrying sync...")
+                    response = await sendRequest(session.access_token)
+                } else {
+                    throw new Error("Could not refresh session")
+                }
+            } catch (err) {
+                console.error("❌ Emergency refresh failed. Needs manual login.")
+                throw new Error("Tu sesión ha expirado. Por favor cierra sesión y vuelve a entrar.")
+            }
+        }
+    }
+
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Direct Fetch Error (${response.status}): ${errorText}`)
+    }
+    return true
+}
+
+const syncToCloud = async (userId: string, data: any, token?: string) => {
+    console.log("🛠️ Cloud Sync: Iniciando...", { userId, fields: Object.keys(data) })
+
+    if (!userId) return
+
+    const payload: any = { id: userId }
+    if (data.positions) payload.positions = data.positions
+    if (data.custom_colors) payload.custom_colors = data.custom_colors
+    if (data.filters) payload.filters = data.filters
+    if (data.hidden_dbs) payload.hidden_dbs = data.hidden_dbs
+    if (data.hide_isolated !== undefined) payload.hide_isolated = data.hide_isolated
+    if (data.notion_token !== undefined) payload.notion_token = data.notion_token
+
+    try {
+        console.log("📡 Intentando sincronización vía Cliente Supabase...")
+        // We use a shorter timeout here to trigger fallback quickly
+        const { error } = await Promise.race([
+            supabase.from('user_graph_data').upsert(payload),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT_CLIENT")), 4000))
+        ]) as any
+
+        if (error) throw error
+        console.log("✅ Sincronización exitosa vía Cliente.")
+    } catch (e: any) {
+        console.warn("⚠️ Cliente Supabase falló o tardó demasiado (Timeout). Intentando fallback vía Fetch directo...")
+        try {
+            // Use the token passed from the component
+            await syncViaFetch(payload, token || '')
+            console.log("✅ Sincronización exitosa vía Fetch directo.")
+        } catch (fetchErr: any) {
+            console.error("❌ Falló tanto el cliente como el fallback:", fetchErr.message)
+            throw fetchErr
+        }
+    }
+}
+
+// Debounce helper
+function debounce(func: Function, wait: number) {
+    let timeout: any
+    return function executedFunction(...args: any[]) {
+        const later = () => {
+            clearTimeout(timeout)
+            func(...args)
+        }
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+    }
+}
 
 interface DashboardContentProps {
     userRole?: string | null
-    session: Session
 }
 
-function DashboardContent({ userRole, session }: DashboardContentProps) {
+function DashboardContent({ userRole }: DashboardContentProps) {
     const { fitView, zoomIn, zoomOut } = useReactFlow()
     const { theme } = useTheme()
+    const { session, loading } = useAuth()
+
+    if (loading || !session) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+    )
 
     const initialGraphData = useMemo(() => {
+        if (!session) return { nodes: [], edges: [] }
         const saved = getSavedPositions(session.user.id)
         const custom = getSavedCustomColors(session.user.id)
         return transformToGraphData(demoDatabases, demoRelations, saved, custom)
-    }, [session.user.id])
+    }, [session?.user.id])
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialGraphData.nodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialGraphData.edges)
-    const [loading, setLoading] = useState(false)
+    const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+    const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
     const [selectedNode, setSelectedNode] = useState<any>(null)
     const [searchQuery, setSearchQuery] = useState("")
     const [syncedDbs, setSyncedDbs] = useState<any[]>(demoDatabases)
     const [syncedRelations, setSyncedRelations] = useState<RawRelation[]>(demoRelations)
-    const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<Set<string>>(() => new Set(getSavedFilters(session.user.id)))
-    const [hiddenDbIds, setHiddenDbIds] = useState<Set<string>>(() => new Set(getSavedHiddenDbs(session.user.id)))
-    const [hideIsolated, setHideIsolated] = useState(() => getSavedHideIsolated(session.user.id))
-    const [customColors, setCustomColors] = useState<Record<string, string>>(() => getSavedCustomColors(session.user.id))
+    const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<Set<string>>(() => new Set(session ? getSavedFilters(session.user.id) : []))
+    const [hiddenDbIds, setHiddenDbIds] = useState<Set<string>>(() => new Set(session ? getSavedHiddenDbs(session.user.id) : []))
+    const [hideIsolated, setHideIsolated] = useState(() => session ? getSavedHideIsolated(session.user.id) : false)
+    const [customColors, setCustomColors] = useState<Record<string, string>>(() => session ? getSavedCustomColors(session.user.id) : {})
     const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set())
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [showTour, setShowTour] = useState(false)
+    const [userPlan, setUserPlan] = useState<'free' | 'pro'>('pro') // Forced to pro for Beta
+    const [isDirty, setIsDirty] = useState(false)
+
+    // Debounced cloud save
+    const debouncedCloudSave = useMemo(() =>
+        debounce((userId: string, data: any) => syncToCloud(userId, data, session?.access_token), 2000)
+        , [session?.access_token])
+
+    // Fetch cloud data on mount
+    useEffect(() => {
+        if (!session) return
+
+        const fetchViaFetch = async (userId: string, token: string) => {
+            const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_graph_data?id=eq.${userId}&select=id,positions,custom_colors,filters,hidden_dbs,hide_isolated,notion_token`
+            const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+            const response = await fetch(url, {
+                headers: {
+                    'apikey': key,
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            if (!response.ok) throw new Error(`Fetch Error: ${response.status}`)
+            const data = await response.json()
+            return data[0] || null
+        }
+
+        const fetchCloudData = async () => {
+            let data = null
+            try {
+                const { data: clientData, error } = await Promise.race([
+                    supabase.from('user_graph_data')
+                        .select('id, positions, custom_colors, filters, hidden_dbs, hide_isolated, notion_token')
+                        .eq('id', session.user.id)
+                        .single(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
+                ]) as any
+
+                if (!error) data = clientData
+            } catch (e) {
+                console.warn("⚠️ Falló carga vía cliente, intentando vía Fetch...")
+            }
+
+            if (!data) {
+                try {
+                    data = await fetchViaFetch(session.user.id, session.access_token || '')
+                    if (data) console.log("✅ Datos cargados con éxito vía Fetch.")
+                } catch (err) {
+                    console.error("❌ Falló carga de datos de la nube:", err)
+                }
+            }
+
+            if (data) {
+                console.log("Cloud Sync: Synchronizing state...")
+
+                // 1. Update localStorage
+                if (data.notion_token) {
+                    localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN), data.notion_token)
+                }
+                localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS), JSON.stringify(data.positions || {}))
+                localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify(data.custom_colors || {}))
+                localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify(data.filters || []))
+                localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(data.hidden_dbs || []))
+                localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED), String(data.hide_isolated || false))
+
+                // 2. Update React State
+                const newFilters = new Set<string>(data.filters || [])
+                const newHidden = new Set<string>(data.hidden_dbs || [])
+                const newIsolated = data.hide_isolated || false
+                const newColors = data.custom_colors || {}
+
+                setSelectedPropertyTypes(newFilters)
+                setHiddenDbIds(newHidden)
+                setHideIsolated(newIsolated)
+                setCustomColors(newColors)
+
+                // 3. Trigger Notion Sync if we have a token and weren't loaded
+                // PASS DATA EXPLICITLY to avoid race conditions with state updates
+                if (data.notion_token && syncedDbs === demoDatabases) {
+                    console.log("Cloud Sync: Auto-syncing Notion with cloud data...")
+                    handleSync(data.notion_token, {
+                        filters: newFilters,
+                        hidden_dbs: newHidden,
+                        hide_isolated: newIsolated,
+                        custom_colors: newColors
+                    })
+                }
+            }
+        }
+        fetchCloudData()
+    }, [session.user.id])
+
+    // ... (omitting fetchPlan useEffect)
+
+    // Fetch user plan on mount
+    useEffect(() => {
+        if (!session) return
+        const fetchPlan = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('plan_type')
+                    .eq('id', session.user.id)
+                    .single()
+                // ...
+
+                if (error) {
+                    console.error("Supabase error fetching plan:", error)
+                    return
+                }
+
+                if (data?.plan_type) {
+                    // Overriding for Beta: keep it pro
+                    setUserPlan('pro')
+                }
+            } catch (err) {
+                console.error("Error fetching plan:", err)
+            }
+        }
+        fetchPlan()
+    }, [session.user.id])
 
     // Auto-onboarding on first visit
     useEffect(() => {
+        if (!session) return
         const hasSeenLocalOnboarding = localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.ONBOARDING))
         const hasSeenAccountOnboarding = session.user.user_metadata?.has_seen_onboarding
 
@@ -293,16 +513,8 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
             const timeout = setTimeout(() => setShowTour(true), 1500)
             return () => clearTimeout(timeout)
         }
-    }, [session.user.id, session.user.user_metadata?.has_seen_onboarding])
+    }, [session?.user.id, session?.user.user_metadata?.has_seen_onboarding])
 
-    // Cleanup legacy settings and auto-sync on mount if token exists
-    useEffect(() => {
-        cleanupLegacySettings()
-        const savedToken = localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN))
-        if (savedToken) {
-            handleSync(savedToken)
-        }
-    }, [session.user.id])
 
     // Map for quick title lookups without depending on nodes state
     const dbTitles = useMemo(() => {
@@ -318,6 +530,12 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
     // Derived state: visible database IDs based on selected property types AND manual toggles AND isolated filter
     const visibleDbIds = useMemo(() => {
         let filtered = syncedDbs
+        const isDemo = syncedDbs === demoDatabases
+
+        // Apply 4-DB limit for Free users (ONLY on real data)
+        if (!isDemo && userPlan === 'free' && filtered.length > 4) {
+            filtered = filtered.slice(0, 4)
+        }
 
         // Apply property type filter if any
         if (selectedPropertyTypes.size > 0) {
@@ -338,7 +556,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
         }
 
         return new Set(filtered.map(db => db.id))
-    }, [syncedDbs, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncedRelations])
+    }, [syncedDbs, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncedRelations, userPlan])
 
     const togglePropertyType = useCallback((type: string) => {
         setSelectedPropertyTypes(prev => {
@@ -349,6 +567,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                 next.add(type)
             }
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify(Array.from(next)))
+            setIsDirty(true)
             return next
         })
     }, [session.user.id])
@@ -362,6 +581,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                 next.add(dbId)
             }
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(Array.from(next)))
+            setIsDirty(true)
             return next
         })
     }, [session.user.id])
@@ -370,6 +590,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
         setHideIsolated((prev: boolean) => {
             const next = !prev
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED), String(next))
+            setIsDirty(true)
             return next
         })
     }, [session.user.id])
@@ -379,6 +600,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
         setHideIsolated(false)
         localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify([]))
         localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED), 'false')
+        setIsDirty(true)
     }, [session.user.id])
 
     // Function to run force layout
@@ -436,33 +658,65 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
         })
     }, [setEdges, nodes])
 
-    const handleSync = async (token: string) => {
+    const handleSync = async (token: string, overrideState?: { filters: Set<string>, hidden_dbs: Set<string>, hide_isolated: boolean, custom_colors: Record<string, string> }) => {
         if (!token) {
             alert("Por favor ingresa un token de Notion")
             return
         }
 
-        setLoading(true)
+        setSyncStatus('saving')
         setSelectedNode(null)
         try {
+            console.log("📡 handleSync: Fetching from Notion...")
             const data = await fetchNotionData(token)
-            const saved = getSavedPositions(session.user.id)
-            const { nodes: newNodes, edges: newEdges } = transformToGraphData(data.databases, data.relations, saved, customColors)
 
+            // Critical: Update state first
             setSyncedDbs(data.databases)
             setSyncedRelations(data.relations)
+
+            // Get current metadata or use override (to avoid state sync race)
+            const savedPositions = getSavedPositions(session.user.id)
+            const currentFilters = overrideState ? Array.from(overrideState.filters) : Array.from(selectedPropertyTypes)
+            const currentHidden = overrideState ? Array.from(overrideState.hidden_dbs) : Array.from(hiddenDbIds)
+            const currentIsolated = overrideState ? overrideState.hide_isolated : hideIsolated
+            const currentColors = overrideState ? overrideState.custom_colors : customColors
+
+            const { nodes: newNodes, edges: newEdges } = transformToGraphData(
+                data.databases,
+                data.relations,
+                savedPositions,
+                currentColors
+            )
+
             setEdges(newEdges)
 
-            // Save token on success
+            // Persist locally
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN), token)
 
-            const hasAllPositions = newNodes.every(n => saved[n.id])
+            // Persist to cloud ALL current state to ensure consistency
+            console.log("☁️ handleSync: Updating cloud state...")
+            debouncedCloudSave(session.user.id, {
+                notion_token: token,
+                positions: savedPositions,
+                custom_colors: currentColors,
+                filters: currentFilters,
+                hidden_dbs: currentHidden,
+                hide_isolated: currentIsolated
+            })
+
+            const hasAllPositions = newNodes.every(n => savedPositions[n.id])
             if (!hasAllPositions) {
+                console.log("🛰️ handleSync: Running layout...")
                 runForceLayout(newNodes, newEdges, searchQuery)
             } else {
                 setNodes(newNodes.map(n => ({
                     ...n,
-                    data: { ...n.data, onSelect: handleSelectNode, searchQuery, color: customColors[n.id] || n.data.color }
+                    data: {
+                        ...n.data,
+                        onSelect: handleSelectNode,
+                        searchQuery,
+                        color: currentColors[n.id] || n.data.color
+                    }
                 })))
                 setTimeout(() => {
                     fitView({ padding: 0.2, duration: 800, maxZoom: 1 })
@@ -470,20 +724,22 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
             }
 
         } catch (error: any) {
-            console.error("Error syncing Notion:", error)
+            console.error("❌ handleSync Error:", error)
             alert(error.message || "Error al sincronizar con Notion")
         } finally {
-            setLoading(false)
+            setSyncStatus('idle')
         }
     }
 
     const onNodeDragStop = useCallback((_: any, node: Node) => {
         savePosition(session.user.id, node.id, node.position)
+        setIsDirty(true)
     }, [session.user.id])
 
     const handleResetLayout = useCallback(() => {
         // Clear saved positions in localStorage for this user
         localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS))
+        setIsDirty(true)
 
         // Re-run the force-directed layout simulation instead of just random positions
         runForceLayout(nodes, edges, searchQuery)
@@ -494,12 +750,14 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
     }, [])
 
     const handleBatchColorChange = useCallback((color: string) => {
+
         const newColors = { ...customColors }
         selectedNodeIds.forEach(id => {
             newColors[id] = color
         })
         setCustomColors(newColors)
         localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify(newColors))
+        setIsDirty(true)
 
         // Update nodes and edges in view
         setNodes(nds => nds.map(n => {
@@ -522,15 +780,9 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
         selectedNodeIds.forEach(id => newHidden.add(id))
         setHiddenDbIds(newHidden)
         localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(Array.from(newHidden)))
+        setIsDirty(true)
         setSelectedNodeIds(new Set()) // Clear selection after hiding
     }, [selectedNodeIds, hiddenDbIds, session.user.id])
-
-    const handleClearSelection = useCallback(() => {
-        // ReactFlow manages internal selection, but we can clear ours
-        setSelectedNodeIds(new Set())
-        // To truly deselect in ReactFlow we'd need to update nodes with selected: false
-        setNodes(nds => nds.map(n => ({ ...n, selected: false })))
-    }, [setNodes])
 
     const handleFocusNode = useCallback((nodeId: string) => {
         fitView({ nodes: [{ id: nodeId }], duration: 800, padding: 0.5, maxZoom: 1.2 })
@@ -551,9 +803,50 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
         localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS))
         localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN))
 
+        debouncedCloudSave(session.user.id, {
+            positions: {},
+            custom_colors: {},
+            filters: [],
+            hidden_dbs: [],
+            hide_isolated: false,
+            notion_token: null as any
+        })
+
         // Reset positions too for demo data
         localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS))
-    }, [session.user.id, setNodes, setEdges, setSyncedDbs, setSyncedRelations, setSelectedPropertyTypes, setHiddenDbIds, setHideIsolated, setCustomColors])
+
+        // Force a layout run for the demo data so it's not clustered
+        const initialGraph = transformToGraphData(demoDatabases, demoRelations, {}, {})
+        runForceLayout(initialGraph.nodes, initialGraph.edges)
+    }, [session.user.id, setNodes, setEdges, setSyncedDbs, setSyncedRelations, setSelectedPropertyTypes, setHiddenDbIds, setHideIsolated, setCustomColors, runForceLayout])
+
+    const handleManualSync = useCallback(async () => {
+        if (!session) return
+        setCloudSyncStatus('saving')
+        try {
+            const userId = session.user.id
+            const payload = {
+                positions: getSavedPositions(userId),
+                custom_colors: getSavedCustomColors(userId),
+                filters: Array.from(selectedPropertyTypes),
+                hidden_dbs: Array.from(hiddenDbIds),
+                hide_isolated: hideIsolated,
+                notion_token: localStorage.getItem(getScopedKey(userId, STORAGE_KEYS.NOTION_TOKEN)) || undefined
+            }
+
+            console.log("🚀 Iniciando guardado manual en Supabase...", payload)
+            await syncToCloud(userId, payload, session?.access_token)
+            console.log("✅ Guardado manual completado con éxito.")
+
+            setCloudSyncStatus('saved')
+            setIsDirty(false)
+            setTimeout(() => setCloudSyncStatus('idle'), 3000)
+        } catch (err) {
+            console.error("Manual Sync failed:", err)
+            setCloudSyncStatus('error')
+            setTimeout(() => setCloudSyncStatus('idle'), 5000)
+        }
+    }, [session, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncToCloud])
 
     // Effect to update nodes/edges when search query or visibility changes
     useEffect(() => {
@@ -604,7 +897,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                 onSync={handleSync}
                 onDisconnect={handleDisconnect}
                 isSynced={syncedDbs !== demoDatabases}
-                loading={loading}
+                loading={syncStatus === 'saving'}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 databases={syncedDbs}
@@ -615,6 +908,10 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                 onToggleHideIsolated={toggleHideIsolated}
                 userRole={userRole}
                 onStartTour={() => setShowTour(true)}
+                userPlan={userPlan}
+                onManualSync={handleManualSync}
+                syncStatus={cloudSyncStatus}
+                isDirty={isDirty}
             />
 
             <div className={`flex flex-1 overflow-hidden transition-all duration-500`}>
@@ -640,6 +937,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                         onConnect={onConnect}
                         onNodeDragStop={onNodeDragStop}
                         onInit={() => {
+                            if (!session) return
                             const saved = getSavedPositions(session.user.id)
                             const hasAllPositions = nodes.every(n => saved[n.id])
 
@@ -650,7 +948,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                                 runForceLayout(nodes, edges, searchQuery)
                             }
                         }}
-                        nodeTypes={nodeTypes}
+                        nodeTypes={NODE_TYPES}
                         fitView
                         fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
                         minZoom={0.05}
@@ -661,7 +959,7 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                         selectionKeyCode="Shift"
                         multiSelectionKeyCode="Shift"
                     >
-                        {loading && (
+                        {syncStatus === 'saving' && (
                             <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/20 dark:bg-black/20 backdrop-blur-[2px] pointer-events-none transition-all duration-300">
                                 <div className="flex flex-col items-center gap-4 p-8 bg-white/80 dark:bg-gray-800/80 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700/50 animate-in fade-in zoom-in duration-300">
                                     <div className="relative">
@@ -717,6 +1015,10 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
                                         <LayoutTemplate size={14} />
                                     </button>
                                 </Tooltip>
+
+                                <div className="h-px w-full bg-gray-100 dark:bg-gray-800 my-0.5" />
+
+                                <ExportButton />
                             </div>
                         </Panel>
 
@@ -743,13 +1045,13 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
 
             <OnboardingTour
                 isOpen={showTour}
-                onClose={async () => {
+                onClose={() => {
                     setShowTour(false)
                     localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ONBOARDING), 'true')
 
                     // Persist to Supabase metadata if not already marked
                     if (session.user.user_metadata?.has_seen_onboarding !== true) {
-                        await supabase.auth.updateUser({
+                        supabase.auth.updateUser({
                             data: { has_seen_onboarding: true }
                         })
                     }
@@ -758,9 +1060,11 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
 
             <SelectionActionBar
                 selectedCount={selectedNodeIds.size}
-                onClearSelection={handleClearSelection}
                 onBatchColorChange={handleBatchColorChange}
                 onBatchHide={handleBatchHide}
+                userPlan={userPlan}
+                isSidebarCollapsed={isSidebarCollapsed}
+                activeColor={selectedNodeIds.size === 1 ? customColors[Array.from(selectedNodeIds)[0]] || nodes.find(n => n.id === Array.from(selectedNodeIds)[0])?.data?.color : undefined}
             />
         </div>
     )
@@ -768,13 +1072,12 @@ function DashboardContent({ userRole, session }: DashboardContentProps) {
 
 interface DashboardPageProps {
     userRole?: string | null
-    session: Session
 }
 
-export default function DashboardPage({ userRole, session }: DashboardPageProps) {
+export default function DashboardPage({ userRole }: DashboardPageProps) {
     return (
         <ReactFlowProvider>
-            <DashboardContent userRole={userRole} session={session} />
+            <DashboardContent userRole={userRole} />
         </ReactFlowProvider>
     )
 }

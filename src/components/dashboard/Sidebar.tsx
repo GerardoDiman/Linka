@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Database, ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal } from "lucide-react"
+import { Database, ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal, Star } from "lucide-react"
 import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
 
@@ -212,53 +212,68 @@ export function Sidebar({
                                             </div>
                                         </button>
                                     </Tooltip>
-                                    {isCollapsed ? (
-                                        <Tooltip content={db.title} position="right">
-                                            <div className="flex-1 min-w-0">
-                                                <span className="truncate font-medium transition-all duration-500 text-transparent w-0">
+                                    {!isCollapsed && (
+                                        <div className="flex-1 text-left truncate">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className={`text-sm font-bold truncate ${db.isHidden ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-slate-200'}`}>
                                                     {db.title}
                                                 </span>
+                                                <div className="flex items-center gap-1">
+                                                    {db.isHidden && (
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)]" />
+                                                    )}
+                                                    <Tooltip content="Ver propiedades" position="bottom">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                if (!db.isHidden) {
+                                                                    onSelectNode?.({
+                                                                        id: db.id,
+                                                                        label: db.title,
+                                                                        color: db.color,
+                                                                        icon: db.icon,
+                                                                        properties: db.properties,
+                                                                        url: db.url,
+                                                                        createdTime: db.createdTime,
+                                                                        lastEditedTime: db.lastEditedTime
+                                                                    })
+                                                                }
+                                                            }}
+                                                            className={`text-[10px] font-mono bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 dark:hover:text-primary transition-all ${db.isHidden ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-400 dark:text-gray-500'
+                                                                }`}
+                                                        >
+                                                            {db.properties?.length || 0}
+                                                        </button>
+                                                    </Tooltip>
+                                                </div>
                                             </div>
-                                        </Tooltip>
-                                    ) : (
-                                        <span className={`truncate font-medium transition-all duration-500 ${db.isHidden ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-200'} opacity-100`}>
-                                            {db.title}
-                                        </span>
+                                        </div>
                                     )}
                                 </div>
-                                {!isCollapsed && (
-                                    <Tooltip content="Ver propiedades" position="bottom">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                if (!db.isHidden) {
-                                                    onSelectNode?.({
-                                                        id: db.id,
-                                                        label: db.title,
-                                                        color: db.color,
-                                                        icon: db.icon,
-                                                        properties: db.properties,
-                                                        url: db.url,
-                                                        createdTime: db.createdTime,
-                                                        lastEditedTime: db.lastEditedTime
-                                                    })
-                                                }
-                                            }}
-                                            className={`text-[10px] font-mono bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 dark:hover:text-primary transition-all ${db.isHidden ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-400 dark:text-gray-500'
-                                                }`}
-                                        >
-                                            {db.properties?.length || 0}
-                                        </button>
-                                    </Tooltip>
-                                )}
                             </div>
                         ))}
                     </div>
                     {filteredAndSortedDbs.length === 0 && !isCollapsed && (
                         <p className="text-xs text-gray-400 text-center py-8 italic">No hay bases de datos visibles</p>
                     )}
+
+                    {/* Pro CTA for Free Users */}
+                    {/* Beta Access Message for all users during Beta phase */}
+                    {!isCollapsed && (
+                        <div className="mt-8 p-5 rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-primary/10 transition-colors" />
+                            <Star className="w-6 h-6 text-primary mb-3 fill-primary/20 group-hover:scale-110 transition-transform" />
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2">Acceso Beta Ilimitado</h4>
+                            <p className="text-[11px] text-slate-400 mb-4 leading-relaxed font-medium">
+                                ¡Gracias por ser parte de la beta! Tienes acceso a todos los colores y sincronización ilimitada gratis.
+                            </p>
+                            <div className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-2 rounded-xl text-center border border-primary/10">
+                                BETA ACTIVA 💎
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </div >
+            </div>
         )
     }
 

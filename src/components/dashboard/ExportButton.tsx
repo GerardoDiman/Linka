@@ -1,0 +1,277 @@
+import { Download, Image as ImageIcon, Palette } from "lucide-react"
+import { toBlob } from "html-to-image"
+import download from "downloadjs"
+import { Tooltip } from "../ui/Tooltip"
+import { useState } from "react"
+import { createPortal } from "react-dom"
+import { motion, AnimatePresence } from "framer-motion"
+import { useReactFlow, getNodesBounds } from "reactflow"
+
+type ExportBg = 'transparent' | 'black' | 'white' | 'dark'
+type ExportQuality = 'standard' | 'high' | 'ultra'
+
+export function ExportButton() {
+    const { getNodes } = useReactFlow()
+    const [isOpen, setIsOpen] = useState(false)
+    const [isExporting, setIsExporting] = useState(false)
+    const [exportProgress, setExportProgress] = useState('')
+    const [selectedBg, setSelectedBg] = useState<ExportBg>('white')
+    const [selectedQuality, setSelectedQuality] = useState<ExportQuality>('high')
+
+    const getBgColor = (bg: ExportBg) => {
+        if (bg === 'transparent') return undefined
+        if (bg === 'white') return '#ffffff'
+        if (bg === 'dark') return '#0f172a'
+        if (bg === 'black') return '#000000'
+        return '#ffffff'
+    }
+
+    const getPixelRatio = (quality: ExportQuality) => {
+        if (quality === 'ultra') return 4
+        if (quality === 'high') return 2
+        return 1
+    }
+
+    const handleExport = async () => {
+        const nodes = getNodes()
+        if (nodes.length === 0) return
+
+        const viewport = document.querySelector('.react-flow__viewport') as HTMLElement
+        if (!viewport) return
+
+        const quality = selectedQuality
+        console.log(`🚀 Iniciando exportación PNG (${quality}) con fondo ${selectedBg}...`)
+        setIsExporting(true)
+        setExportProgress('Preparando exportación...')
+
+        try {
+            // Wait for any animations to finish
+            await new Promise(resolve => setTimeout(resolve, 500))
+
+            setExportProgress('Calculando dimensiones...')
+            await new Promise(resolve => setTimeout(resolve, 200))
+
+            // 1. Calculate the bounding box of the actual graph content
+            const bounds = getNodesBounds(nodes)
+            const padding = 100
+
+            // 2. Dimensions from bounds
+            const contentWidth = bounds.width + padding * 2
+            const contentHeight = bounds.height + padding * 2
+
+            const configWidth = contentWidth
+            const configHeight = contentHeight
+
+            // 3. Get quality settings
+            let pixelRatio = getPixelRatio(quality)
+
+            // Reduce quality for very large graphs
+            if (contentWidth * contentHeight > 25000000 && pixelRatio > 2) {
+                pixelRatio = 2
+                console.warn('⚠️ Gráfico muy grande, reduciendo calidad a High')
+            }
+
+            const bgColor = getBgColor(selectedBg)
+
+            const options: any = {
+                backgroundColor: bgColor,
+                width: configWidth,
+                height: configHeight,
+                pixelRatio,
+                style: {
+                    width: `${configWidth}px`,
+                    height: `${configHeight}px`,
+                    background: bgColor || 'transparent',
+                    transform: `translate(${-bounds.x + padding}px, ${-bounds.y + padding}px)`,
+                },
+                skipFonts: true,
+                cacheBust: true,
+                imagePlaceholder: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                filter: (node: HTMLElement) => {
+                    const cls = node.className || ""
+                    if (typeof cls === 'string') {
+                        return !cls.includes('react-flow__panel') &&
+                            !cls.includes('react-flow__controls') &&
+                            !cls.includes('react-flow__attribution') &&
+                            !cls.includes('react-flow__minimap')
+                    }
+                    return true
+                },
+                // Replace external images to avoid CORS errors
+                onClone: (clonedDoc: Document) => {
+                    const images = clonedDoc.getElementsByTagName('img');
+                    for (let i = 0; i < images.length; i++) {
+                        const img = images[i];
+                        const src = img.src;
+                        if (src && (src.startsWith('http://') || src.startsWith('https://'))) {
+                            const url = new URL(src);
+                            if (url.origin !== window.location.origin) {
+                                // Replace with transparent pixel
+                                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                            }
+                        }
+                    }
+                }
+            }
+
+            setExportProgress('Capturando gráfico...')
+            const blob = await toBlob(viewport, options)
+
+            setExportProgress('Descargando...')
+            if (blob) {
+                const qualityLabel = quality === 'ultra' ? 'ultra' : quality === 'high' ? 'hq' : 'std'
+                download(blob, `linka-graph-${qualityLabel}-${new Date().getTime()}.png`, "image/png")
+            } else {
+                throw new Error('PNG export failed')
+            }
+        } catch (err) {
+            console.error('❌ Error en exportación:', err)
+
+            // Ultra-safe fallback: Capture visible area only
+            try {
+                const element = document.querySelector('.react-flow') as HTMLElement
+                const fallbackOptions = {
+                    backgroundColor: getBgColor(selectedBg),
+                    pixelRatio: 1,
+                    filter: (node: HTMLElement) => {
+                        const cls = node.className || ""
+                        return typeof cls === "string" && !cls.includes('react-flow__panel')
+                    }
+                }
+                const blob = await toBlob(element, fallbackOptions)
+                if (blob) {
+                    download(blob, `linka-graph-basic-${new Date().getTime()}.png`)
+                    alert("Se ha exportado una captura básica debido a límites técnicos.")
+                }
+            } catch (fallbackErr) {
+                alert("Error crítico. Prueba a reducir el zoom de tu navegador.")
+            }
+        } finally {
+            setIsExporting(false)
+            setIsOpen(false)
+        }
+    }
+
+    const bgOptions: { id: ExportBg, label: string, color?: string }[] = [
+        { id: 'transparent', label: 'Transparente' },
+        { id: 'white', label: 'Blanco', color: '#ffffff' },
+        { id: 'dark', label: 'Oscuro', color: '#0f172a' },
+        { id: 'black', label: 'Negro', color: '#000000' },
+    ]
+
+    const qualityOptions: { id: ExportQuality, label: string, desc: string }[] = [
+        { id: 'standard', label: 'Estándar', desc: '1x' },
+        { id: 'high', label: 'Alta', desc: '2x' },
+        { id: 'ultra', label: 'Ultra', desc: '4x' },
+    ]
+
+    return (
+        <>
+            <div className="relative">
+                <Tooltip content="Exportar gráfico" position="right">
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        disabled={isExporting}
+                        className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors flex items-center justify-center border-0 bg-transparent outline-none disabled:opacity-50"
+                    >
+                        <Download size={14} className={isExporting ? 'animate-bounce' : ''} />
+                    </button>
+                </Tooltip>
+
+                <AnimatePresence>
+                    {isOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                            animate={{ opacity: 1, scale: 1, x: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, x: 10 }}
+                            className="absolute left-full ml-2 bottom-0 flex flex-col gap-2 p-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 rounded-xl shadow-xl z-50 min-w-[160px]"
+                        >
+                            <div className="flex flex-col gap-1.5 pb-2 border-b border-gray-100 dark:border-slate-700">
+                                <span className="text-[9px] font-black uppercase text-gray-400 dark:text-slate-500 px-2 tracking-wider">Fondo</span>
+                                <div className="flex items-center gap-1.5 px-1.5">
+                                    {bgOptions.map((opt) => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => setSelectedBg(opt.id)}
+                                            className={`w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center overflow-hidden
+                                                ${selectedBg === opt.id ? 'border-primary ring-2 ring-primary/20 scale-110' : 'border-gray-100 dark:border-slate-700 hover:scale-105'}
+                                            `}
+                                            style={{ backgroundColor: opt.color || 'transparent' }}
+                                            title={opt.label}
+                                        >
+                                            {opt.id === 'transparent' && <Palette size={10} className="text-gray-400" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5 pb-2 border-b border-gray-100 dark:border-slate-700">
+                                <span className="text-[9px] font-black uppercase text-gray-400 dark:text-slate-500 px-2 tracking-wider">Calidad</span>
+                                <div className="flex flex-col gap-1 px-1.5">
+                                    {qualityOptions.map((opt) => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => setSelectedQuality(opt.id)}
+                                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center justify-between
+                                                ${selectedQuality === opt.id
+                                                    ? 'bg-primary text-white'
+                                                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'}
+                                            `}
+                                        >
+                                            <span>{opt.label}</span>
+                                            <span className="text-[9px] opacity-70">{opt.desc}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleExport}
+                                className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-all shadow-sm"
+                            >
+                                <ImageIcon size={14} />
+                                Exportar PNG
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* Export Progress Modal - Rendered to document.body via Portal */}
+            {isExporting && createPortal(
+                <AnimatePresence>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999]"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 min-w-[300px]"
+                        >
+                            {/* Spinner */}
+                            <div className="relative w-16 h-16">
+                                <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+                                <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+                            </div>
+
+                            {/* Progress Message */}
+                            <div className="flex flex-col items-center gap-2">
+                                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                    Exportando...
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">
+                                    {exportProgress}
+                                </p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                </AnimatePresence>,
+                document.body
+            )}
+        </>
+    )
+}

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { AuthLayout } from "../components/auth/AuthLayout"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
@@ -8,7 +8,6 @@ import { supabase } from "../lib/supabase"
 import { Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
-    const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -28,7 +27,7 @@ export default function LoginPage() {
 
             if (error) throw error
 
-            navigate("/dashboard")
+            // Redirection is handled by App.tsx observing session change
         } catch (err: any) {
             setError(err.message || "Error al iniciar sesión")
         } finally {

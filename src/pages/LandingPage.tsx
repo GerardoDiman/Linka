@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { Hero } from "../components/landing/Hero"
 import { Features } from "../components/landing/Features"
@@ -6,12 +5,11 @@ import { HowItWorks } from "../components/landing/HowItWorks"
 import { Testimonials } from "../components/landing/Testimonials"
 import { FAQ } from "../components/landing/FAQ"
 import { AccessRequestForm } from "../components/landing/AccessRequestForm"
-import { supabase } from "../lib/supabase"
 import { Logo } from "../components/ui/Logo"
-import type { Session } from "@supabase/supabase-js"
+import { useAuth } from "../context/AuthContext"
 
 export default function LandingPage() {
-    const [session, setSession] = useState<Session | null>(null)
+    const { session } = useAuth()
     const { scrollY, scrollYProgress } = useScroll()
     const scaleX = useSpring(scrollYProgress, {
         stiffness: 100,
@@ -37,11 +35,6 @@ export default function LandingPage() {
         ["none", "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"]
     )
 
-    useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session)
-        })
-    }, [])
 
     return (
         <div className="min-h-screen bg-white selection:bg-primary/10 selection:text-primary">

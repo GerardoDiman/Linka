@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import {
@@ -6,10 +6,11 @@ import {
     Type, AlignLeft, Hash, List, Layers, Calendar, Users,
     File, CheckSquare, Link, Mail, Phone, Variable, GitBranch,
     Combine, Clock, UserPlus, History, UserCheck, Activity,
-    Fingerprint, ShieldCheck, Database, X, Sun, Moon, HelpCircle
+    Fingerprint, ShieldCheck, Database, X, Sun, Moon, HelpCircle,
+    Star
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { supabase } from "../../lib/supabase"
+import { useAuth } from "../../context/AuthContext"
 import { useTheme } from "../../context/ThemeContext"
 import { Logo } from "../ui/Logo"
 import { useClickOutside } from "../../hooks/useClickOutside"
@@ -41,6 +42,10 @@ interface NavbarProps {
     onToggleHideIsolated?: () => void
     userRole?: string | null
     onStartTour?: () => void
+    userPlan?: 'free' | 'pro'
+    onManualSync?: () => void
+    syncStatus?: 'idle' | 'saving' | 'saved' | 'error'
+    isDirty?: boolean
 }
 
 const PROPERTY_TYPE_ICONS: Record<string, any> = {
@@ -82,25 +87,21 @@ export function Navbar({
     hideIsolated = false,
     onToggleHideIsolated,
     userRole,
-    onStartTour
+    onStartTour,
+    userPlan = 'free',
+    onManualSync,
+    syncStatus = 'idle',
+    isDirty = false
 }: NavbarProps) {
     const navigate = useNavigate()
     const { theme, toggleTheme } = useTheme()
+    const { user, signOut } = useAuth()
     const [token, setToken] = useState("")
     const [showSyncPopover, setShowSyncPopover] = useState(false)
     const [showFilterPopover, setShowFilterPopover] = useState(false)
-    const [user, setUser] = useState<any>(null)
 
     const filterPopoverRef = useClickOutside(() => setShowFilterPopover(false))
     const syncPopoverRef = useClickOutside(() => setShowSyncPopover(false))
-
-    useEffect(() => {
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            setUser(user)
-        }
-        getUser()
-    }, [])
 
     const propertyTypes = useMemo(() => {
         const types = new Set<string>()
@@ -126,7 +127,7 @@ export function Navbar({
 
                 <div className="h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
-                <div className="flex-1 max-w-md flex items-center gap-2">
+                <div className="flex-1 max-w-xs flex items-center gap-2">
                     <div className="flex-1 relative group">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors">
                             <Search size={18} />
@@ -332,6 +333,34 @@ export function Navbar({
                     </Button>
                 </Tooltip>
 
+                <Tooltip content={
+                    syncStatus === 'saving' ? 'Guardando en la nube...' :
+                        syncStatus === 'saved' ? 'Sincronizado' :
+                            syncStatus === 'error' ? 'Error al guardar' : 'Sincronizar ahora con la nube'
+                } position="bottom">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-10 w-10 rounded-xl transition-all relative ${syncStatus === 'error' ? 'text-red-500 hover:bg-red-50' :
+                            syncStatus === 'saved' ? 'text-green-500 hover:bg-green-50' :
+                                'text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-primary/5'
+                            }`}
+                        onClick={onManualSync}
+                        disabled={syncStatus === 'saving'}
+                    >
+                        {syncStatus === 'saving' ? <Loader2 size={20} className="animate-spin" /> : <Activity size={20} />}
+                        {isDirty && syncStatus === 'idle' && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full animate-pulse border border-white" />
+                        )}
+                        {syncStatus === 'saved' && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full border border-white" />
+                        )}
+                        {syncStatus === 'error' && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white" />
+                        )}
+                    </Button>
+                </Tooltip>
+
                 <Tooltip content={theme === 'light' ? 'Modo Oscuro' : 'Modo Claro'} position="bottom">
                     <Button
                         id="navbar-theme"
@@ -369,12 +398,23 @@ export function Navbar({
                     </Button>
                 </Tooltip>
 
+                {/* Beta Badge instead of Pro CTA during Beta phase */}
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-xl mr-2">
+                    <Star className="w-3.5 h-3.5 text-primary fill-primary/20" />
+                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter">BETA ABIERTA</span>
+                </div>
+
                 <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1" />
 
                 {user && (
                     <div className="flex items-center gap-3 px-2 py-1 bg-gray-50/50 dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-slate-800/50">
                         <div className="flex flex-col items-end hidden md:flex">
-                            <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider leading-none">Usuario</span>
+                            <div className="flex items-center gap-1.5">
+                                {userPlan === 'pro' && (
+                                    <span className="bg-primary/20 text-[9px] font-black text-primary px-1.5 py-0.5 rounded-md uppercase tracking-tighter">BETA</span>
+                                )}
+                                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider leading-none">Usuario</span>
+                            </div>
                             <span className="text-xs font-bold text-gray-700 dark:text-slate-200 truncate max-w-[120px]">
                                 {user.user_metadata?.username || user.user_metadata?.full_name || user.email?.split('@')[0]}
                             </span>
@@ -391,8 +431,14 @@ export function Navbar({
                         size="icon"
                         className="h-10 w-10 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50"
                         onClick={async () => {
-                            await supabase.auth.signOut()
-                            navigate("/")
+                            try {
+                                await signOut()
+                                navigate("/", { replace: true })
+                            } catch (err) {
+                                console.error("Error during log out:", err)
+                                // Fallback navigation
+                                window.location.href = "/"
+                            }
                         }}
                     >
                         <LogOut size={20} />
