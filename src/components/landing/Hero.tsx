@@ -3,13 +3,16 @@ import { Button } from "../ui/button"
 import { ArrowRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { DataAnimation } from "./DataAnimation"
+import { SplitText } from "../animations/SplitText"
+import { ShinyText } from "../animations/ShinyText"
+import { Magnetic } from "../animations/Magnetic"
 
 export function Hero() {
     const navigate = useNavigate()
 
     return (
-        <section className="relative isolate pt-24 pb-20 sm:pt-32 sm:pb-32 overflow-hidden bg-white">
-            {/* Animated Background Elements */}
+        <section className="relative isolate pt-20 pb-16 sm:pt-24 sm:pb-24 overflow-hidden bg-white">
+            {/* ... (background elements unchanged) ... */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
                 <svg
@@ -69,49 +72,62 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="mx-auto max-w-3xl"
+                    className="mx-auto max-w-4xl"
                 >
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
+                        className="mb-8"
                     >
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary ring-1 ring-inset ring-primary/20 mb-8">
-                            Nueva Versión 2.0
-                        </span>
+                        <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium ring-1 ring-inset ring-primary/20">
+                            <ShinyText text="Nueva Versión 2.0" speed={3} className="!text-primary font-bold" />
+                        </div>
                     </motion.div>
 
-                    <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-7xl leading-tight">
-                        Visualiza tus datos con{" "}
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600">
-                            Inteligencia
-                        </span>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl mb-4 lg:mb-6 leading-[1.1] lg:leading-[1.05]">
+                        <SplitText
+                            text="Visualiza tus datos con"
+                            display="block"
+                            delay={0.2}
+                            className="pb-1"
+                        />
+                        <SplitText
+                            text="Inteligencia"
+                            delay={1.2}
+                            display="block"
+                            className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-600 to-primary pb-2"
+                        />
                     </h1>
 
-                    <p className="mt-8 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
+                    <p className="mt-10 text-xl leading-8 text-gray-600 max-w-2xl mx-auto font-medium">
                         Linka transforma tus bases de datos en un canvas interactivo.
                         Entiende las relaciones entre tus datos de manera gráfica, intuitiva y potente.
                     </p>
 
-                    <div className="mt-10 flex items-center justify-center gap-x-6">
-                        <Button
-                            size="lg"
-                            onClick={() => {
-                                const element = document.getElementById('access');
-                                element?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="h-12 px-8 rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-1"
-                        >
-                            Comenzar ahora <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            onClick={() => navigate("/register")}
-                            className="h-12 px-8 rounded-full hover:bg-gray-50 transition-all hover:-translate-y-1"
-                        >
-                            Registrarse
-                        </Button>
+                    <div className="mt-10 lg:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+                        <Magnetic amount={1.2}>
+                            <Button
+                                size="lg"
+                                onClick={() => {
+                                    const element = document.getElementById('access');
+                                    element?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="w-full sm:w-auto h-14 px-10 text-lg rounded-full shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all font-bold"
+                            >
+                                Comenzar ahora <ArrowRight className="ml-2 h-5 w-5" />
+                            </Button>
+                        </Magnetic>
+                        <Magnetic amount={1.2}>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => navigate("/register")}
+                                className="w-full sm:w-auto h-14 px-10 text-lg rounded-full hover:bg-slate-50 transition-all border-2 font-bold"
+                            >
+                                Registrarse
+                            </Button>
+                        </Magnetic>
                     </div>
                 </motion.div>
 
@@ -131,14 +147,14 @@ export function Hero() {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
+                                <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100 flex flex-col justify-center">
                                     <h4 className="font-bold text-blue-700 mb-1">Sincronización</h4>
-                                    <p className="text-sm text-blue-600/80">Cambios en tiempo real reflejados en tu mapa.</p>
+                                    <p className="text-sm text-blue-600/80 leading-snug">Cambios en tiempo real reflejados en tu mapa.</p>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-purple-50/50 border border-purple-100">
+                                <div className="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 flex flex-col justify-center">
                                     <h4 className="font-bold text-purple-700 mb-1">Inteligencia</h4>
-                                    <p className="text-sm text-purple-600/80">Detección automática de relaciones complejas.</p>
+                                    <p className="text-sm text-purple-600/80 leading-snug">Detección automática de relaciones complejas.</p>
                                 </div>
                             </div>
 

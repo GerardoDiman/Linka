@@ -38,32 +38,36 @@ export function HowItWorks() {
                     </p>
                 </div>
 
-                <div className="relative">
+                <div className="relative mt-20">
                     {/* Connection Line (Desktop) */}
-                    <div className="hidden lg:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent -translate-y-1/2" />
+                    <div className="hidden lg:block absolute top-[40px] left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10">
                         {steps.map((step, index) => (
                             <motion.div
                                 key={step.title}
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: index * 0.2 }}
-                                className="flex flex-col items-center text-center"
+                                transition={{ duration: 0.6, delay: index * 0.2 }}
+                                className="flex flex-col items-center text-center group"
                             >
-                                <div className={`w-20 h-20 ${step.bg} rounded-2xl flex items-center justify-center mb-6 shadow-sm group hover:scale-110 transition-transform duration-300`}>
-                                    <step.icon className={`w-10 h-10 ${step.color}`} />
+                                <div className="relative">
+                                    <div className={`absolute -inset-4 ${step.bg} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                                    <div className={`relative w-24 h-24 ${step.bg} rounded-3xl flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 group-hover:shadow-xl transition-all duration-500`}>
+                                        <step.icon className={`w-12 h-12 ${step.color}`} />
+                                    </div>
+
+                                    {/* Step Number Badge */}
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white border-2 border-primary shadow-lg flex items-center justify-center text-sm font-bold text-primary z-20">
+                                        {index + 1}
+                                    </div>
                                 </div>
-                                <h3 className="text-xl font-bold text-secondary mb-3">{step.title}</h3>
-                                <p className="text-gray-600 leading-relaxed max-w-xs">
+
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">{step.title}</h3>
+                                <p className="text-gray-600 leading-relaxed text-lg font-medium">
                                     {step.description}
                                 </p>
-
-                                {/* Step Number */}
-                                <div className="mt-6 w-8 h-8 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center text-sm font-bold text-gray-400 shadow-sm">
-                                    {index + 1}
-                                </div>
                             </motion.div>
                         ))}
                     </div>

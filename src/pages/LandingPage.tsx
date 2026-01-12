@@ -1,8 +1,7 @@
+import { useState } from "react"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { Hero } from "../components/landing/Hero"
 import { Features } from "../components/landing/Features"
-import { HowItWorks } from "../components/landing/HowItWorks"
-import { Testimonials } from "../components/landing/Testimonials"
 import { FAQ } from "../components/landing/FAQ"
 import { AccessRequestForm } from "../components/landing/AccessRequestForm"
 import { Logo } from "../components/ui/Logo"
@@ -10,6 +9,7 @@ import { useAuth } from "../context/AuthContext"
 
 export default function LandingPage() {
     const { session } = useAuth()
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const { scrollY, scrollYProgress } = useScroll()
     const scaleX = useSpring(scrollYProgress, {
         stiffness: 100,
@@ -50,37 +50,92 @@ export default function LandingPage() {
                 }}
                 className="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
             >
-                <nav className="flex items-center justify-between p-4 lg:px-8 max-w-7xl mx-auto" aria-label="Global">
+                <nav className="flex items-center justify-between p-4 lg:px-12 max-w-[1600px] mx-auto" aria-label="Global">
                     <div className="flex lg:flex-1">
-                        <a href="#" className="flex items-center gap-2 group transition-transform hover:scale-105">
+                        <a href="#" className="flex items-center gap-2 group transition-transform hover:scale-105 active:scale-95">
                             <Logo size={32} />
-                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600">
+                            <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600 tracking-tight">
                                 Linka
                             </span>
                         </a>
                     </div>
-                    <div className="hidden lg:flex lg:gap-x-12">
-                        <a href="#features" className="text-sm font-semibold leading-6 text-gray-600 hover:text-primary transition-colors">Características</a>
-                        <a href="#how-it-works" className="text-sm font-semibold leading-6 text-gray-600 hover:text-primary transition-colors">Cómo funciona</a>
-                        <a href="#access" className="text-sm font-semibold leading-6 text-gray-600 hover:text-primary transition-colors">Solicitar Acceso</a>
+
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex lg:gap-x-12 md:gap-x-8">
+                        <a href="#features" className="text-sm font-bold leading-6 text-slate-600 hover:text-primary transition-colors">Características</a>
+                        <a href="#access" className="text-sm font-bold leading-6 text-slate-600 hover:text-primary transition-colors">Solicitar Acceso</a>
                     </div>
+
                     <div className="flex lg:flex-1 lg:justify-end items-center gap-4">
                         {session ? (
-                            <a href="/dashboard" className="text-sm font-semibold leading-6 text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+                            <a href="/dashboard" className="hidden sm:flex text-sm font-bold leading-6 text-primary hover:text-primary/80 transition-colors items-center gap-1">
                                 Ir al Dashboard <span aria-hidden="true">&rarr;</span>
                             </a>
                         ) : (
-                            <>
-                                <a href="/login" className="hidden sm:block text-sm font-semibold leading-6 text-gray-900 hover:text-primary transition-colors">
-                                    Iniciar Sesión
+                            <div className="hidden sm:flex items-center gap-4">
+                                <a href="/login" className="text-sm font-bold leading-6 text-slate-900 hover:text-primary transition-colors">
+                                    Conectar
                                 </a>
-                                <a href="/register" className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all hover:scale-105 active:scale-95">
-                                    Registrarse
+                                <a href="/register" className="rounded-full bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-primary hover:shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                                    Empezar
                                 </a>
-                            </>
+                            </div>
                         )}
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            type="button"
+                            className="md:hidden -m-2.5 inline-flex items-center justify-center rounded-full p-2.5 text-slate-700 hover:bg-slate-100 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
+                            <span className="sr-only">Abrir menú</span>
+                            {isMobileMenuOpen ? (
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            ) : (
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                            )}
+                        </button>
                     </div>
                 </nav>
+
+                {/* Mobile Menu Overlay */}
+                <motion.div
+                    initial={false}
+                    animate={isMobileMenuOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+                    className="md:hidden overflow-hidden bg-white border-t border-slate-100"
+                >
+                    <div className="space-y-1 p-4">
+                        <a
+                            href="#features"
+                            className="block rounded-xl px-3 py-4 text-base font-bold text-slate-900 hover:bg-slate-50 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            Características
+                        </a>
+                        <a
+                            href="#access"
+                            className="block rounded-xl px-3 py-4 text-base font-bold text-slate-900 hover:bg-slate-50 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            Solicitar Acceso
+                        </a>
+                        <div className="pt-4 pb-2 border-t border-slate-50 mt-2 space-y-4">
+                            {!session && (
+                                <>
+                                    <a href="/login" className="block px-3 text-base font-bold text-slate-900">Iniciar Sesión</a>
+                                    <a href="/register" className="block rounded-full bg-primary px-4 py-3 text-center text-base font-bold text-white shadow-lg">Registrarse</a>
+                                </>
+                            )}
+                            {session && (
+                                <a href="/dashboard" className="block px-3 text-base font-bold text-primary">Ir al Dashboard</a>
+                            )}
+                        </div>
+                    </div>
+                </motion.div>
             </motion.header>
 
             <main>
@@ -95,12 +150,6 @@ export default function LandingPage() {
                 >
                     <Features />
                 </motion.div>
-
-                <div id="how-it-works">
-                    <HowItWorks />
-                </div>
-
-                <Testimonials />
 
                 <FAQ />
 

@@ -122,18 +122,18 @@ export function DataAnimation() {
                     animate={{
                         scale: 1,
                         opacity: 1,
-                        y: ["-50%", "-52%", "-50%"]
+                        y: ["-50%", "-51.5%", "-50%"]
                     }}
                     whileHover={{
                         scale: 1.05,
-                        boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
                         zIndex: 30
                     }}
                     transition={{
-                        scale: { duration: 0.2 },
-                        opacity: { duration: 0.5, delay: index * 0.1 },
+                        scale: { duration: 0.3, ease: "easeOut" },
+                        opacity: { duration: 0.6, delay: index * 0.1 },
                         y: {
-                            duration: 4 + Math.random() * 2,
+                            duration: 3 + Math.random() * 2,
                             repeat: Infinity,
                             ease: "easeInOut"
                         }
