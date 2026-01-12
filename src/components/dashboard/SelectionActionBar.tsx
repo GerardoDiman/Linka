@@ -61,7 +61,7 @@ export function SelectionActionBar({
                     onClick={() => isFree && onOpenPricing?.()}
                 >
                     <div className={`flex flex-col gap-1`}>
-                        <div className={`flex items-center flex-wrap gap-1.5 bg-gray-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-gray-100 dark:border-slate-800 relative transition-all max-w-[280px] sm:max-w-[400px] ${isFree ? 'opacity-40 grayscale-[0.8] blur-[0.5px]' : ''}`}>
+                        <div className={`grid grid-cols-9 gap-1.5 bg-gray-50 dark:bg-slate-900 p-2 rounded-2xl border border-gray-100 dark:border-slate-800 relative transition-all w-fit ${isFree ? 'opacity-40 grayscale-[0.8] blur-[0.5px]' : ''}`}>
                             {PRESET_COLORS.map((color) => (
                                 <Tooltip key={color} content={isFree ? "Función Pro" : "Cambiar color"}>
                                     <button

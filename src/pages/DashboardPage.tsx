@@ -176,27 +176,6 @@ const getSavedPositions = (userId: string): Record<string, { x: number; y: numbe
     }
 }
 
-const savePosition = (userId: string, nodeId: string, position: { x: number; y: number }) => {
-    try {
-        const saved = getSavedPositions(userId)
-        saved[nodeId] = position
-        localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.POSITIONS), JSON.stringify(saved))
-    } catch (e) {
-        console.error("Error saving position:", e)
-    }
-}
-
-const saveAllPositions = (userId: string, nodes: Node[]) => {
-    try {
-        const saved = getSavedPositions(userId)
-        nodes.forEach(node => {
-            saved[node.id] = node.position
-        })
-        localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.POSITIONS), JSON.stringify(saved))
-    } catch (e) {
-        console.error("Error saving positions:", e)
-    }
-}
 
 const getSavedFilters = (userId: string): string[] => {
     try {
@@ -264,7 +243,6 @@ const syncViaFetch = async (payload: any, token: string) => {
     if (response.status === 401) {
         const errorData = await response.json().catch(() => ({}))
         if (errorData.message?.includes('expired') || errorData.code === 'PGRST303') {
-            console.warn("🔐 JWT Expired detected. Attempting emergency refresh...")
 
             try {
                 // Try to refresh using the client (even if it hangs, we might get lucky or it might be a quick call)
@@ -274,7 +252,6 @@ const syncViaFetch = async (payload: any, token: string) => {
                 ]) as any
 
                 if (session?.access_token) {
-                    console.log("🔓 Emergency refresh success! Retrying sync...")
                     response = await sendRequest(session.access_token)
                 } else {
                     throw new Error("Could not refresh session")
@@ -294,8 +271,6 @@ const syncViaFetch = async (payload: any, token: string) => {
 }
 
 const syncToCloud = async (userId: string, data: any, token?: string) => {
-    console.log("🛠️ Cloud Sync: Iniciando...", { userId, fields: Object.keys(data) })
-
     if (!userId) return
 
     const payload: any = { id: userId }
@@ -307,7 +282,6 @@ const syncToCloud = async (userId: string, data: any, token?: string) => {
     if (data.notion_token !== undefined) payload.notion_token = data.notion_token
 
     try {
-        console.log("📡 Intentando sincronización vía Cliente Supabase...")
         // We use a shorter timeout here to trigger fallback quickly
         const { error } = await Promise.race([
             supabase.from('user_graph_data').upsert(payload),
@@ -315,13 +289,10 @@ const syncToCloud = async (userId: string, data: any, token?: string) => {
         ]) as any
 
         if (error) throw error
-        console.log("✅ Sincronización exitosa vía Cliente.")
     } catch (e: any) {
-        console.warn("⚠️ Cliente Supabase falló o tardó demasiado (Timeout). Intentando fallback vía Fetch directo...")
         try {
             // Use the token passed from the component
             await syncViaFetch(payload, token || '')
-            console.log("✅ Sincronización exitosa vía Fetch directo.")
         } catch (fetchErr: any) {
             console.error("❌ Falló tanto el cliente como el fallback:", fetchErr.message)
             throw fetchErr
@@ -329,18 +300,6 @@ const syncToCloud = async (userId: string, data: any, token?: string) => {
     }
 }
 
-// Debounce helper
-function debounce(func: Function, wait: number) {
-    let timeout: any
-    return function executedFunction(...args: any[]) {
-        const later = () => {
-            clearTimeout(timeout)
-            func(...args)
-        }
-        clearTimeout(timeout)
-        timeout = setTimeout(later, wait)
-    }
-}
 
 interface DashboardContentProps {
     userRole?: string | null
@@ -381,11 +340,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const [showTour, setShowTour] = useState(false)
     const [userPlan, setUserPlan] = useState<'free' | 'pro'>('pro') // Forced to pro for Beta
     const [isDirty, setIsDirty] = useState(false)
+    const [notionToken, setNotionToken] = useState<string | null>(() => session ? localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN)) : null)
 
-    // Debounced cloud save
-    const debouncedCloudSave = useMemo(() =>
-        debounce((userId: string, data: any) => syncToCloud(userId, data, session?.access_token), 2000)
-        , [session?.access_token])
 
     // Fetch cloud data on mount
     useEffect(() => {
@@ -426,18 +382,17 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             if (!data) {
                 try {
                     data = await fetchViaFetch(session.user.id, session.access_token || '')
-                    if (data) console.log("✅ Datos cargados con éxito vía Fetch.")
                 } catch (err) {
                     console.error("❌ Falló carga de datos de la nube:", err)
                 }
             }
 
             if (data) {
-                console.log("Cloud Sync: Synchronizing state...")
 
                 // 1. Update localStorage
                 if (data.notion_token) {
                     localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN), data.notion_token)
+                    setNotionToken(data.notion_token)
                 }
                 localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS), JSON.stringify(data.positions || {}))
                 localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify(data.custom_colors || {}))
@@ -458,14 +413,14 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
                 // 3. Trigger Notion Sync if we have a token and weren't loaded
                 // PASS DATA EXPLICITLY to avoid race conditions with state updates
+                // skipDirty: true prevents the orange dot on initial load
                 if (data.notion_token && syncedDbs === demoDatabases) {
-                    console.log("Cloud Sync: Auto-syncing Notion with cloud data...")
                     handleSync(data.notion_token, {
                         filters: newFilters,
                         hidden_dbs: newHidden,
                         hide_isolated: newIsolated,
                         custom_colors: newColors
-                    })
+                    }, true)
                 }
             }
         }
@@ -566,11 +521,10 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             } else {
                 next.add(type)
             }
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify(Array.from(next)))
             setIsDirty(true)
             return next
         })
-    }, [session.user.id])
+    }, [])
 
     const toggleDbVisibility = useCallback((dbId: string) => {
         setHiddenDbIds(prev => {
@@ -580,28 +534,24 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             } else {
                 next.add(dbId)
             }
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(Array.from(next)))
             setIsDirty(true)
             return next
         })
-    }, [session.user.id])
+    }, [])
 
     const toggleHideIsolated = useCallback(() => {
         setHideIsolated((prev: boolean) => {
             const next = !prev
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED), String(next))
             setIsDirty(true)
             return next
         })
-    }, [session.user.id])
+    }, [])
 
     const clearPropertyFilters = useCallback(() => {
         setSelectedPropertyTypes(new Set())
         setHideIsolated(false)
-        localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify([]))
-        localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED), 'false')
         setIsDirty(true)
-    }, [session.user.id])
+    }, [])
 
     // Function to run force layout
     const runForceLayout = useCallback((nodesToLayout: Node[], edgesToLayout: Edge[], currentSearch: string = "") => {
@@ -643,11 +593,11 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         })
 
         setNodes(layoutedNodes)
-        saveAllPositions(session.user.id, layoutedNodes)
+        setEdges(edgesToLayout)
         setTimeout(() => {
             window.requestAnimationFrame(() => fitView({ padding: 0.2, duration: 800, maxZoom: 1 }))
         }, 100)
-    }, [setNodes, fitView, handleSelectNode, session.user.id, customColors])
+    }, [setNodes, setEdges, fitView, handleSelectNode, customColors])
 
 
     const onConnect = useCallback((params: Connection | Edge) => {
@@ -658,7 +608,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         })
     }, [setEdges, nodes])
 
-    const handleSync = async (token: string, overrideState?: { filters: Set<string>, hidden_dbs: Set<string>, hide_isolated: boolean, custom_colors: Record<string, string> }) => {
+    const handleSync = async (token: string, overrideState?: { filters: Set<string>, hidden_dbs: Set<string>, hide_isolated: boolean, custom_colors: Record<string, string> }, skipDirty: boolean = false) => {
         if (!token) {
             alert("Por favor ingresa un token de Notion")
             return
@@ -676,9 +626,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
             // Get current metadata or use override (to avoid state sync race)
             const savedPositions = getSavedPositions(session.user.id)
-            const currentFilters = overrideState ? Array.from(overrideState.filters) : Array.from(selectedPropertyTypes)
-            const currentHidden = overrideState ? Array.from(overrideState.hidden_dbs) : Array.from(hiddenDbIds)
-            const currentIsolated = overrideState ? overrideState.hide_isolated : hideIsolated
             const currentColors = overrideState ? overrideState.custom_colors : customColors
 
             const { nodes: newNodes, edges: newEdges } = transformToGraphData(
@@ -688,21 +635,14 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 currentColors
             )
 
+            // Track the potentially unsaved token in state
+            setNotionToken(token)
+
+            // Mark as dirty so user can save token change to cloud
+            if (!skipDirty) setIsDirty(true)
+
+            // CRITICAL: Always update edges
             setEdges(newEdges)
-
-            // Persist locally
-            localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN), token)
-
-            // Persist to cloud ALL current state to ensure consistency
-            console.log("☁️ handleSync: Updating cloud state...")
-            debouncedCloudSave(session.user.id, {
-                notion_token: token,
-                positions: savedPositions,
-                custom_colors: currentColors,
-                filters: currentFilters,
-                hidden_dbs: currentHidden,
-                hide_isolated: currentIsolated
-            })
 
             const hasAllPositions = newNodes.every(n => savedPositions[n.id])
             if (!hasAllPositions) {
@@ -731,32 +671,26 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         }
     }
 
-    const onNodeDragStop = useCallback((_: any, node: Node) => {
-        savePosition(session.user.id, node.id, node.position)
+    const onNodeDragStop = useCallback(() => {
         setIsDirty(true)
-    }, [session.user.id])
+    }, [])
 
     const handleResetLayout = useCallback(() => {
-        // Clear saved positions in localStorage for this user
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS))
         setIsDirty(true)
-
         // Re-run the force-directed layout simulation instead of just random positions
         runForceLayout(nodes, edges, searchQuery)
-    }, [nodes, edges, searchQuery, runForceLayout, session.user.id])
+    }, [nodes, edges, searchQuery, runForceLayout])
 
     const handleSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: Node[] }) => {
         setSelectedNodeIds(new Set(selectedNodes.map(n => n.id)))
     }, [])
 
     const handleBatchColorChange = useCallback((color: string) => {
-
         const newColors = { ...customColors }
         selectedNodeIds.forEach(id => {
             newColors[id] = color
         })
         setCustomColors(newColors)
-        localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify(newColors))
         setIsDirty(true)
 
         // Update nodes and edges in view
@@ -773,16 +707,15 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             }
             return e
         }))
-    }, [selectedNodeIds, customColors, setNodes, setEdges, session.user.id])
+    }, [selectedNodeIds, customColors, setNodes, setEdges])
 
     const handleBatchHide = useCallback(() => {
         const newHidden = new Set(hiddenDbIds)
         selectedNodeIds.forEach(id => newHidden.add(id))
         setHiddenDbIds(newHidden)
-        localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(Array.from(newHidden)))
         setIsDirty(true)
         setSelectedNodeIds(new Set()) // Clear selection after hiding
-    }, [selectedNodeIds, hiddenDbIds, session.user.id])
+    }, [selectedNodeIds, hiddenDbIds])
 
     const handleFocusNode = useCallback((nodeId: string) => {
         fitView({ nodes: [{ id: nodeId }], duration: 800, padding: 0.5, maxZoom: 1.2 })
@@ -797,46 +730,48 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         setHiddenDbIds(new Set())
         setHideIsolated(false)
         setCustomColors({})
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS))
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.HIDDEN_DBS))
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.ISOLATED))
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS))
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN))
-
-        debouncedCloudSave(session.user.id, {
-            positions: {},
-            custom_colors: {},
-            filters: [],
-            hidden_dbs: [],
-            hide_isolated: false,
-            notion_token: null as any
-        })
-
-        // Reset positions too for demo data
-        localStorage.removeItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS))
-
-        // Force a layout run for the demo data so it's not clustered
+        setNotionToken(null)
+        setIsDirty(true)
         const initialGraph = transformToGraphData(demoDatabases, demoRelations, {}, {})
         runForceLayout(initialGraph.nodes, initialGraph.edges)
-    }, [session.user.id, setNodes, setEdges, setSyncedDbs, setSyncedRelations, setSelectedPropertyTypes, setHiddenDbIds, setHideIsolated, setCustomColors, runForceLayout])
+    }, [setNodes, setEdges, setSyncedDbs, setSyncedRelations, setSelectedPropertyTypes, setHiddenDbIds, setHideIsolated, setCustomColors, runForceLayout])
 
     const handleManualSync = useCallback(async () => {
         if (!session) return
         setCloudSyncStatus('saving')
         try {
             const userId = session.user.id
+
+            // 1. Collect current state data
+            const currentPositions: Record<string, { x: number, y: number }> = {}
+            nodes.forEach(node => {
+                currentPositions[node.id] = node.position
+            })
+
             const payload = {
-                positions: getSavedPositions(userId),
-                custom_colors: getSavedCustomColors(userId),
+                positions: currentPositions,
+                custom_colors: customColors,
                 filters: Array.from(selectedPropertyTypes),
                 hidden_dbs: Array.from(hiddenDbIds),
                 hide_isolated: hideIsolated,
-                notion_token: localStorage.getItem(getScopedKey(userId, STORAGE_KEYS.NOTION_TOKEN)) || undefined
+                notion_token: notionToken || undefined
             }
 
-            console.log("🚀 Iniciando guardado manual en Supabase...", payload)
+
+            // 2. Persist to LocalStorage
+            localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.POSITIONS), JSON.stringify(currentPositions))
+            localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify(customColors))
+            localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.FILTERS), JSON.stringify(Array.from(selectedPropertyTypes)))
+            localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(Array.from(hiddenDbIds)))
+            localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.ISOLATED), String(hideIsolated))
+            if (notionToken === null) {
+                localStorage.removeItem(getScopedKey(userId, STORAGE_KEYS.NOTION_TOKEN))
+            } else {
+                localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.NOTION_TOKEN), notionToken)
+            }
+
+            // 3. Persist to Cloud
             await syncToCloud(userId, payload, session?.access_token)
-            console.log("✅ Guardado manual completado con éxito.")
 
             setCloudSyncStatus('saved')
             setIsDirty(false)
@@ -846,7 +781,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             setCloudSyncStatus('error')
             setTimeout(() => setCloudSyncStatus('idle'), 5000)
         }
-    }, [session, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncToCloud])
+    }, [session, nodes, customColors, selectedPropertyTypes, hiddenDbIds, hideIsolated, notionToken])
 
     // Effect to update nodes/edges when search query or visibility changes
     useEffect(() => {

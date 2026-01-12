@@ -46,13 +46,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let mounted = true
 
         const initAuth = async () => {
-            console.log('DEBUG: initAuth internal starting...')
             try {
                 // Get initial session
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
                 if (sessionError) {
-                    console.error('DEBUG: getSession error:', sessionError)
                     throw sessionError
                 }
 
@@ -78,18 +76,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         initAuth()
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state change event:', event)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (!mounted) return
 
             setSession(session)
             setUser(session?.user ?? null)
 
             if (session?.user) {
-                console.log('Auth event:', event, ' - User detected:', session.user.id)
                 await fetchRole(session.user.id)
             } else {
-                console.log('Auth event:', event, ' - No user')
                 setRole(null)
             }
 
@@ -112,7 +107,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [])
 
     const signOut = async () => {
-        console.log('DEBUG: Aggressive Sign Out START')
 
         // 1. Clear local UI state immediately to prevent flicker
         setSession(null)
@@ -121,7 +115,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         try {
             // 2. Wipe storage and cookies BEFORE calling supabase to prevent auto-restoration
-            console.log('DEBUG: Purging localStorage and cookies...')
 
             // Collect all auth-related keys
             const keysToRemove = [];
@@ -142,11 +135,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // 3. Inform Supabase
             await supabase.auth.signOut()
-            console.log('Sign out call finished')
         } catch (err) {
-            console.error('DEBUG: Sign out error', err)
+            console.error('Sign out error:', err)
         } finally {
-            console.log('DEBUG: Sign out workflow complete. Redirecting...')
             // Force a hard reload if the SPA state is sticky
             window.location.href = '/';
         }

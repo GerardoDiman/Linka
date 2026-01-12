@@ -2,7 +2,6 @@ import type { RawDatabase, RawRelation } from "./graph"
 import { getNextColor } from "./colors"
 
 export async function fetchNotionData(token: string): Promise<{ databases: RawDatabase[], relations: RawRelation[] }> {
-    console.log("Fetching Notion data with token...")
 
     try {
         const response = await fetch('/api/notion/search', {
