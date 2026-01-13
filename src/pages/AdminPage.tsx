@@ -58,7 +58,6 @@ export default function AdminPage() {
 
             // Trigger webhook if approved
             if (newStatus === 'approved' && entry) {
-                console.log(`[Admin] Condition met for approval webhook: ${entry.email}`)
                 const success = await sendN8NWebhook("user_approval", {
                     email: entry.email,
                     comments: entry.comments

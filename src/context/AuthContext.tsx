@@ -23,72 +23,86 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loadingRef.current = loading
     }, [loading])
 
-    const fetchRole = async (userId: string) => {
+    const fetchRole = async (userId: string, accessToken?: string) => {
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', userId)
-                .single()
+            // 1. Try via standard client with a timeout race
+            const { data, error } = await Promise.race([
+                supabase.from('profiles').select('role').eq('id', userId).single(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
+            ]) as any
 
-            if (!error && data) {
+            if (!error && data?.role) {
                 setRole(data.role)
-            } else {
-                setRole('user') // Default role
+                return data.role
             }
+            throw error || new Error("No data")
         } catch (err) {
-            console.error('Error fetching role:', err)
+            console.warn('⚠️ Fetching role via client failed, using emergency Fetch fallback...')
+            try {
+                // 2. Direct fetch fallback (more reliable during client hangs)
+                const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=role`
+                const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+                const response = await fetch(url, {
+                    headers: {
+                        'apikey': key,
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                })
+
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`)
+
+                const data = await response.json()
+                if (data?.[0]?.role) {
+                    setRole(data[0].role)
+                    return data[0].role
+                }
+            } catch (fetchErr) {
+                console.error('❌ Role fallback failed:', fetchErr)
+            }
+
+            // 3. Last resort default
             setRole('user')
+            return 'user'
         }
     }
 
     useEffect(() => {
         let mounted = true
+        const handleAuthChange = async (newSession: Session | null) => {
+            if (!mounted) return
 
-        const initAuth = async () => {
             try {
-                // Get initial session
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-                if (sessionError) {
-                    throw sessionError
-                }
-
-                if (!mounted) return
-
-                if (session) {
-                    setSession(session)
-                    setUser(session.user)
-                    setLoading(false)
-                    await fetchRole(session.user.id)
+                if (newSession?.user) {
+                    setSession(newSession)
+                    setUser(newSession.user)
+                    await fetchRole(newSession.user.id, newSession.access_token)
                 } else {
                     setSession(null)
                     setUser(null)
                     setRole(null)
+                }
+            } catch (err) {
+                // Silently handle or use generic error log in production if needed
+            } finally {
+                if (mounted) {
                     setLoading(false)
                 }
-            } catch (err: any) {
-                console.error('Auth check error:', err)
-                if (mounted) setLoading(false)
             }
         }
 
-        initAuth()
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            if (!mounted) return
-
-            setSession(session)
-            setUser(session?.user ?? null)
-
-            if (session?.user) {
-                await fetchRole(session.user.id)
-            } else {
-                setRole(null)
+        const init = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
+                await handleAuthChange(session)
+            } catch (err) {
+                if (mounted) setLoading(false)
             }
+        }
+        init()
 
-            setLoading(false)
+        // 2. Listen for changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            handleAuthChange(session)
         })
 
         // Safety timeout to prevent permanent hang (5 seconds)

@@ -370,7 +370,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                     supabase.from('user_graph_data')
                         .select('id, positions, custom_colors, filters, hidden_dbs, hide_isolated, notion_token')
                         .eq('id', session.user.id)
-                        .single(),
+                        .maybeSingle(),
                     new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
                 ]) as any
 
@@ -438,7 +438,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                     .from('profiles')
                     .select('plan_type')
                     .eq('id', session.user.id)
-                    .single()
+                    .maybeSingle()
                 // ...
 
                 if (error) {

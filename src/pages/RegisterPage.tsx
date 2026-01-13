@@ -48,20 +48,25 @@ export default function RegisterPage() {
         }
 
         try {
-            // 1. Verificar si el email está en la lista de espera y aprobado
-            const { data: waitlistEntry, error: waitlistError } = await supabase
-                .from('waitlist')
-                .select('status')
-                .eq('email', email)
-                .single()
+            const normalizedEmail = email.toLowerCase().trim()
 
-            if (waitlistError || !waitlistEntry) {
+            // 1. Verificar si el email está en la lista de espera y aprobado mediante RPC seguro
+            const { data: status, error: rpcError } = await supabase
+                .rpc('check_waitlist_status', { email_to_check: normalizedEmail })
+
+            if (rpcError) {
+                setError("Ocurrió un error técnico al verificar tu acceso. Por favor contacta a soporte.")
+                setLoading(false)
+                return
+            }
+
+            if (!status) {
                 setError("Este correo no ha solicitado acceso o no se encuentra en la lista de espera.")
                 setLoading(false)
                 return
             }
 
-            if (waitlistEntry.status !== 'approved') {
+            if (status !== 'approved') {
                 setError("Tu solicitud de acceso aún no ha sido aprobada. Te avisaremos por correo.")
                 setLoading(false)
                 return

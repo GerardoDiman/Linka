@@ -20,9 +20,10 @@ export function AccessRequestForm() {
         setError(null)
 
         try {
+            const normalizedEmail = email.toLowerCase().trim()
             const { error } = await supabase
                 .from('waitlist')
-                .insert([{ email, comments }])
+                .insert([{ email: normalizedEmail, comments }])
 
             if (error) throw error
 
