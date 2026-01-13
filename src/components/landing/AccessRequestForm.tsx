@@ -55,44 +55,65 @@ export function AccessRequestForm() {
     }
 
     return (
-        <Card className="w-full max-w-md mx-auto">
-            <CardHeader>
-                <CardTitle>Solicitar Acceso Anticipado</CardTitle>
-                <CardDescription>
-                    Únete a la lista de espera y sé de los primeros en probar Linka.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="w-full max-w-lg mx-auto relative group">
+            {/* Background Decor */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-violet-500/20 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+
+            <div className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 rounded-[2rem] shadow-2xl overflow-hidden p-8 md:p-10">
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">Solicitar Acceso</h2>
+                    <p className="text-slate-500 font-medium">
+                        Únete a la lista de espera exclusiva y sé de los primeros en experimentar Linka.
+                    </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {error && (
-                        <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-100 rounded-lg">
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3"
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                             {error}
-                        </div>
+                        </motion.div>
                     )}
+
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Tu Mejor Email</label>
                         <Input
                             type="email"
-                            placeholder="tu@email.com"
+                            placeholder="nombre@ejemplo.com"
                             required
                             value={email}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                            className="h-14 rounded-2xl border-slate-200 bg-white/50 focus:ring-primary/20 transition-all text-base px-6"
                         />
                     </div>
+
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">¿Por qué quieres acceso?</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">¿Qué planeas construir?</label>
                         <Textarea
-                            placeholder="Cuéntanos un poco sobre cómo planeas usar Linka..."
+                            placeholder="Cuéntanos un poco sobre tu ecosistema de Notion..."
                             value={comments}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComments(e.target.value)}
-                            className="resize-none"
+                            className="min-h-[120px] rounded-2xl border-slate-200 bg-white/50 focus:ring-primary/20 transition-all text-base p-6 resize-none"
                         />
                     </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? "Enviando..." : "Unirme a la lista"}
+
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98]"
+                    >
+                        {loading ? "Enviando..." : "Unirme a la lista de espera"}
                     </Button>
+
+                    <p className="text-center text-[10px] text-slate-400 font-medium px-4 leading-relaxed">
+                        Al unirte, aceptas nuestra política de privacidad. Te notificaremos vía email cuando estemos listos para recibirte.
+                    </p>
                 </form>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }

@@ -5,12 +5,12 @@ import {
     Share2,
     Zap,
     Lock,
-    Users,
     Download,
     FileText,
     Layout,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Palette
 } from "lucide-react"
 
 // --- Hero Visual Components (Redesigned for the Gallery) ---
@@ -140,8 +140,8 @@ const SecurityVisualHero = () => (
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.15),transparent)] blur-3xl" />
         </div>
 
-        <div className="relative w-full h-full flex items-center justify-center scale-110 lg:scale-135">
-            <div className="relative w-full max-w-[160px] lg:max-w-[200px] aspect-[16/10] bg-white rounded-3xl border border-emerald-100/50 shadow-2xl p-6 flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full flex items-center justify-center scale-100 lg:scale-115">
+            <div className="relative w-full max-w-[140px] lg:max-w-[180px] aspect-[16/10] bg-white rounded-3xl border border-emerald-100/50 shadow-2xl p-6 flex flex-col items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent" />
                 <div className="relative z-10 flex flex-col items-center">
                     <div className="relative">
@@ -150,7 +150,7 @@ const SecurityVisualHero = () => (
                     <div className="mt-6 w-24 lg:w-32 h-1.5 bg-slate-50 rounded-full overflow-hidden">
                         <motion.div
                             animate={{ x: ["-100%", "100%"] }}
-                            transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                             className="w-1/2 h-full bg-emerald-500"
                         />
                     </div>
@@ -223,28 +223,75 @@ const SyncVisualHero = () => (
     </div>
 )
 
-const CollaborationVisualHero = () => (
-    <div className="relative w-full h-full flex items-center justify-center p-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(244,63,94,0.15),transparent)]" />
-        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#f43f5e_1px,transparent_1px)] [background-size:20px_20px]" />
+const CustomizationVisualHero = () => (
+    <div className="relative w-full h-full flex items-center justify-center p-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(244,63,94,0.1),transparent)]" />
 
-        <div className="flex -space-x-6 lg:-space-x-8 scale-100 lg:scale-110">
-            {[...Array(3)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    animate={{ y: [0, i % 2 === 0 ? -8 : 8, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, delay: i * 0.5 }}
-                    className={`w-12 h-12 lg:w-16 lg:h-16 rounded-full border-[3px] border-white bg-gradient-to-br shadow-xl ${['from-rose-400 to-rose-600', 'from-blue-400 to-blue-600', 'from-purple-400 to-purple-600'][i]}`}
-                />
-            ))}
+        {/* Animated Settings UI Elements */}
+        <div className="relative flex items-center gap-4 lg:gap-6 scale-90 lg:scale-105">
+            {/* Color Palette Node */}
             <motion.div
-                animate={{ y: [0, 4, 0] }}
-                transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}
-                className="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-[3px] border-white bg-slate-50 shadow-xl flex items-center justify-center text-xs font-black text-slate-400 z-10"
+                animate={{
+                    backgroundColor: ["#f43f5e", "#3b82f6", "#8b5cf6", "#f43f5e"],
+                    scale: [1, 1.05, 1],
+                    rotate: [0, 5, -5, 0]
+                }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="w-16 h-16 lg:w-20 lg:h-20 rounded-3xl shadow-2xl border-4 border-white flex items-center justify-center text-white"
             >
-                +12
+                <Palette className="w-8 h-8 lg:w-10 lg:h-10" />
             </motion.div>
+
+            {/* Floating Filtered Nodes */}
+            <div className="flex flex-col gap-3 lg:gap-4">
+                {[0, 1, 2].map((i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0.2, x: 20 }}
+                        animate={{
+                            opacity: [0.2, 1, 0.2],
+                            x: [20, 0, 20],
+                            scale: [0.9, 1, 0.9]
+                        }}
+                        transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            delay: i * 0.8,
+                            ease: "easeInOut"
+                        }}
+                        className="h-3 lg:h-4 w-20 lg:w-24 bg-slate-100 rounded-full overflow-hidden"
+                    >
+                        <motion.div
+                            animate={{
+                                backgroundColor: ["#e2e8f0", "#fda4af", "#e2e8f0"],
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, delay: i * 0.8 }}
+                            className="h-full w-full"
+                        />
+                    </motion.div>
+                ))}
+            </div>
         </div>
+
+        {/* Floating Sparks */}
+        {[...Array(8)].map((_, i) => (
+            <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                    opacity: [0, 0.5, 0],
+                    scale: [0, 1, 0],
+                    x: [0, (Math.random() - 0.5) * 100],
+                    y: [0, (Math.random() - 0.5) * 100]
+                }}
+                transition={{
+                    duration: 3 + Math.random() * 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 5
+                }}
+                className="absolute w-1.5 h-1.5 bg-rose-400 rounded-full blur-[1px]"
+            />
+        ))}
     </div>
 )
 
@@ -254,10 +301,10 @@ const ExportVisualHero = () => (
         <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent top-1/4" />
         <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent bottom-1/4" />
 
-        <div className="relative group/file scale-100 lg:scale-115">
+        <div className="relative group/file scale-90 lg:scale-110">
             <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                 className="w-20 h-28 lg:w-28 lg:h-36 bg-white rounded-3xl shadow-xl border border-indigo-100 flex flex-col items-center justify-center p-5 relative overflow-hidden"
             >
                 <div className="absolute top-0 inset-x-0 h-1 bg-indigo-500/20" />
@@ -270,10 +317,10 @@ const ExportVisualHero = () => (
             <motion.div
                 animate={{
                     scale: [1, 1.05, 1],
-                    y: [0, 4, 0]
+                    y: [0, 2, 0]
                 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute -bottom-2 -right-2 bg-indigo-600 text-white p-2.5 lg:p-3 rounded-2xl shadow-xl z-10"
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute -bottom-1 -right-1 bg-indigo-600 text-white p-2 lg:p-2.5 rounded-2xl shadow-xl z-10"
             >
                 <Download className="w-4 h-4 lg:w-5 lg:h-5" />
             </motion.div>
@@ -285,48 +332,48 @@ const ExportVisualHero = () => (
 
 const galleryFeatures = [
     {
-        name: "Gráfico de Nodos Activo",
-        description: "Visualiza tu ecosistema completo como una red de nodos inteligentes. Conecta bases de datos y páginas con una claridad sin precedentes.",
+        name: "Mapeo Visual Inteligente",
+        description: "Visualiza tu ecosistema de Notion como una red de nodos interconectados. Encuentra dependencias y organiza tus bases de datos con total claridad.",
         icon: Database,
         visual: <NodeVisualHero />,
         color: "bg-blue-600",
         badge: "Visual Core"
     },
     {
-        name: "Relaciones de un Vistazo",
-        description: "Identificamos conexiones complejas automáticamente, permitiéndote navegar tu conocimiento multidimensional sin esfuerzo.",
+        name: "Relaciones Automáticas",
+        description: "Linka identifica y muestra las conexiones entre tus tablas automáticamente, permitiéndote navegar tu conocimiento multidimensional sin esfuerzo.",
         icon: Share2,
         visual: <RelationVisualHero />,
         color: "bg-purple-600",
         badge: "Intelligence"
     },
     {
-        name: "Seguridad End-to-End",
-        description: "Tu privacidad es lo primero. Implementamos encriptación de grado militar para asegurar que tus datos siempre sean tuyos.",
+        name: "Privacidad y Seguridad",
+        description: "Tus datos son solo tuyos. Implementamos prácticas de seguridad robustas para asegurar que tu información de Notion se mantenga privada y protegida.",
         icon: Lock,
         visual: <SecurityVisualHero />,
         color: "bg-emerald-600",
         badge: "Private"
     },
     {
-        name: "Sincronización en Tiempo Real",
-        description: "Tus cambios en Notion se reflejan al instante. Sin esperas, sin errores, solo flujo puro de información.",
+        name: "Sincronización bajo Demanda",
+        description: "Refleja tus cambios de Notion en segundos con un solo clic. Sin esperas innecesarias para mantener tu gráfico siempre al día.",
         icon: Zap,
         visual: <SyncVisualHero />,
         color: "bg-amber-500",
         badge: "Fast"
     },
     {
-        name: "Gestión de Equipo",
-        description: "Colabora de forma fluida con permisos granulares y visualización compartida de estructuras de datos.",
-        icon: Users,
-        visual: <CollaborationVisualHero />,
+        name: "Personalización Avanzada",
+        description: "Adapta el gráfico a tu gusto. Personaliza colores, aplica filtros inteligentes y oculta lo que no necesites para enfocarte en lo importante.",
+        icon: Palette,
+        visual: <CustomizationVisualHero />,
         color: "bg-rose-600",
-        badge: "Social"
+        badge: "Design"
     },
     {
-        name: "Exportación Profesional",
-        description: "Lleva tus mapas a donde quieras con exportaciones en SVG, PNG y PDF optimizadas para impresión y diseño.",
+        name: "Exportación en Alta Calidad",
+        description: "Descarga tus mapas en formato PNG de alta fidelidad, perfecto para tus reportes, presentaciones o documentación técnica.",
         icon: Download,
         visual: <ExportVisualHero />,
         color: "bg-indigo-600",
@@ -412,11 +459,11 @@ export function Features() {
                     {galleryFeatures.map((feature) => (
                         <motion.div
                             key={feature.name}
-                            className="min-w-full lg:min-w-[48%] snap-start px-1 lg:px-2 py-1"
+                            className="min-w-full lg:min-w-[48%] snap-start px-1 lg:px-2 py-1 flex"
                             whileHover={{ y: -3 }}
                             transition={{ duration: 0.3, ease: "easeOut" }}
                         >
-                            <div className="relative group bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl overflow-hidden flex flex-col lg:grid lg:grid-cols-[0.9fr_1.1fr] transition-all duration-500 cursor-pointer">
+                            <div className="relative group bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl overflow-hidden flex flex-col lg:grid lg:grid-cols-[0.9fr_1.1fr] transition-all duration-500 cursor-pointer w-full h-auto">
                                 {/* Text Content */}
                                 <div className="p-6 md:p-7 lg:p-8 order-2 lg:order-1 flex flex-col items-start justify-center">
                                     <div className="flex items-center gap-3.5 mb-3 lg:mb-4">

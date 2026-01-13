@@ -4,20 +4,24 @@ import { ChevronDown } from "lucide-react"
 
 const faqs = [
     {
-        question: "¿Es seguro conectar mi cuenta de Notion?",
-        answer: "Sí, Linka utiliza tokens de integración oficiales de Notion y solo solicita los permisos necesarios para leer la estructura de tus bases de datos. No almacenamos tus datos de contenido."
+        question: "¿Cómo protege Linka mi privacidad en Notion?",
+        answer: "Linka utiliza el protocolo oficial de integración de Notion. Solo solicitamos permisos para leer la estructura de tus bases de datos y páginas. Nunca almacenamos el contenido interno de tus documentos; solo visualizamos las conexiones entre ellos."
     },
     {
-        question: "¿Qué tipos de bases de datos puedo visualizar?",
-        answer: "Puedes visualizar cualquier base de datos de Notion a la que tengas acceso. Linka detectará automáticamente las relaciones (Relation properties) entre ellas."
+        question: "¿La sincronización con Notion es automática?",
+        answer: "Para darte total control y optimizar el rendimiento, la sincronización es bajo demanda. Con un solo clic en el botón de 'Sincronizar', Linka traerá los últimos cambios y relaciones de tu espacio de trabajo."
     },
     {
-        question: "¿Ofrecen una versión gratuita?",
-        answer: "Sí, tenemos un plan gratuito que te permite visualizar un número limitado de nodos y relaciones. Para sistemas más complejos, ofrecemos planes premium."
+        question: "¿Puedo exportar mis gráficos para presentaciones?",
+        answer: "Sí, puedes exportar cualquier visualización en formato PNG de alta fidelidad. Esto es ideal para incluir tus mapas de datos en reportes, presentaciones de equipo o documentación técnica."
     },
     {
-        question: "¿Puedo exportar mis mapas de datos?",
-        answer: "¡Claro! Los usuarios premium pueden exportar sus visualizaciones en formatos de alta resolución como PNG, SVG y PDF."
+        question: "¿Qué pasa si mis bases de datos son muy grandes?",
+        answer: "Linka está diseñado para manejar estructuras complejas. Contamos con filtros inteligentes que te permiten ocultar o mostrar bases de datos específicas, permitiéndote enfocarte en las relaciones que realmente importan."
+    },
+    {
+        question: "¿Cómo puedo obtener soporte si tengo dudas?",
+        answer: "Estamos aquí para ayudarte. Puedes contactarnos directamente escribiendo a soporte@linka.io o a través de nuestros canales oficiales. Respondemos a todas las consultas en menos de 24 horas."
     }
 ]
 

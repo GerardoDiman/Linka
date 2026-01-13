@@ -81,7 +81,7 @@ export function Hero() {
                         className="mb-8"
                     >
                         <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium ring-1 ring-inset ring-primary/20">
-                            <ShinyText text="Nueva Versión 2.0" speed={3} className="!text-primary font-bold" />
+                            <ShinyText text="Early Access" speed={3} className="!text-primary font-bold" />
                         </div>
                     </motion.div>
 
@@ -152,7 +152,7 @@ export function Hero() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
                                 <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100 flex flex-col justify-center">
                                     <h4 className="font-bold text-blue-700 mb-1">Sincronización</h4>
-                                    <p className="text-sm text-blue-600/80 leading-snug">Cambios en tiempo real reflejados en tu mapa.</p>
+                                    <p className="text-sm text-blue-600/80 leading-snug">Control total de tus datos con sincronización bajo demanda.</p>
                                 </div>
                                 <div className="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 flex flex-col justify-center">
                                     <h4 className="font-bold text-purple-700 mb-1">Inteligencia</h4>
@@ -167,7 +167,7 @@ export function Hero() {
                                             <img key={i} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i}`} alt={`Usuario de Linka ${i}`} />
                                         ))}
                                     </div>
-                                    <span>+500 usuarios ya visualizan sus datos</span>
+                                    <span>Próximamente para toda la comunidad de Notion</span>
                                 </div>
                             </div>
                         </div>
@@ -177,7 +177,7 @@ export function Hero() {
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-violet-600 rounded-2xl blur opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200"></div>
                             <div className="relative rounded-2xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10">
                                 <div className="rounded-xl bg-white shadow-2xl ring-1 ring-gray-900/10 overflow-hidden relative">
-                                    <div className="w-full relative" style={{ paddingBottom: '56.25%' }}>
+                                    <div className="w-full relative pb-[70%] sm:pb-[56.25%]">
                                         <div className="absolute inset-0">
                                             <DataAnimation />
                                         </div>

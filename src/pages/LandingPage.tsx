@@ -175,13 +175,13 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-2">
-                            <Logo size={24} className="opacity-50 grayscale hover:grayscale-0 transition-all duration-500" />
+                            <Logo size={24} className="opacity-50 grayscale" />
                             <span className="text-lg font-bold text-gray-400">Linka</span>
                         </div>
-                        <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Linka. Todos los derechos reservados.</p>
+                        <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Linka. Visualización Inteligente para Notion.</p>
                         <div className="flex gap-6">
-                            <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">Privacidad</a>
-                            <a href="#" className="text-gray-400 hover:text-primary transition-colors text-sm">Términos</a>
+                            <span className="text-gray-300 text-sm">Privacidad</span>
+                            <span className="text-gray-300 text-sm">Términos</span>
                         </div>
                     </div>
                 </div>
