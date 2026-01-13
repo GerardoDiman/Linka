@@ -9,6 +9,7 @@ import { sendN8NWebhook } from "../lib/webhooks"
 import { Input } from "../components/ui/input"
 import { Mail, UserPlus, Sparkles } from "lucide-react"
 import { Tooltip } from "../components/ui/Tooltip"
+import { useToast } from "../context/ToastContext"
 
 interface WaitlistEntry {
     id: string
@@ -20,6 +21,7 @@ interface WaitlistEntry {
 
 export default function AdminPage() {
     const navigate = useNavigate()
+    const { toast } = useToast()
     const [entries, setEntries] = useState<WaitlistEntry[]>([])
     const [loading, setLoading] = useState(true)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -64,14 +66,14 @@ export default function AdminPage() {
                 })
 
                 if (success) {
-                    alert(`✅ Webhook de aprobación enviado para: ${entry.email}`)
+                    toast.success(`Webhook de aprobación enviado para: ${entry.email}`)
                 } else {
-                    alert(`❌ Error al enviar webhook de aprobación. Revisa la consola y los logs de Supabase.`)
+                    toast.error(`Error al enviar webhook de aprobación. Revisa la consola y los logs de Supabase.`)
                 }
             }
         } else {
             console.error("[Admin] Error updating status in Supabase:", error)
-            alert(`❌ Error al actualizar el estado: ${error.message}`)
+            toast.error(`Error al actualizar el estado: ${error.message}`)
         }
         setActionLoading(null)
     }
@@ -100,9 +102,9 @@ export default function AdminPage() {
 
             setInviteEmail("")
             fetchEntries()
-            alert("Invitación especial enviada con éxito")
+            toast.success("Invitación especial enviada con éxito")
         } catch (err: any) {
-            alert(err.message || "Error al enviar la invitación")
+            toast.error(err.message || "Error al enviar la invitación")
         } finally {
             setInviting(false)
         }

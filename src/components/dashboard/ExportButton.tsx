@@ -6,12 +6,14 @@ import { useState } from "react"
 import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useReactFlow, getNodesBounds } from "reactflow"
+import { useToast } from "../../context/ToastContext"
 
 type ExportBg = 'transparent' | 'black' | 'white' | 'dark'
 type ExportQuality = 'standard' | 'high' | 'ultra'
 
 export function ExportButton() {
     const { getNodes } = useReactFlow()
+    const { toast } = useToast()
     const [isOpen, setIsOpen] = useState(false)
     const [isExporting, setIsExporting] = useState(false)
     const [exportProgress, setExportProgress] = useState('')
@@ -141,10 +143,10 @@ export function ExportButton() {
                 const blob = await toBlob(element, fallbackOptions)
                 if (blob) {
                     download(blob, `linka-graph-basic-${new Date().getTime()}.png`)
-                    alert("Se ha exportado una captura básica debido a límites técnicos.")
+                    toast.info("Se ha exportado una captura básica debido a límites técnicos.")
                 }
             } catch (fallbackErr) {
-                alert("Error crítico. Prueba a reducir el zoom de tu navegador.")
+                toast.error("Error crítico. Prueba a reducir el zoom de tu navegador.")
             }
         } finally {
             setIsExporting(false)

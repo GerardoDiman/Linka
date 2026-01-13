@@ -24,11 +24,11 @@ const NodeVisualHero = () => (
 
         <div className="relative w-full h-full p-8 lg:p-12">
             {/* Extended Connection Lines for Rectangular Space */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
                 <motion.path
-                    d="M 15%,25% L 85%,15% L 90%,75% L 10%,85% Z"
+                    d="M 15 25 L 85 15 L 90 75 L 10 85 Z"
                     stroke="currentColor"
-                    strokeWidth="1"
+                    strokeWidth="0.5"
                     fill="none"
                     className="text-primary/20"
                     initial={{ pathLength: 0, opacity: 0 }}
@@ -36,10 +36,10 @@ const NodeVisualHero = () => (
                     transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                 />
                 <motion.path
-                    d="M 15%,25% L 90%,75% M 85%,15% L 10%,85% M 50%,50% L 15%,25% M 50%,50% L 85%,15% M 50%,50% L 90%,75% M 50%,50% L 10%,85%"
+                    d="M 15 25 L 90 75 M 85 15 L 10 85 M 50 50 L 15 25 M 50 50 L 85 15 M 50 50 L 90 75 M 50 50 L 10 85"
                     stroke="currentColor"
-                    strokeWidth="0.5"
-                    strokeDasharray="4 4"
+                    strokeWidth="0.2"
+                    strokeDasharray="2 2"
                     fill="none"
                     className="text-primary/15"
                 />

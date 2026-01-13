@@ -7,9 +7,11 @@ import { Card, CardContent } from "../components/ui/card"
 import { supabase } from "../lib/supabase"
 import { Eye, EyeOff, Check } from "lucide-react"
 import { sendN8NWebhook } from "../lib/webhooks"
+import { useToast } from "../context/ToastContext"
 
 export default function RegisterPage() {
     const navigate = useNavigate()
+    const { toast } = useToast()
     const [loading, setLoading] = useState(false)
     const [fullName, setFullName] = useState("")
     const [username, setUsername] = useState("")
@@ -32,14 +34,8 @@ export default function RegisterPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError("")
         setLoading(true)
-        setError(null)
-
-        if (!isPasswordValid) {
-            setError("La contraseña no cumple con todos los requisitos")
-            setLoading(false)
-            return
-        }
 
         if (password !== confirmPassword) {
             setError("Las contraseñas no coinciden")
@@ -94,7 +90,7 @@ export default function RegisterPage() {
                 username
             })
 
-            alert("Registro exitoso. Por favor revisa tu email para confirmar tu cuenta.")
+            toast.success("¡Registro exitoso! Por favor revisa tu email para confirmar tu cuenta.")
             navigate("/login")
         } catch (err: any) {
             setError(err.message || "Error al registrarse")

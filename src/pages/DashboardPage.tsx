@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { supabase } from "../lib/supabase"
 import { useAuth } from "../context/AuthContext"
+import { useToast } from "../context/ToastContext"
 
 import { Sidebar } from "../components/dashboard/Sidebar"
 import { DatabaseNode } from "../components/dashboard/DatabaseNode"
@@ -309,6 +310,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const { fitView, zoomIn, zoomOut } = useReactFlow()
     const { theme } = useTheme()
     const { session, loading } = useAuth()
+    const { toast } = useToast()
 
     if (loading || !session) return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
@@ -610,7 +612,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     const handleSync = async (token: string, overrideState?: { filters: Set<string>, hidden_dbs: Set<string>, hide_isolated: boolean, custom_colors: Record<string, string> }, skipDirty: boolean = false) => {
         if (!token) {
-            alert("Por favor ingresa un token de Notion")
+            toast.warning("Por favor ingresa un token de Notion")
             return
         }
 
@@ -665,7 +667,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
         } catch (error: any) {
             console.error("❌ handleSync Error:", error)
-            alert(error.message || "Error al sincronizar con Notion")
+            toast.error(error.message || "Error al sincronizar con Notion")
         } finally {
             setSyncStatus('idle')
         }

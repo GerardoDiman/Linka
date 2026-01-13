@@ -2,6 +2,7 @@ import { useState } from "react"
 import { X, Check, Star, Zap, Loader2 } from "lucide-react"
 import { Button } from "../ui/button"
 import { supabase } from "../../lib/supabase"
+import { useToast } from "../../context/ToastContext"
 
 interface PricingModalProps {
     isOpen: boolean
@@ -11,6 +12,7 @@ interface PricingModalProps {
 
 export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps) {
     const [loading, setLoading] = useState(false)
+    const { toast } = useToast()
 
     if (!isOpen) return null
 
@@ -25,7 +27,7 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
             }
         } catch (err) {
             console.error("Error initiating checkout:", err)
-            alert("No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo.")
+            toast.error("No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo.")
         } finally {
             setLoading(false)
         }

@@ -74,15 +74,21 @@ function AppRoutes() {
   )
 }
 
+import { ToastProvider } from "./context/ToastContext"
+import { ToastContainer } from "./components/ui/Toast"
+
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
-      </ThemeProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+          <ToastContainer />
+        </ThemeProvider>
+      </AuthProvider>
+    </ToastProvider>
   )
 }
 
