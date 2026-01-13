@@ -439,7 +439,11 @@ export function Features() {
                                 </div>
 
                                 {/* Immersive Visual Area - Truly Full Bleed & Adaptive */}
-                                <div className={`order-1 lg:order-2 ${feature.color.split('-').slice(0, -1).join('-')}-500/[0.03] lg:${feature.color.split('-').slice(0, -1).join('-')}-500/[0.05] p-0 h-[220px] md:h-[240px] lg:h-auto lg:self-stretch lg:border-l border-slate-100 flex items-center justify-center overflow-hidden relative`}>
+                                <div
+                                    className={`order-1 lg:order-2 ${feature.color.split('-').slice(0, -1).join('-')}-500/[0.03] lg:${feature.color.split('-').slice(0, -1).join('-')}-500/[0.05] p-0 h-[220px] md:h-[240px] lg:h-auto lg:self-stretch lg:border-l border-slate-100 flex items-center justify-center overflow-hidden relative`}
+                                    role="img"
+                                    aria-label={`Visualización animada de ${feature.name}`}
+                                >
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
 
                                     {/* Adaptive Mouse Perspective */}

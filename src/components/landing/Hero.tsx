@@ -113,9 +113,10 @@ export function Hero() {
                                     const element = document.getElementById('access');
                                     element?.scrollIntoView({ behavior: 'smooth' });
                                 }}
+                                aria-label="Comenzar ahora a usar Linka"
                                 className="w-full sm:w-auto h-14 px-10 text-lg rounded-full shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all font-bold"
                             >
-                                Comenzar ahora <ArrowRight className="ml-2 h-5 w-5" />
+                                Comenzar ahora <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                             </Button>
                         </Magnetic>
                         <Magnetic amount={1.2}>
@@ -123,6 +124,7 @@ export function Hero() {
                                 variant="outline"
                                 size="lg"
                                 onClick={() => navigate("/register")}
+                                aria-label="Crear una cuenta nueva en Linka"
                                 className="w-full sm:w-auto h-14 px-10 text-lg rounded-full hover:bg-slate-50 transition-all border-2 font-bold"
                             >
                                 Registrarse
@@ -162,7 +164,7 @@ export function Hero() {
                                 <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
                                     <div className="flex -space-x-2">
                                         {[1, 2, 3, 4].map((i) => (
-                                            <img key={i} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i}`} alt="User" />
+                                            <img key={i} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i}`} alt={`Usuario de Linka ${i}`} />
                                         ))}
                                     </div>
                                     <span>+500 usuarios ya visualizan sus datos</span>

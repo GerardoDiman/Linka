@@ -45,6 +45,9 @@ export function FAQ() {
                             >
                                 <button
                                     onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+                                    aria-expanded={activeIndex === index}
+                                    aria-controls={`faq-answer-${index}`}
+                                    id={`faq-question-${index}`}
                                     className="w-full px-6 py-5 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
                                 >
                                     <span className="font-semibold text-secondary">{faq.question}</span>
@@ -60,6 +63,9 @@ export function FAQ() {
                                             animate={{ height: "auto", opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.3 }}
+                                            id={`faq-answer-${index}`}
+                                            role="region"
+                                            aria-labelledby={`faq-question-${index}`}
                                         >
                                             <div className="px-6 pb-5 text-gray-600 leading-relaxed">
                                                 {faq.answer}
