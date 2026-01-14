@@ -146,14 +146,7 @@ const demoDatabases: RawDatabase[] = [
     },
 ]
 
-const demoRelations: RawRelation[] = [
-    { source: '1', target: '2' },
-    { source: '2', target: '3' },
-    { source: '2', target: '4' },
-    { source: '2', target: '5' },
-    { source: '1', target: '8' },
-    { source: '8', target: '1' },
-]
+
 
 
 const getScopedKey = (userId: string, key: string) => `linka_${userId}_${key}`
@@ -528,7 +521,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 // 3. Trigger Notion Sync if we have a token and weren't loaded
                 // PASS DATA EXPLICITLY to avoid race conditions with state updates
                 // skipDirty: true prevents the orange dot on initial load
-                if (data.notion_token && syncedDbs === demoDatabases) {
+                const isShowingDemo = syncedDbs === demoDatabases || (syncedDbs.length > 0 && syncedDbs[0].id === '1')
+                if (data.notion_token && isShowingDemo) {
                     handleSync(data.notion_token, {
                         filters: newFilters,
                         hidden_dbs: newHidden,
@@ -583,6 +577,15 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             return () => clearTimeout(timeout)
         }
     }, [session?.user.id, session?.user.user_metadata?.has_seen_onboarding])
+
+    // Update demo data language when it changes
+    useEffect(() => {
+        const isShowingDemo = syncedDbs === demoDatabases || (syncedDbs.length > 0 && syncedDbs[0].id === '1')
+        if (isShowingDemo) {
+            setSyncedDbs(localizedDemoDatabases)
+            setSyncedRelations(localizedDemoRelations)
+        }
+    }, [localizedDemoDatabases, localizedDemoRelations])
 
 
     // Map for quick title lookups without depending on nodes state
@@ -836,19 +839,19 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     }, [fitView])
 
     const handleDisconnect = useCallback(() => {
-        setSyncedDbs(demoDatabases)
-        setSyncedRelations(demoRelations)
-        setNodes(transformToGraphData(demoDatabases, demoRelations, {}, {}).nodes)
-        setEdges(transformToGraphData(demoDatabases, demoRelations, {}, {}).edges)
+        setSyncedDbs(localizedDemoDatabases)
+        setSyncedRelations(localizedDemoRelations)
+        setNodes(transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}).nodes)
+        setEdges(transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}).edges)
         setSelectedPropertyTypes(new Set())
         setHiddenDbIds(new Set())
         setHideIsolated(false)
         setCustomColors({})
         setNotionToken(null)
         setIsDirty(true)
-        const initialGraph = transformToGraphData(demoDatabases, demoRelations, {}, {})
+        const initialGraph = transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {})
         runForceLayout(initialGraph.nodes, initialGraph.edges)
-    }, [setNodes, setEdges, setSyncedDbs, setSyncedRelations, setSelectedPropertyTypes, setHiddenDbIds, setHideIsolated, setCustomColors, runForceLayout])
+    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, setSyncedDbs, setSyncedRelations])
 
     const handleManualSync = useCallback(async () => {
         if (!session) return
