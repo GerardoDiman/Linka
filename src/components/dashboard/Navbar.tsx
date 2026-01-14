@@ -7,7 +7,7 @@ import {
     File, CheckSquare, Link, Mail, Phone, Variable, GitBranch,
     Combine, Clock, UserPlus, History, UserCheck, Activity,
     Fingerprint, ShieldCheck, Database, X, Sun, Moon, HelpCircle,
-    Star, Languages
+    Star
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"

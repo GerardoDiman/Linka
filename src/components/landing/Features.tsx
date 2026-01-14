@@ -10,9 +10,7 @@ import {
     Layout,
     ChevronLeft,
     ChevronRight,
-    Palette,
-    Star,
-    Languages
+    Palette
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
