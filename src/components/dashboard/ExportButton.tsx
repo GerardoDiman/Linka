@@ -7,18 +7,33 @@ import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useReactFlow, getNodesBounds } from "reactflow"
 import { useToast } from "../../context/ToastContext"
+import { useTranslation } from "react-i18next"
 
 type ExportBg = 'transparent' | 'black' | 'white' | 'dark'
 type ExportQuality = 'standard' | 'high' | 'ultra'
 
 export function ExportButton() {
     const { getNodes } = useReactFlow()
+    const { t } = useTranslation()
     const { toast } = useToast()
     const [isOpen, setIsOpen] = useState(false)
     const [isExporting, setIsExporting] = useState(false)
     const [exportProgress, setExportProgress] = useState('')
     const [selectedBg, setSelectedBg] = useState<ExportBg>('white')
     const [selectedQuality, setSelectedQuality] = useState<ExportQuality>('high')
+
+    const bgOptions: { id: ExportBg, label: string, color?: string }[] = [
+        { id: 'transparent', label: t('dashboard.export.transparent') },
+        { id: 'white', label: t('dashboard.export.white'), color: '#ffffff' },
+        { id: 'dark', label: t('dashboard.export.dark'), color: '#0f172a' },
+        { id: 'black', label: t('dashboard.export.black'), color: '#000000' },
+    ]
+
+    const qualityOptions: { id: ExportQuality, label: string, desc: string }[] = [
+        { id: 'standard', label: t('dashboard.export.standard'), desc: '1x' },
+        { id: 'high', label: t('dashboard.export.high'), desc: '2x' },
+        { id: 'ultra', label: t('dashboard.export.ultra'), desc: '4x' },
+    ]
 
     const getBgColor = (bg: ExportBg) => {
         if (bg === 'transparent') return undefined
@@ -44,13 +59,13 @@ export function ExportButton() {
         const quality = selectedQuality
         console.log(`🚀 Iniciando exportación PNG (${quality}) con fondo ${selectedBg}...`)
         setIsExporting(true)
-        setExportProgress('Preparando exportación...')
+        setExportProgress(t('dashboard.export.preparing'))
 
         try {
             // Wait for any animations to finish
             await new Promise(resolve => setTimeout(resolve, 500))
 
-            setExportProgress('Calculando dimensiones...')
+            setExportProgress(t('dashboard.export.calculating'))
             await new Promise(resolve => setTimeout(resolve, 200))
 
             // 1. Calculate the bounding box of the actual graph content
@@ -116,10 +131,10 @@ export function ExportButton() {
                 }
             }
 
-            setExportProgress('Capturando gráfico...')
+            setExportProgress(t('dashboard.export.capturing'))
             const blob = await toBlob(viewport, options)
 
-            setExportProgress('Descargando...')
+            setExportProgress(t('dashboard.export.downloading'))
             if (blob) {
                 const qualityLabel = quality === 'ultra' ? 'ultra' : quality === 'high' ? 'hq' : 'std'
                 download(blob, `linka-graph-${qualityLabel}-${new Date().getTime()}.png`, "image/png")
@@ -143,10 +158,10 @@ export function ExportButton() {
                 const blob = await toBlob(element, fallbackOptions)
                 if (blob) {
                     download(blob, `linka-graph-basic-${new Date().getTime()}.png`)
-                    toast.info("Se ha exportado una captura básica debido a límites técnicos.")
+                    toast.info(t('dashboard.export.fallbackInfo'))
                 }
             } catch (fallbackErr) {
-                toast.error("Error crítico. Prueba a reducir el zoom de tu navegador.")
+                toast.error(t('dashboard.export.criticalError'))
             }
         } finally {
             setIsExporting(false)
@@ -154,23 +169,11 @@ export function ExportButton() {
         }
     }
 
-    const bgOptions: { id: ExportBg, label: string, color?: string }[] = [
-        { id: 'transparent', label: 'Transparente' },
-        { id: 'white', label: 'Blanco', color: '#ffffff' },
-        { id: 'dark', label: 'Oscuro', color: '#0f172a' },
-        { id: 'black', label: 'Negro', color: '#000000' },
-    ]
-
-    const qualityOptions: { id: ExportQuality, label: string, desc: string }[] = [
-        { id: 'standard', label: 'Estándar', desc: '1x' },
-        { id: 'high', label: 'Alta', desc: '2x' },
-        { id: 'ultra', label: 'Ultra', desc: '4x' },
-    ]
 
     return (
         <>
             <div className="relative">
-                <Tooltip content="Exportar gráfico" position="right">
+                <Tooltip content={t('dashboard.export.tooltip')} position="right">
                     <button
                         onClick={() => setIsOpen(!isOpen)}
                         disabled={isExporting}
@@ -189,7 +192,7 @@ export function ExportButton() {
                             className="absolute left-full ml-2 bottom-0 flex flex-col gap-2 p-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 rounded-xl shadow-xl z-50 min-w-[160px]"
                         >
                             <div className="flex flex-col gap-1.5 pb-2 border-b border-gray-100 dark:border-slate-700">
-                                <span className="text-[9px] font-black uppercase text-gray-400 dark:text-slate-500 px-2 tracking-wider">Fondo</span>
+                                <span className="text-[9px] font-black uppercase text-gray-400 dark:text-slate-500 px-2 tracking-wider">{t('dashboard.export.background')}</span>
                                 <div className="flex items-center gap-1.5 px-1.5">
                                     {bgOptions.map((opt) => (
                                         <button
@@ -208,7 +211,7 @@ export function ExportButton() {
                             </div>
 
                             <div className="flex flex-col gap-1.5 pb-2 border-b border-gray-100 dark:border-slate-700">
-                                <span className="text-[9px] font-black uppercase text-gray-400 dark:text-slate-500 px-2 tracking-wider">Calidad</span>
+                                <span className="text-[9px] font-black uppercase text-gray-400 dark:text-slate-500 px-2 tracking-wider">{t('dashboard.export.quality')}</span>
                                 <div className="flex flex-col gap-1 px-1.5">
                                     {qualityOptions.map((opt) => (
                                         <button
@@ -232,7 +235,7 @@ export function ExportButton() {
                                 className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-all shadow-sm"
                             >
                                 <ImageIcon size={14} />
-                                Exportar PNG
+                                {t('dashboard.export.button')}
                             </button>
                         </motion.div>
                     )}
@@ -263,7 +266,7 @@ export function ExportButton() {
                             {/* Progress Message */}
                             <div className="flex flex-col items-center gap-2">
                                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                    Exportando...
+                                    {t('dashboard.export.exporting')}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">
                                     {exportProgress}

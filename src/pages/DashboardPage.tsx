@@ -33,6 +33,7 @@ import { fetchNotionData } from "../lib/notion"
 import { transformToGraphData, type RawDatabase, type RawRelation } from "../lib/graph"
 import { NODE_COLORS } from "../lib/colors"
 import { useTheme } from "../context/ThemeContext"
+import { useTranslation } from "react-i18next"
 
 
 // Raw Demo Data (Template)
@@ -259,6 +260,7 @@ const syncViaFetch = async (payload: any, token: string) => {
                 }
             } catch (err) {
                 console.error("❌ Emergency refresh failed. Needs manual login.")
+                // Note: We can't use 't' easily in a helper function outside component without passing it
                 throw new Error("Tu sesión ha expirado. Por favor cierra sesión y vuelve a entrar.")
             }
         }
@@ -309,10 +311,122 @@ interface DashboardContentProps {
 }
 
 function DashboardContent({ userRole }: DashboardContentProps) {
+    const { t } = useTranslation()
     const { fitView, zoomIn, zoomOut } = useReactFlow()
     const { theme } = useTheme()
     const { session, loading } = useAuth()
     const { toast } = useToast()
+
+    const localizedDemoDatabases = useMemo(() => [
+        {
+            id: '1',
+            title: t('dashboard.demo.users'),
+            properties: [
+                { name: t('dashboard.demo.props.name'), type: 'title' },
+                { name: t('dashboard.demo.props.email'), type: 'email' }
+            ],
+            color: NODE_COLORS[0],
+            icon: '👤',
+            url: 'https://notion.so/usuarios',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '2',
+            title: t('dashboard.demo.tasks'),
+            properties: [
+                { name: t('dashboard.demo.props.title'), type: 'title' },
+                { name: t('dashboard.demo.props.status'), type: 'status' }
+            ],
+            color: NODE_COLORS[1],
+            icon: '✅',
+            url: 'https://notion.so/tareas',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '3',
+            title: t('dashboard.demo.comments'),
+            properties: [
+                { name: t('dashboard.demo.props.text'), type: 'rich_text' }
+            ],
+            color: NODE_COLORS[2],
+            icon: '💬',
+            url: 'https://notion.so/comentarios',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '4',
+            title: t('dashboard.demo.tags'),
+            properties: [
+                { name: t('dashboard.demo.props.name'), type: 'title' }
+            ],
+            color: NODE_COLORS[3],
+            icon: '🏷️',
+            url: 'https://notion.so/etiquetas',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '5',
+            title: t('dashboard.demo.files'),
+            properties: [
+                { name: 'url', type: 'url' }
+            ],
+            color: NODE_COLORS[4],
+            icon: '📁',
+            url: 'https://notion.so/archivos',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '6',
+            title: t('dashboard.demo.logs'),
+            properties: [
+                { name: t('dashboard.demo.props.event'), type: 'rich_text' }
+            ],
+            color: NODE_COLORS[5],
+            icon: '📜',
+            url: 'https://notion.so/logs',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '7',
+            title: t('dashboard.demo.config'),
+            properties: [
+                { name: 'key', type: 'title' },
+                { name: 'value', type: 'rich_text' }
+            ],
+            color: NODE_COLORS[6],
+            icon: '⚙️',
+            url: 'https://notion.so/config',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+        {
+            id: '8',
+            title: t('dashboard.demo.notifications'),
+            properties: [
+                { name: t('dashboard.demo.props.message'), type: 'rich_text' }
+            ],
+            color: NODE_COLORS[7],
+            icon: '🔔',
+            url: 'https://notion.so/notificaciones',
+            createdTime: new Date().toISOString(),
+            lastEditedTime: new Date().toISOString()
+        },
+    ], [t])
+
+    const localizedDemoRelations = useMemo(() => [
+        { source: '1', target: '2' },
+        { source: '2', target: '3' },
+        { source: '2', target: '4' },
+        { source: '2', target: '5' },
+        { source: '1', target: '8' },
+        { source: '8', target: '1' },
+    ], [])
 
     if (loading || !session) return <DashboardSkeleton />
 
@@ -320,8 +434,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         if (!session) return { nodes: [], edges: [] }
         const saved = getSavedPositions(session.user.id)
         const custom = getSavedCustomColors(session.user.id)
-        return transformToGraphData(demoDatabases, demoRelations, saved, custom)
-    }, [session?.user.id])
+        return transformToGraphData(localizedDemoDatabases, localizedDemoRelations, saved, custom)
+    }, [session?.user.id, localizedDemoDatabases, localizedDemoRelations])
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialGraphData.nodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialGraphData.edges)
@@ -329,8 +443,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
     const [selectedNode, setSelectedNode] = useState<any>(null)
     const [searchQuery, setSearchQuery] = useState("")
-    const [syncedDbs, setSyncedDbs] = useState<any[]>(demoDatabases)
-    const [syncedRelations, setSyncedRelations] = useState<RawRelation[]>(demoRelations)
+    const [syncedDbs, setSyncedDbs] = useState<any[]>(localizedDemoDatabases)
+    const [syncedRelations, setSyncedRelations] = useState<RawRelation[]>(localizedDemoRelations)
     const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<Set<string>>(() => new Set(session ? getSavedFilters(session.user.id) : []))
     const [hiddenDbIds, setHiddenDbIds] = useState<Set<string>>(() => new Set(session ? getSavedHiddenDbs(session.user.id) : []))
     const [hideIsolated, setHideIsolated] = useState(() => session ? getSavedHideIsolated(session.user.id) : false)
@@ -610,7 +724,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     const handleSync = async (token: string, overrideState?: { filters: Set<string>, hidden_dbs: Set<string>, hide_isolated: boolean, custom_colors: Record<string, string> }, skipDirty: boolean = false) => {
         if (!token) {
-            toast.warning("Por favor ingresa un token de Notion")
+            toast.warning(t('dashboard.errors.missingToken'))
             return
         }
 
@@ -665,7 +779,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
         } catch (error: any) {
             console.error("❌ handleSync Error:", error)
-            toast.error(error.message || "Error al sincronizar con Notion")
+            toast.error(error.message || t('dashboard.errors.syncError'))
         } finally {
             setSyncStatus('idle')
         }
@@ -902,8 +1016,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                                         <Loader2 className="w-10 h-10 text-primary animate-spin relative z-10" />
                                     </div>
                                     <div className="flex flex-col items-center gap-1">
-                                        <span className="text-sm font-bold text-gray-800 dark:text-gray-100">Sincronizando Notion</span>
-                                        <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Trayendo tus bases de datos...</span>
+                                        <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{t('dashboard.syncStates.syncingNotion')}</span>
+                                        <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">{t('dashboard.syncStates.fetchingDbs')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -912,7 +1026,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
                         <Panel position="bottom-left" className="!m-6">
                             <div className="flex flex-col gap-2 p-1.5 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/50 dark:border-gray-800/50 rounded-2xl shadow-2xl">
-                                <Tooltip content="Acercar" position="right">
+                                <Tooltip content={t('dashboard.controls.zoomIn')} position="right">
                                     <button
                                         onClick={() => zoomIn()}
                                         className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors flex items-center justify-center border-0 bg-transparent outline-none"
@@ -921,7 +1035,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                                     </button>
                                 </Tooltip>
 
-                                <Tooltip content="Alejar" position="right">
+                                <Tooltip content={t('dashboard.controls.zoomOut')} position="right">
                                     <button
                                         onClick={() => zoomOut()}
                                         className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors flex items-center justify-center border-0 bg-transparent outline-none"
@@ -930,7 +1044,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                                     </button>
                                 </Tooltip>
 
-                                <Tooltip content="Ajustar a la pantalla" position="right">
+                                <Tooltip content={t('dashboard.controls.fitView')} position="right">
                                     <button
                                         onClick={() => fitView()}
                                         className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors flex items-center justify-center border-0 bg-transparent outline-none"
@@ -941,7 +1055,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
                                 <div className="h-px w-full bg-gray-100 dark:bg-gray-800 my-0.5" />
 
-                                <Tooltip content="Reiniciar disposición automática" position="right">
+                                <Tooltip content={t('dashboard.controls.resetLayout')} position="right">
                                     <button
                                         id="dashboard-reset-layout"
                                         onClick={handleResetLayout}

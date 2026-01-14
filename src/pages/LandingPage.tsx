@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import { useTranslation } from "react-i18next"
 import { Hero } from "../components/landing/Hero"
 import { Features } from "../components/landing/Features"
 import { FAQ } from "../components/landing/FAQ"
@@ -8,6 +9,7 @@ import { Logo } from "../components/ui/Logo"
 import { useAuth } from "../context/AuthContext"
 
 export default function LandingPage() {
+    const { t } = useTranslation()
     const { session } = useAuth()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const { scrollY, scrollYProgress } = useScroll()
@@ -62,22 +64,22 @@ export default function LandingPage() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex lg:gap-x-12 md:gap-x-8">
-                        <a href="#features" className="text-sm font-bold leading-6 text-slate-600 hover:text-primary transition-colors">Características</a>
-                        <a href="#access" className="text-sm font-bold leading-6 text-slate-600 hover:text-primary transition-colors">Solicitar Acceso</a>
+                        <a href="#features" className="text-sm font-bold leading-6 text-slate-600 hover:text-primary transition-colors">{t('landing.nav.features')}</a>
+                        <a href="#access" className="text-sm font-bold leading-6 text-slate-600 hover:text-primary transition-colors">{t('landing.nav.access')}</a>
                     </div>
 
                     <div className="flex lg:flex-1 lg:justify-end items-center gap-4">
                         {session ? (
                             <a href="/dashboard" className="hidden sm:flex text-sm font-bold leading-6 text-primary hover:text-primary/80 transition-colors items-center gap-1">
-                                Ir al Dashboard <span aria-hidden="true">&rarr;</span>
+                                {t('landing.nav.dashboard')} <span aria-hidden="true">&rarr;</span>
                             </a>
                         ) : (
                             <div className="hidden sm:flex items-center gap-4">
                                 <a href="/login" className="text-sm font-bold leading-6 text-slate-900 hover:text-primary transition-colors">
-                                    Conectar
+                                    {t('landing.nav.login')}
                                 </a>
                                 <a href="/register" className="rounded-full bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-primary hover:shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-                                    Empezar
+                                    {t('landing.nav.getStarted')}
                                 </a>
                             </div>
                         )}
@@ -88,7 +90,7 @@ export default function LandingPage() {
                             className="md:hidden -m-2.5 inline-flex items-center justify-center rounded-full p-2.5 text-slate-700 hover:bg-slate-100 transition-colors"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
-                            <span className="sr-only">Abrir menú</span>
+                            <span className="sr-only">{t('landing.nav.openMenu')}</span>
                             {isMobileMenuOpen ? (
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -114,24 +116,24 @@ export default function LandingPage() {
                             className="block rounded-xl px-3 py-4 text-base font-bold text-slate-900 hover:bg-slate-50 transition-colors"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
-                            Características
+                            {t('landing.nav.features')}
                         </a>
                         <a
                             href="#access"
                             className="block rounded-xl px-3 py-4 text-base font-bold text-slate-900 hover:bg-slate-50 transition-colors"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
-                            Solicitar Acceso
+                            {t('landing.nav.access')}
                         </a>
                         <div className="pt-4 pb-2 border-t border-slate-50 mt-2 space-y-4">
                             {!session && (
                                 <>
-                                    <a href="/login" className="block px-3 text-base font-bold text-slate-900">Iniciar Sesión</a>
-                                    <a href="/register" className="block rounded-full bg-primary px-4 py-3 text-center text-base font-bold text-white shadow-lg">Registrarse</a>
+                                    <a href="/login" className="block px-3 text-base font-bold text-slate-900">{t('landing.nav.signIn')}</a>
+                                    <a href="/register" className="block rounded-full bg-primary px-4 py-3 text-center text-base font-bold text-white shadow-lg">{t('landing.nav.signUp')}</a>
                                 </>
                             )}
                             {session && (
-                                <a href="/dashboard" className="block px-3 text-base font-bold text-primary">Ir al Dashboard</a>
+                                <a href="/dashboard" className="block px-3 text-base font-bold text-primary">{t('landing.nav.dashboard')}</a>
                             )}
                         </div>
                     </div>
@@ -178,10 +180,10 @@ export default function LandingPage() {
                             <Logo size={24} className="opacity-50 grayscale" />
                             <span className="text-lg font-bold text-gray-400">Linka</span>
                         </div>
-                        <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Linka. Visualización Inteligente para Notion.</p>
+                        <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Linka. {t('landing.footer.tagline')}</p>
                         <div className="flex gap-6">
-                            <span className="text-gray-300 text-sm">Privacidad</span>
-                            <span className="text-gray-300 text-sm">Términos</span>
+                            <span className="text-gray-300 text-sm">{t('landing.footer.privacy')}</span>
+                            <span className="text-gray-300 text-sm">{t('landing.footer.terms')}</span>
                         </div>
                     </div>
                 </div>

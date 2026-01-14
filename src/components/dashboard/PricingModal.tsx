@@ -3,6 +3,7 @@ import { X, Check, Star, Zap, Loader2 } from "lucide-react"
 import { Button } from "../ui/button"
 import { supabase } from "../../lib/supabase"
 import { useToast } from "../../context/ToastContext"
+import { useTranslation } from "react-i18next"
 
 interface PricingModalProps {
     isOpen: boolean
@@ -11,6 +12,7 @@ interface PricingModalProps {
 }
 
 export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps) {
+    const { t } = useTranslation()
     const [loading, setLoading] = useState(false)
     const { toast } = useToast()
 
@@ -27,7 +29,7 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
             }
         } catch (err) {
             console.error("Error initiating checkout:", err)
-            toast.error("No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo.")
+            toast.error(t('dashboard.pricing.checkoutError'))
         } finally {
             setLoading(false)
         }
@@ -63,9 +65,9 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
                                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-primary/20">
                                     <Zap className="w-8 h-8 text-primary shadow-lg" />
                                 </div>
-                                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">Maximiza tu Visión</h2>
+                                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">{t('dashboard.pricing.title')}</h2>
                                 <p className="text-slate-400 max-w-md">
-                                    Desbloquea todo el potencial de Linka y organiza tus bases de datos de Notion sin límites.
+                                    {t('dashboard.pricing.subtitle')}
                                 </p>
                             </div>
 
@@ -73,18 +75,18 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
                                 {/* Free Plan */}
                                 <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex flex-col">
                                     <div className="mb-6">
-                                        <h3 className="text-lg font-semibold text-white mb-1">Plan Free</h3>
+                                        <h3 className="text-lg font-semibold text-white mb-1">{t('dashboard.pricing.freePlan')}</h3>
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-3xl font-bold text-white">$0</span>
-                                            <span className="text-slate-500 text-sm">/siempre</span>
+                                            <span className="text-slate-500 text-sm">{t('dashboard.pricing.forever')}</span>
                                         </div>
                                     </div>
 
                                     <ul className="space-y-3 mb-8 flex-1">
                                         {[
-                                            'Hasta 4 bases de datos',
-                                            'Filtros básicos',
-                                            'Sincronización manual',
+                                            t('dashboard.pricing.freeLimit'),
+                                            t('dashboard.pricing.basicFilters'),
+                                            t('dashboard.pricing.manualSync'),
                                         ].map((item) => (
                                             <li key={item} className="flex items-center gap-3 text-sm text-slate-300">
                                                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -98,34 +100,34 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
                                         disabled={currentPlan === 'free'}
                                         className={`w-full bg-transparent border-slate-700 ${currentPlan === 'free' ? 'text-slate-500' : 'text-slate-300'}`}
                                     >
-                                        {currentPlan === 'free' ? 'Tu Plan Actual' : 'Plan Base'}
+                                        {currentPlan === 'free' ? t('dashboard.pricing.currentPlan') : t('dashboard.pricing.basePlan')}
                                     </Button>
                                 </div>
 
                                 {/* Pro Plan */}
                                 <div className="p-6 rounded-2xl bg-primary/5 border-2 border-primary/50 flex flex-col relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 bg-primary text-[10px] font-bold text-white px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                                        Recomendado
+                                        {t('dashboard.pricing.recommended')}
                                     </div>
 
                                     <div className="mb-6">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="text-lg font-semibold text-white">Plan Pro</h3>
+                                            <h3 className="text-lg font-semibold text-white">{t('dashboard.pricing.proPlan')}</h3>
                                             <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                                         </div>
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-3xl font-bold text-white">$12</span>
-                                            <span className="text-slate-400 text-sm">/mes</span>
+                                            <span className="text-slate-400 text-sm">{t('dashboard.pricing.perMonth')}</span>
                                         </div>
                                     </div>
 
                                     <ul className="space-y-3 mb-8 flex-1">
                                         {[
-                                            'Bases de datos ilimitadas',
-                                            'Sincronización automática',
-                                            'Colores personalizados pro',
-                                            'Soporte prioritario',
-                                            'Acceso a futuras funciones',
+                                            t('dashboard.pricing.proLimit'),
+                                            t('dashboard.pricing.autoSync'),
+                                            t('dashboard.pricing.customColors'),
+                                            t('dashboard.pricing.prioritySupport'),
+                                            t('dashboard.pricing.futureFeatures'),
                                         ].map((item) => (
                                             <li key={item} className="flex items-center gap-3 text-sm text-slate-200">
                                                 <Check className="w-4 h-4 text-primary shrink-0" />
@@ -142,17 +144,17 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
                                         {loading ? (
                                             <>
                                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                Iniciando...
+                                                {t('dashboard.pricing.starting')}
                                             </>
                                         ) : (
-                                            currentPlan === 'pro' ? 'Tu Plan Actual' : 'Hazte Pro Ahora'
+                                            currentPlan === 'pro' ? t('dashboard.pricing.currentPlan') : t('dashboard.pricing.getPro')
                                         )}
                                     </Button>
                                 </div>
                             </div>
 
                             <p className="mt-8 text-center text-xs text-slate-500">
-                                ¿Tienes preguntas? Contáctanos en soporte@linka.io
+                                {t('dashboard.pricing.questions')}
                             </p>
                         </div>
                     </div>

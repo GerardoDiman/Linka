@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Database, ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal, Star } from "lucide-react"
 import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
+import { useTranslation } from "react-i18next"
 
 const NotionIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
     <svg
@@ -51,6 +52,7 @@ export function Sidebar({
     isCollapsed,
     onToggleCollapse
 }: SidebarProps) {
+    const { t } = useTranslation()
     const [view, setView] = useState<'main' | 'details'>('main')
     const [sortBy, setSortBy] = useState<'name' | 'properties'>('name')
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -112,7 +114,7 @@ export function Sidebar({
                     <div className="px-6 pt-6 pb-2 space-y-4">
                         <div className="text-center space-y-0.5">
                             <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-[0.2em]">
-                                Bases de Datos
+                                {t('dashboard.sidebar.visibility')}
                             </h3>
                             <div className="text-2xl font-black text-primary/40 dark:text-primary/30 font-mono">
                                 {filteredAndSortedDbs.length.toString().padStart(2, '0')}
@@ -121,27 +123,27 @@ export function Sidebar({
 
                         <div className="flex items-center justify-center gap-2">
                             <div className="flex items-center gap-1.5 p-1">
-                                <Tooltip content="Ordenar por nombre">
+                                <Tooltip content={t('dashboard.sidebar.sortByName')}>
                                     <button
                                         onClick={() => setSortBy('name')}
                                         className={`text-[10px] px-3 py-1.5 rounded-lg transition-all ${sortBy === 'name' ? 'text-primary font-black scale-110' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                                             }`}
                                     >
-                                        Nombre
+                                        {t('common.name')}
                                     </button>
                                 </Tooltip>
                                 <div className="w-1 h-1 rounded-full bg-gray-200 dark:bg-slate-800" />
-                                <Tooltip content="Ordenar por propiedades">
+                                <Tooltip content={t('dashboard.sidebar.sortByProps')}>
                                     <button
                                         onClick={() => setSortBy('properties')}
                                         className={`text-[10px] px-3 py-1.5 rounded-lg transition-all ${sortBy === 'properties' ? 'text-primary font-black scale-110' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300'
                                             }`}
                                     >
-                                        Props
+                                        {t('dashboard.sidebar.props')}
                                     </button>
                                 </Tooltip>
                                 <div className="w-px h-3 bg-gray-200 dark:bg-slate-800 mx-1" />
-                                <Tooltip content={sortOrder === 'asc' ? 'Orden Ascendente' : 'Orden Descendente'}>
+                                <Tooltip content={sortOrder === 'asc' ? t('dashboard.sidebar.asc') : t('dashboard.sidebar.desc')}>
                                     <button
                                         onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                                         className="text-gray-400 dark:text-gray-500 hover:text-primary p-1.5 rounded-lg transition-all"
@@ -151,7 +153,7 @@ export function Sidebar({
                                 </Tooltip>
                                 <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 mx-1" />
                                 <div className="flex items-center gap-1">
-                                    <Tooltip content="Colapsar panel" position="right">
+                                    <Tooltip content={t('dashboard.sidebar.collapse')} position="right">
                                         <button
                                             id="sidebar-collapse-btn"
                                             onClick={onToggleCollapse}
@@ -188,7 +190,7 @@ export function Sidebar({
                                 }}
                             >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <Tooltip content={db.isHidden ? "Mostrar en canvas" : "Ocultar en canvas"} position="right">
+                                    <Tooltip content={db.isHidden ? t('dashboard.sidebar.showCanvas') : t('dashboard.sidebar.hideCanvas')} position="right">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation()
@@ -222,7 +224,7 @@ export function Sidebar({
                                                     {db.isHidden && (
                                                         <div className="w-1.5 h-1.5 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)]" />
                                                     )}
-                                                    <Tooltip content="Ver propiedades" position="bottom">
+                                                    <Tooltip content={t('dashboard.sidebar.viewProps')} position="bottom">
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
@@ -254,7 +256,7 @@ export function Sidebar({
                         ))}
                     </div>
                     {filteredAndSortedDbs.length === 0 && !isCollapsed && (
-                        <p className="text-xs text-gray-400 text-center py-8 italic">No hay bases de datos visibles</p>
+                        <p className="text-xs text-gray-400 text-center py-8 italic">{t('dashboard.sidebar.noDbs')}</p>
                     )}
 
                     {/* Pro CTA for Free Users */}
@@ -263,12 +265,12 @@ export function Sidebar({
                         <div className="mt-8 p-5 rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-primary/10 transition-colors" />
                             <Star className="w-6 h-6 text-primary mb-3 fill-primary/20 group-hover:scale-110 transition-transform" />
-                            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2">Acceso Beta Ilimitado</h4>
+                            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2">{t('dashboard.sidebar.betaTitle')}</h4>
                             <p className="text-[11px] text-slate-400 mb-4 leading-relaxed font-medium">
-                                ¡Gracias por ser parte de la beta! Tienes acceso a todos los colores y sincronización ilimitada gratis.
+                                {t('dashboard.sidebar.betaDesc')}
                             </p>
                             <div className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-2 rounded-xl text-center border border-primary/10">
-                                BETA ACTIVA 💎
+                                {t('dashboard.sidebar.betaStatus')}
                             </div>
                         </div>
                     )}
@@ -281,24 +283,24 @@ export function Sidebar({
         return (
             <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-2 duration-300">
                 <div className={`px-6 pt-4 pb-2 ${isCollapsed ? 'flex flex-col items-center gap-4' : 'flex items-center justify-between'}`}>
-                    <Tooltip content="Volver al listado" position="right">
+                    <Tooltip content={t('common.backToList')} position="right">
                         <button
                             onClick={handleBack}
                             className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-secondary transition-colors bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10"
                         >
                             <ChevronLeft size={16} />
-                            {!isCollapsed && "Volver al listado"}
+                            {!isCollapsed && t('common.backToList')}
                         </button>
                     </Tooltip>
                     {!isCollapsed && (
-                        <Tooltip content="Abrir en Notion">
+                        <Tooltip content={t('dashboard.sidebar.viewInNotion')}>
                             <a
                                 href={selectedNode?.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-primary transition-colors flex items-center gap-1 bg-gray-50 dark:bg-gray-800 px-2 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700"
                             >
-                                Ver en Notion
+                                {t('dashboard.sidebar.viewInNotion')}
                                 <ExternalLink size={10} />
                             </a>
                         </Tooltip>
@@ -332,7 +334,7 @@ export function Sidebar({
                                 <div>
                                     <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                         <Tag size={14} />
-                                        Propiedades ({selectedNode?.properties?.length || 0})
+                                        {t('dashboard.sidebar.properties')} ({selectedNode?.properties?.length || 0})
                                     </h3>
                                     <div className="space-y-2">
                                         {selectedNode?.properties
@@ -365,15 +367,15 @@ export function Sidebar({
                                 <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
                                     <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                         <Info size={14} />
-                                        Información
+                                        {t('dashboard.sidebar.info')}
                                     </h3>
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-xs">
-                                            <span className="text-gray-500 dark:text-gray-400">Creado</span>
+                                            <span className="text-gray-500 dark:text-gray-400">{t('dashboard.sidebar.created')}</span>
                                             <span className="text-gray-700 dark:text-gray-200 font-medium">{new Date(selectedNode?.createdTime).toLocaleDateString()}</span>
                                         </div>
                                         <div className="flex justify-between text-xs">
-                                            <span className="text-gray-500 dark:text-gray-400">Actualizado</span>
+                                            <span className="text-gray-500 dark:text-gray-400">{t('dashboard.sidebar.updated')}</span>
                                             <span className="text-gray-700 dark:text-gray-200 font-medium">{new Date(selectedNode?.lastEditedTime).toLocaleDateString()}</span>
                                         </div>
                                     </div>
@@ -401,7 +403,7 @@ export function Sidebar({
                     </div>
 
                     <div className="relative" ref={sortPopoverRef}>
-                        <Tooltip content="Opciones de orden" position="right">
+                        <Tooltip content={t('dashboard.sidebar.sortOptions')} position="right">
                             <button
                                 onClick={() => setShowSortPopover(!showSortPopover)}
                                 className={`p-2.5 rounded-xl transition-all ${showSortPopover ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-110' : 'text-gray-400 dark:text-gray-500 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10'}`}
@@ -414,29 +416,29 @@ export function Sidebar({
                             <div className="absolute left-full ml-4 top-0 z-50 animate-in fade-in slide-in-from-left-2 duration-200">
                                 <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl shadow-2xl p-4 w-48 space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">Ordenar por</label>
+                                        <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-1">{t('dashboard.sidebar.sortBy')}</label>
                                         <div className="grid grid-cols-2 gap-1 bg-gray-50 dark:bg-slate-900 p-1 rounded-xl">
-                                            <Tooltip content="Ordenar por nombre" position="right">
+                                            <Tooltip content={t('dashboard.sidebar.sortByName')} position="right">
                                                 <button
                                                     onClick={() => setSortBy('name')}
                                                     className={`text-[10px] py-2 w-full rounded-lg transition-all ${sortBy === 'name' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm font-bold' : 'text-gray-500 dark:text-slate-400'}`}
                                                 >
-                                                    Nombre
+                                                    {t('common.name')}
                                                 </button>
                                             </Tooltip>
-                                            <Tooltip content="Ordenar por propiedades" position="right">
+                                            <Tooltip content={t('dashboard.sidebar.sortByProps')} position="right">
                                                 <button
                                                     onClick={() => setSortBy('properties')}
                                                     className={`text-[10px] py-2 w-full rounded-lg transition-all ${sortBy === 'properties' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm font-bold' : 'text-gray-500 dark:text-slate-400'}`}
                                                 >
-                                                    Props
+                                                    {t('dashboard.sidebar.props')}
                                                 </button>
                                             </Tooltip>
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between px-1">
-                                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Sentido</span>
-                                        <Tooltip content={sortOrder === 'asc' ? 'Orden Ascendente' : 'Orden Descendente'} position="right">
+                                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t('dashboard.sidebar.sortOrder')}</span>
+                                        <Tooltip content={sortOrder === 'asc' ? t('dashboard.sidebar.asc') : t('dashboard.sidebar.desc')} position="right">
                                             <button
                                                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                                                 className="text-gray-500 dark:text-gray-400 hover:text-primary p-1 transition-colors"
@@ -450,7 +452,7 @@ export function Sidebar({
                         )}
                     </div>
 
-                    <Tooltip content="Expandir panel" position="right">
+                    <Tooltip content={t('dashboard.sidebar.expand')} position="right">
                         <button
                             onClick={onToggleCollapse}
                             className="p-2.5 rounded-xl text-gray-400 hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all rotate-180"

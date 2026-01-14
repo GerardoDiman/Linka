@@ -1,0 +1,342 @@
+{
+    "common": {
+        "loading": "Cargando...",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "logout": "Cerrar Sesión",
+        "search": "Buscar...",
+        "syncNow": "Sincronizar Ahora",
+        "name": "Nombre",
+        "backToList": "Volver al listado",
+        "hide": "Ocultar",
+        "selection": "Seleccion"
+    },
+    "landing": {
+        "nav": {
+            "features": "Características",
+            "access": "Solicitar Acceso",
+            "dashboard": "Ir al Dashboard",
+            "login": "Conectar",
+            "getStarted": "Empezar",
+            "openMenu": "Abrir menú",
+            "signIn": "Iniciar Sesión",
+            "signUp": "Registrarse"
+        },
+        "hero": {
+            "badge": "Acceso Anticipado",
+            "title1": "Visualiza tus datos con",
+            "title2": "Inteligencia",
+            "description": "Linka transforma tus bases de datos en un canvas interactivo. Entiende las relaciones entre tus datos de manera gráfica, intuitiva y potente.",
+            "cta": "Comenzar ahora",
+            "secondaryCta": "Registrarse",
+            "intelTitle": "Inteligencia",
+            "intelDesc": "Detección automática de relaciones complejas.",
+            "infoTitle": "Explora sin límites",
+            "infoDesc": "Navega por tus datos como nunca antes. Linka crea un mapa mental automático de tu ecosistema Notion.",
+            "syncTitle": "Sincronización",
+            "syncDesc": "Control total de tus datos con sincronización bajo demanda.",
+            "community": "Próximamente para toda la comunidad de Notion",
+            "avatarAlt": "Usuario de Linka",
+            "animation": {
+                "nodes": {
+                    "tasks": "Tareas",
+                    "users": "Usuarios",
+                    "notifications": "Notificaciones",
+                    "comments": "Comentarios",
+                    "tags": "Etiquetas",
+                    "files": "Archivos",
+                    "logs": "Logs"
+                },
+                "more": "Ver más"
+            }
+        },
+        "features": {
+            "title": "Tu cerebro digital en alta resolución",
+            "subtitle": "Explora las herramientas que redefinen tu flujo de trabajo en Notion.",
+            "tour": "Tour de Producto",
+            "badges": {
+                "visualCore": "Núcleo Visual",
+                "intelligence": "Inteligencia",
+                "private": "Privado",
+                "fast": "Rápido",
+                "design": "Diseño",
+                "toolkit": "Herramientas"
+            },
+            "cards": {
+                "visualMapping": {
+                    "title": "Mapeo Visual Inteligente",
+                    "description": "Visualiza tu ecosistema de Notion como una red de nodos interconectados. Encuentra dependencias y organiza tus bases de datos con total claridad."
+                },
+                "autoRelations": {
+                    "title": "Relaciones Automáticas",
+                    "description": "Linka identifica y muestra las conexiones entre tus tablas automáticamente, permitiéndote navegar tu conocimiento multidimensional sin esfuerzo."
+                },
+                "privacy": {
+                    "title": "Privacidad y Seguridad",
+                    "description": "Tus datos son solo tuyos. Implementamos prácticas de seguridad robustas para asegurar que tu información de Notion se mantenga privada y protegida."
+                },
+                "sync": {
+                    "title": "Sincronización bajo Demanda",
+                    "description": "Refleja tus cambios de Notion en segundos con un solo clic. Sin esperas innecesarias para mantener tu gráfico siempre al día."
+                },
+                "customization": {
+                    "title": "Personalización Avanzada",
+                    "description": "Adapta el gráfico a tu gusto. Personaliza colores, aplica filtros inteligentes y oculta lo que no necesites para enfocarte en lo importante."
+                },
+                "qualityExport": {
+                    "title": "Exportación en Alta Calidad",
+                    "description": "Descarga tus mapas en formato PNG de alta fidelidad, perfecto para tus reportes, presentaciones o documentación técnica."
+                }
+            }
+        },
+        "faq": {
+            "title": "Preguntas Frecuentes",
+            "subtitle": "Todo lo que necesitas saber sobre Linka.",
+            "q1": {
+                "question": "¿Cómo protege Linka mi privacidad en Notion?",
+                "answer": "Linka utiliza el protocolo oficial de integración de Notion. Solo solicitamos permisos para leer la estructura de tus bases de datos y páginas. Nunca almacenamos el contenido interno de tus documentos; solo visualizamos las conexiones entre ellos."
+            },
+            "q2": {
+                "question": "¿La sincronización con Notion es automática?",
+                "answer": "Para darte total control y optimizar el rendimiento, la sincronización es bajo demanda. Con un solo clic en el botón de 'Sincronizar', Linka traerá los últimos cambios y relaciones de tu espacio de trabajo."
+            },
+            "q3": {
+                "question": "¿Puedo exportar mis gráficos para presentaciones?",
+                "answer": "Sí, puedes exportar cualquier visualización en formato PNG de alta fidelidad. Esto es ideal para incluir tus mapas de datos en reportes, presentaciones de equipo o documentación técnica."
+            },
+            "q4": {
+                "question": "¿Qué pasa si mis bases de datos son muy grandes?",
+                "answer": "Linka está diseñado para manejar estructuras complejas. Contamos con filtros inteligentes que te permiten ocultar o mostrar bases de datos específicas, permitiéndote enfocarte en las relaciones que realmente importan."
+            },
+            "q5": {
+                "question": "¿Cómo puedo obtener soporte si tengo dudas?",
+                "answer": "Estamos aquí para ayudarte. Puedes contactarnos directamente escribiendo a soporte@linka.io o a través de nuestros canales oficiales. Respondemos a todas las consultas en menos de 24 horas."
+            }
+        },
+        "access": {
+            "title": "Solicitar Acceso",
+            "subtitle": "Únete a la lista de espera exclusiva y sé de los primeros en experimentar Linka.",
+            "form": {
+                "emailLabel": "Tu Mejor Email",
+                "emailPlaceholder": "nombre@ejemplo.com",
+                "commentsLabel": "¿Qué planeas construir?",
+                "commentsPlaceholder": "Cuéntanos un poco sobre tu ecosistema de Notion...",
+                "submit": "Unirme a la lista de espera",
+                "submitting": "Enviando...",
+                "policy": "Al unirte, aceptas nuestra política de privacidad. Te notificaremos vía email cuando estemos listos para recibirte."
+            },
+            "success": {
+                "title": "¡Solicitud enviada con éxito!",
+                "desc": "Tu solicitud está en revisión. Te notificaremos por correo cuando sea aprobada para que puedas registrarte."
+            },
+            "error": "Error al enviar la solicitud"
+        },
+        "footer": {
+            "tagline": "Visualización Inteligente para Notion.",
+            "privacy": "Privacidad",
+            "terms": "Términos"
+        }
+    },
+    "dashboard": {
+        "navbar": {
+            "sync": "Sincronizar Notion",
+            "disconnect": "Desconectar",
+            "search": "Buscar bases de datos...",
+            "pro": "PLAN PRO",
+            "free": "PLAN GRATIS",
+            "tour": "Ayuda",
+            "betaBadge": "BETA ABIERTA",
+            "userLabel": "Usuario",
+            "filters": "Filtros",
+            "clear": "Limpiar",
+            "hideIsolated": "Ocultar sin relaciones",
+            "propertyTypes": "Tipos de Propiedad",
+            "noPropsFound": "No se encontraron propiedades",
+            "startTourTooltip": "Iniciar Tour de Ayuda",
+            "cloudSync": {
+                "saving": "Guardando en la nube...",
+                "saved": "Sincronizado",
+                "error": "Error al guardar",
+                "idle": "Sincronizar ahora con la nube"
+            },
+            "theme": {
+                "dark": "Modo Oscuro",
+                "light": "Modo Claro"
+            },
+            "admin": "Panel de Administración",
+            "share": "Compartir",
+            "settings": "Configuración"
+        },
+        "syncStates": {
+            "syncing": "Sincronizando...",
+            "success": "Sincronizado con éxito",
+            "syncingNotion": "Sincronizando Notion",
+            "fetchingDbs": "Trayendo tus bases de datos..."
+        },
+        "controls": {
+            "zoomIn": "Acercar",
+            "zoomOut": "Alejar",
+            "fitView": "Ajustar a la pantalla",
+            "resetLayout": "Reiniciar disposición automática"
+        },
+        "node": {
+            "openInNotionTooltip": "Abrir en Notion",
+            "properties": "Propiedades",
+            "relations": "Relaciones",
+            "outgoing": "Salientes",
+            "incoming": "Entrantes",
+            "created": "Creado",
+            "updated": "Actualizado",
+            "viewProperties": "Ver Propiedades"
+        },
+        "demo": {
+            "users": "Usuarios",
+            "tasks": "Tareas",
+            "comments": "Comentarios",
+            "tags": "Etiquetas",
+            "files": "Archivos",
+            "logs": "Logs",
+            "config": "Config",
+            "notifications": "Notificaciones",
+            "props": {
+                "name": "Nombre",
+                "email": "Email",
+                "title": "Título",
+                "status": "Estado",
+                "text": "Texto",
+                "event": "Evento",
+                "message": "Mensaje"
+            }
+        },
+        "sidebar": {
+            "filters": "Filtros de Propiedades",
+            "visibility": "Bases de Datos",
+            "hideIsolated": "Ocultar sin relaciones",
+            "clearFilters": "Limpiar Filtros",
+            "sortByName": "Ordenar por nombre",
+            "sortByProps": "Ordenar por propiedades",
+            "props": "Props",
+            "asc": "Orden Ascendente",
+            "desc": "Orden Descendente",
+            "collapse": "Colapsar panel",
+            "expand": "Expandir panel",
+            "showCanvas": "Mostrar en canvas",
+            "hideCanvas": "Ocultar en canvas",
+            "viewProps": "Ver propiedades",
+            "noDbs": "No hay bases de datos visibles",
+            "betaTitle": "Acceso Beta Ilimitado",
+            "betaDesc": "¡Gracias por ser parte de la beta! Tienes acceso a todos los colores y sincronización ilimitada gratis.",
+            "betaStatus": "BETA ACTIVA 💎",
+            "viewInNotion": "Ver en Notion",
+            "properties": "Propiedades",
+            "info": "Información",
+            "created": "Creado",
+            "updated": "Actualizado",
+            "sortOptions": "Opciones de orden",
+            "sortBy": "Ordenar por",
+            "sortOrder": "Sentido"
+        },
+        "selection": {
+            "selected_one": "seleccionada",
+            "selected_other": "seleccionadas",
+            "proFeature": "Función Pro",
+            "changeColor": "Cambiar color",
+            "proUnlock": "¡Hazte Pro para usar colores! 🔒",
+            "hideSelected": "Ocultar seleccionadas"
+        },
+        "export": {
+            "tooltip": "Exportar gráfico",
+            "background": "Fondo",
+            "transparent": "Transparente",
+            "white": "Blanco",
+            "dark": "Oscuro",
+            "black": "Negro",
+            "quality": "Calidad",
+            "standard": "Estándar",
+            "high": "Alta",
+            "ultra": "Ultra",
+            "button": "Exportar PNG",
+            "exporting": "Exportando...",
+            "preparing": "Preparando exportación...",
+            "calculating": "Calculando dimensiones...",
+            "capturing": "Capturando gráfico...",
+            "downloading": "Descargando...",
+            "fallbackInfo": "Se ha exportado una captura básica debido a límites técnicos.",
+            "criticalError": "Error crítico. Prueba a reducir el zoom de tu navegador."
+        },
+        "pricing": {
+            "title": "Maximiza tu Visión",
+            "subtitle": "Desbloquea todo el potencial de Linka y organiza tus bases de datos de Notion sin límites.",
+            "freePlan": "Plan Free",
+            "forever": "/siempre",
+            "freeLimit": "Hasta 4 bases de datos",
+            "basicFilters": "Filtros básicos",
+            "manualSync": "Sincronización manual",
+            "currentPlan": "Tu Plan Actual",
+            "basePlan": "Plan Base",
+            "recommended": "Recomendado",
+            "proPlan": "Plan Pro",
+            "perMonth": "/mes",
+            "proLimit": "Bases de datos ilimitadas",
+            "autoSync": "Sincronización automática",
+            "customColors": "Colores personalizados pro",
+            "prioritySupport": "Soporte prioritario",
+            "futureFeatures": "Acceso a futuras funciones",
+            "starting": "Iniciando...",
+            "getPro": "Hazte Pro Ahora",
+            "questions": "¿Tienes preguntas? Contáctanos en soporte@linka.io",
+            "checkoutError": "No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo."
+        },
+        "tour": {
+            "stepXofY": "Paso {{current}} de {{total}}",
+            "prev": "Anterior",
+            "next": "Siguiente",
+            "complete": "Completar",
+            "steps": {
+                "intro": {
+                    "title": "¡Bienvenido a Linka!",
+                    "content": "Esta es tu brújula para navegar la complejidad de tus bases de datos de Notion. Vamos a darte un tour rápido."
+                },
+                "sync": {
+                    "title": "Conecta con Notion",
+                    "content": "Aquí puedes ingresar tu Token de Integración para traer tus bases de datos reales. Linka recordará tu sesión."
+                },
+                "search": {
+                    "title": "Búsqueda Rápida",
+                    "content": "¿Buscas una base de datos específica? Escribe aquí para resaltar los nodos y filtrar tu lista al instante."
+                },
+                "filters": {
+                    "title": "Filtros de Propiedades",
+                    "content": "Filtra el mapa por tipos de propiedad (ej. solo ver DBs que tengan Emails) o limpia el ruido ocultando bases aisladas."
+                },
+                "inventory": {
+                    "title": "Tu Inventario",
+                    "content": "Aquí tienes todas tus bases de datos. Puedes ver cuántas propiedades tienen y hacer doble clic para centrar una en el mapa."
+                },
+                "workspace": {
+                    "title": "Espacio de Trabajo",
+                    "content": "Colapsa este panel si necesitas más espacio para explorar tu mapa. Linka es totalmente responsivo."
+                },
+                "canvas": {
+                    "title": "El Mapa Interactivo",
+                    "content": "Arrastra los nodos para organizarlos a tu gusto. Haz zoom con la rueda del ratón o usa los controles para navegar."
+                },
+                "layout": {
+                    "title": "Orden Automático",
+                    "content": "¿Tu mapa se volvió caótico? Pulsa aquí y nuestro algoritmo de fuerzas volverá a organizar todo de forma equilibrada."
+                },
+                "theme": {
+                    "title": "A tu Estilo",
+                    "content": "Cambia entre el modo oscuro (para concentración) y el modo claro (para claridad) según prefieras."
+                }
+            }
+        },
+        "errors": {
+            "expiredSession": "Tu sesión ha expirado. Por favor cierra sesión y vuelve a entrar.",
+            "missingToken": "Por favor ingresa un token de Notion",
+            "syncError": "Error al sincronizar con Notion"
+        }
+    }
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronRight, ChevronLeft, X, HelpCircle, CheckCircle2 } from "lucide-react"
 import { Button } from "../ui/button"
+import { useTranslation } from "react-i18next"
 
 interface Step {
     targetId: string
@@ -10,62 +11,6 @@ interface Step {
     position: "top" | "bottom" | "left" | "right" | "center"
 }
 
-const STEPS: Step[] = [
-    {
-        targetId: "navbar-logo",
-        title: "¡Bienvenido a Linka!",
-        content: "Esta es tu brújula para navegar la complejidad de tus bases de datos de Notion. Vamos a darte un tour rápido.",
-        position: "bottom"
-    },
-    {
-        targetId: "navbar-sync",
-        title: "Conecta con Notion",
-        content: "Aquí puedes ingresar tu Token de Integración para traer tus bases de datos reales. Linka recordará tu sesión.",
-        position: "bottom"
-    },
-    {
-        targetId: "navbar-search",
-        title: "Búsqueda Rápida",
-        content: "¿Buscas una base de datos específica? Escribe aquí para resaltar los nodos y filtrar tu lista al instante.",
-        position: "bottom"
-    },
-    {
-        targetId: "navbar-filters",
-        title: "Filtros de Propiedades",
-        content: "Filtra el mapa por tipos de propiedad (ej. solo ver DBs que tengan Emails) o limpia el ruido ocultando bases aisladas.",
-        position: "bottom"
-    },
-    {
-        targetId: "sidebar-container",
-        title: "Tu Inventario",
-        content: "Aquí tienes todas tus bases de datos. Puedes ver cuántas propiedades tienen y hacer doble clic para centrar una en el mapa.",
-        position: "right"
-    },
-    {
-        targetId: "sidebar-collapse-btn",
-        title: "Espacio de Trabajo",
-        content: "Colapsa este panel si necesitas más espacio para explorar tu mapa. Linka es totalmente responsivo.",
-        position: "right"
-    },
-    {
-        targetId: "dashboard-canvas",
-        title: "El Mapa Interactivo",
-        content: "Arrastra los nodos para organizarlos a tu gusto. Haz zoom con la rueda del ratón o usa los controles para navegar.",
-        position: "center"
-    },
-    {
-        targetId: "dashboard-reset-layout",
-        title: "Orden Automático",
-        content: "¿Tu mapa se volvió caótico? Pulsa aquí y nuestro algoritmo de fuerzas volverá a organizar todo de forma equilibrada.",
-        position: "right"
-    },
-    {
-        targetId: "navbar-theme",
-        title: "A tu Estilo",
-        content: "Cambia entre el modo oscuro (para concentración) y el modo claro (para claridad) según prefieras.",
-        position: "bottom"
-    }
-]
 
 interface OnboardingTourProps {
     isOpen: boolean
@@ -73,8 +18,66 @@ interface OnboardingTourProps {
 }
 
 export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
+    const { t } = useTranslation()
     const [currentStep, setCurrentStep] = useState(0)
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
+
+    const STEPS: Step[] = [
+        {
+            targetId: "navbar-logo",
+            title: t('dashboard.tour.steps.intro.title'),
+            content: t('dashboard.tour.steps.intro.content'),
+            position: "bottom"
+        },
+        {
+            targetId: "navbar-sync",
+            title: t('dashboard.tour.steps.sync.title'),
+            content: t('dashboard.tour.steps.sync.content'),
+            position: "bottom"
+        },
+        {
+            targetId: "navbar-search",
+            title: t('dashboard.tour.steps.search.title'),
+            content: t('dashboard.tour.steps.search.content'),
+            position: "bottom"
+        },
+        {
+            targetId: "navbar-filters",
+            title: t('dashboard.tour.steps.filters.title'),
+            content: t('dashboard.tour.steps.filters.content'),
+            position: "bottom"
+        },
+        {
+            targetId: "sidebar-container",
+            title: t('dashboard.tour.steps.inventory.title'),
+            content: t('dashboard.tour.steps.inventory.content'),
+            position: "right"
+        },
+        {
+            targetId: "sidebar-collapse-btn",
+            title: t('dashboard.tour.steps.workspace.title'),
+            content: t('dashboard.tour.steps.workspace.content'),
+            position: "right"
+        },
+        {
+            targetId: "dashboard-canvas",
+            title: t('dashboard.tour.steps.canvas.title'),
+            content: t('dashboard.tour.steps.canvas.content'),
+            position: "center"
+        },
+        {
+            targetId: "dashboard-reset-layout",
+            title: t('dashboard.tour.steps.layout.title'),
+            content: t('dashboard.tour.steps.layout.content'),
+            position: "right"
+        },
+        {
+            targetId: "navbar-theme",
+            title: t('dashboard.tour.steps.theme.title'),
+            content: t('dashboard.tour.steps.theme.content'),
+            position: "bottom"
+        }
+    ]
 
     const step = STEPS[currentStep]
 
@@ -213,7 +216,7 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
                                 )}
                             </div>
                             <span className="text-[10px] font-black text-primary uppercase tracking-widest whitespace-nowrap">
-                                Paso {currentStep + 1} de {STEPS.length}
+                                {t('dashboard.tour.stepXofY', { current: currentStep + 1, total: STEPS.length })}
                             </span>
                         </div>
                         <button
@@ -241,14 +244,14 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
                                 onClick={handlePrev}
                             >
                                 <ChevronLeft className="mr-1 w-4 h-4" />
-                                Anterior
+                                {t('dashboard.tour.prev')}
                             </Button>
                         )}
                         <Button
                             className="flex-[1.5] h-11 rounded-2xl shadow-lg shadow-primary/20 font-bold"
                             onClick={handleNext}
                         >
-                            {currentStep === STEPS.length - 1 ? "Completar" : "Siguiente"}
+                            {currentStep === STEPS.length - 1 ? t('dashboard.tour.complete') : t('dashboard.tour.next')}
                             {currentStep < STEPS.length - 1 && <ChevronRight className="ml-1 w-4 h-4" />}
                         </Button>
                     </div>

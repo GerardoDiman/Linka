@@ -3,6 +3,7 @@ import { EyeOff, Lock } from "lucide-react"
 import { Button } from "../ui/button"
 import { Tooltip } from "../ui/Tooltip"
 import { NODE_COLORS } from "../../lib/colors"
+import { useTranslation } from "react-i18next"
 
 interface SelectionActionBarProps {
     selectedCount: number
@@ -26,6 +27,7 @@ export function SelectionActionBar({
     isSidebarCollapsed,
     activeColor
 }: SelectionActionBarProps) {
+    const { t } = useTranslation()
     if (selectedCount === 0) return null
 
     const isFree = userPlan === 'free'
@@ -51,7 +53,9 @@ export function SelectionActionBar({
                         {selectedCount}
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-gray-900 dark:text-white leading-none uppercase tracking-tight">Seleccion</span>
+                        <span className="text-[10px] font-bold text-gray-900 dark:text-white leading-none uppercase tracking-tight">
+                            {selectedCount === 1 ? t('dashboard.selection.selected_one') : t('dashboard.selection.selected_other', { count: selectedCount })}
+                        </span>
                     </div>
                 </div>
 
@@ -63,7 +67,7 @@ export function SelectionActionBar({
                     <div className={`flex flex-col gap-1`}>
                         <div className={`grid grid-cols-9 gap-1.5 bg-gray-50 dark:bg-slate-900 p-2 rounded-2xl border border-gray-100 dark:border-slate-800 relative transition-all w-fit ${isFree ? 'opacity-40 grayscale-[0.8] blur-[0.5px]' : ''}`}>
                             {PRESET_COLORS.map((color) => (
-                                <Tooltip key={color} content={isFree ? "Función Pro" : "Cambiar color"}>
+                                <Tooltip key={color} content={isFree ? t('dashboard.selection.proFeature') : t('dashboard.selection.changeColor')}>
                                     <button
                                         onClick={(e) => {
                                             if (isFree) {
@@ -86,7 +90,7 @@ export function SelectionActionBar({
                         </div>
                         {isFree && (
                             <span className="text-[8px] font-bold text-primary/80 dark:text-primary/60 text-center uppercase tracking-[0.1em]">
-                                ¡Hazte Pro para usar colores! 🔒
+                                {t('dashboard.selection.proUnlock')}
                             </span>
                         )}
                     </div>
@@ -94,7 +98,7 @@ export function SelectionActionBar({
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 pl-2">
-                    <Tooltip content="Ocultar seleccionadas">
+                    <Tooltip content={t('dashboard.selection.hideSelected')}>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -102,7 +106,7 @@ export function SelectionActionBar({
                             className="h-9 px-3 rounded-xl text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-900 font-bold flex items-center gap-2 transition-all"
                         >
                             <EyeOff size={16} />
-                            Ocultar
+                            {t('common.hide')}
                         </Button>
                     </Tooltip>
                 </div>

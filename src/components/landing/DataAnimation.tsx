@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Database, Table, Share2, FileText, Tag, Bell, Users, MessageSquare } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 interface SchemaNode {
     id: string
@@ -13,36 +14,8 @@ interface SchemaNode {
     relations: number
 }
 
-const desktopNodes: SchemaNode[] = [
-    { id: "tareas", title: "Tareas", icon: Table, color: "#3b82f6", x: 50, y: 50, properties: 2, relations: 3 },
-    { id: "usuarios", title: "Usuarios", icon: Users, color: "#8b5cf6", x: 80, y: 35, properties: 2, relations: 2 },
-    { id: "notificaciones", title: "Notificaciones", icon: Bell, color: "#f43f5e", x: 50, y: 15, properties: 2, relations: 1 },
-    { id: "comentarios", title: "Comentarios", icon: MessageSquare, color: "#10b981", x: 80, y: 65, properties: 2, relations: 1 },
-    { id: "etiquetas", title: "Etiquetas", icon: Tag, color: "#f59e0b", x: 50, y: 85, properties: 2, relations: 1 },
-    { id: "archivos", title: "Archivos", icon: FileText, color: "#06b6d4", x: 20, y: 65, properties: 2, relations: 1 },
-    { id: "logs", title: "Logs", icon: Database, color: "#64748b", x: 20, y: 35, properties: 2, relations: 0 },
-]
-
-const mobileNodes: SchemaNode[] = [
-    { id: "tareas", title: "Tareas", icon: Table, color: "#3b82f6", x: 50, y: 50, properties: 2, relations: 3 },
-    { id: "usuarios", title: "Usuarios", icon: Users, color: "#8b5cf6", x: 78, y: 35, properties: 2, relations: 2 },
-    { id: "notificaciones", title: "Notificaciones", icon: Bell, color: "#f43f5e", x: 50, y: 22, properties: 2, relations: 1 },
-    { id: "comentarios", title: "Comentarios", icon: MessageSquare, color: "#10b981", x: 78, y: 65, properties: 2, relations: 1 },
-    { id: "etiquetas", title: "Etiquetas", icon: Tag, color: "#f59e0b", x: 50, y: 78, properties: 2, relations: 1 },
-    { id: "archivos", title: "Archivos", icon: FileText, color: "#06b6d4", x: 22, y: 65, properties: 2, relations: 1 },
-    { id: "logs", title: "Logs", icon: Database, color: "#64748b", x: 22, y: 35, properties: 2, relations: 0 },
-]
-
-const connections = [
-    { from: "tareas", to: "usuarios", color: "#F97316" },
-    { from: "tareas", to: "notificaciones", color: "#A855F7" },
-    { from: "tareas", to: "comentarios", color: "#3B82F6" },
-    { from: "tareas", to: "etiquetas", color: "#EC4899" },
-    { from: "tareas", to: "archivos", color: "#06B6D4" },
-    { from: "notificaciones", to: "usuarios", color: "#A855F7" },
-]
-
 export function DataAnimation() {
+    const { t } = useTranslation()
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
@@ -51,6 +24,35 @@ export function DataAnimation() {
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
+
+    const desktopNodes: SchemaNode[] = [
+        { id: "tareas", title: t('landing.hero.animation.nodes.tasks'), icon: Table, color: "#3b82f6", x: 50, y: 50, properties: 2, relations: 3 },
+        { id: "usuarios", title: t('landing.hero.animation.nodes.users'), icon: Users, color: "#8b5cf6", x: 80, y: 35, properties: 2, relations: 2 },
+        { id: "notificaciones", title: t('landing.hero.animation.nodes.notifications'), icon: Bell, color: "#f43f5e", x: 50, y: 15, properties: 2, relations: 1 },
+        { id: "comentarios", title: t('landing.hero.animation.nodes.comments'), icon: MessageSquare, color: "#10b981", x: 80, y: 65, properties: 2, relations: 1 },
+        { id: "etiquetas", title: t('landing.hero.animation.nodes.tags'), icon: Tag, color: "#f59e0b", x: 50, y: 85, properties: 2, relations: 1 },
+        { id: "archivos", title: t('landing.hero.animation.nodes.files'), icon: FileText, color: "#06b6d4", x: 20, y: 65, properties: 2, relations: 1 },
+        { id: "logs", title: t('landing.hero.animation.nodes.logs'), icon: Database, color: "#64748b", x: 20, y: 35, properties: 2, relations: 0 },
+    ]
+
+    const mobileNodes: SchemaNode[] = [
+        { id: "tareas", title: t('landing.hero.animation.nodes.tasks'), icon: Table, color: "#3b82f6", x: 50, y: 50, properties: 2, relations: 3 },
+        { id: "usuarios", title: t('landing.hero.animation.nodes.users'), icon: Users, color: "#8b5cf6", x: 78, y: 35, properties: 2, relations: 2 },
+        { id: "notificaciones", title: t('landing.hero.animation.nodes.notifications'), icon: Bell, color: "#f43f5e", x: 50, y: 22, properties: 2, relations: 1 },
+        { id: "comentarios", title: t('landing.hero.animation.nodes.comments'), icon: MessageSquare, color: "#10b981", x: 78, y: 65, properties: 2, relations: 1 },
+        { id: "etiquetas", title: t('landing.hero.animation.nodes.tags'), icon: Tag, color: "#f59e0b", x: 50, y: 78, properties: 2, relations: 1 },
+        { id: "archivos", title: t('landing.hero.animation.nodes.files'), icon: FileText, color: "#06b6d4", x: 22, y: 65, properties: 2, relations: 1 },
+        { id: "logs", title: t('landing.hero.animation.nodes.logs'), icon: Database, color: "#64748b", x: 22, y: 35, properties: 2, relations: 0 },
+    ]
+
+    const connections = [
+        { from: "tareas", to: "usuarios", color: "#F97316" },
+        { from: "tareas", to: "notificaciones", color: "#A855F7" },
+        { from: "tareas", to: "comentarios", color: "#3B82F6" },
+        { from: "tareas", to: "etiquetas", color: "#EC4899" },
+        { from: "tareas", to: "archivos", color: "#06B6D4" },
+        { from: "notificaciones", to: "usuarios", color: "#A855F7" },
+    ]
 
     const nodes = isMobile ? mobileNodes : desktopNodes
 
@@ -197,7 +199,7 @@ export function DataAnimation() {
                     {/* Card Footer */}
                     <div className="px-1 py-0.5 bg-gray-50/30 border-t flex justify-center relative z-10">
                         <span className="text-[5px] sm:text-[6px] font-bold text-primary flex items-center gap-0.5">
-                            <Database className="w-1 h-1" /> Ver más
+                            <Database className="w-1 h-1" /> {t('landing.hero.animation.more')}
                         </span>
                     </div>
                 </motion.div>

@@ -7,9 +7,10 @@ import {
     File, CheckSquare, Link, Mail, Phone, Variable, GitBranch,
     Combine, Clock, UserPlus, History, UserCheck, Activity,
     Fingerprint, ShieldCheck, Database, X, Sun, Moon, HelpCircle,
-    Star
+    Star, Languages
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { useAuth } from "../../context/AuthContext"
 import { useTheme } from "../../context/ThemeContext"
 import { Logo } from "../ui/Logo"
@@ -94,6 +95,7 @@ export function Navbar({
     isDirty = false
 }: NavbarProps) {
     const navigate = useNavigate()
+    const { t, i18n } = useTranslation()
     const { theme, toggleTheme } = useTheme()
     const { user, signOut } = useAuth()
     const [token, setToken] = useState("")
@@ -114,7 +116,7 @@ export function Navbar({
     return (
         <nav className="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-6 z-20 shadow-sm transition-colors duration-300">
             <div className="flex items-center gap-6 flex-1">
-                <Tooltip content="Ir a Inicio" position="bottom">
+                <Tooltip content={t('dashboard.navbar.tour')} position="bottom">
                     <div
                         id="navbar-logo"
                         className="flex items-center gap-2 cursor-pointer group/logo transition-all hover:opacity-80"
@@ -134,7 +136,7 @@ export function Navbar({
                         </div>
                         <Input
                             id="navbar-search"
-                            placeholder="Buscar..."
+                            placeholder={t('dashboard.navbar.search')}
                             className="pl-10 h-10 bg-gray-50 dark:bg-slate-900/60 border-gray-100 dark:border-slate-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-slate-900/80 focus:border-gray-200 dark:focus:border-slate-700 focus:ring-0 transition-all rounded-xl shadow-none"
                             value={searchQuery}
                             onChange={(e) => onSearchChange?.(e.target.value)}
@@ -142,7 +144,7 @@ export function Navbar({
                     </div>
 
                     <div className="relative flex items-center" ref={filterPopoverRef}>
-                        <Tooltip content="Filtrar" position="bottom">
+                        <Tooltip content={t('dashboard.navbar.filters')} position="bottom">
                             <Button
                                 id="navbar-filters"
                                 variant="ghost"
@@ -165,14 +167,14 @@ export function Navbar({
                         {showFilterPopover && (
                             <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Filtros</h3>
+                                    <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t('dashboard.navbar.filters')}</h3>
                                     {(selectedPropertyTypes.size > 0 || hideIsolated) && (
                                         <button
                                             onClick={onClearFilters}
                                             className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1"
                                         >
                                             <X size={10} />
-                                            Limpiar
+                                            {t('dashboard.navbar.clear')}
                                         </button>
                                     )}
                                 </div>
@@ -187,7 +189,7 @@ export function Navbar({
                                             <div className={`p-1.5 rounded-md ${hideIsolated ? 'bg-primary/10' : 'bg-gray-200'}`}>
                                                 <GitBranch size={14} className={hideIsolated ? 'rotate-180 transition-transform' : ''} />
                                             </div>
-                                            <span className="text-sm font-medium">Ocultar sin relaciones</span>
+                                            <span className="text-sm font-medium">{t('dashboard.navbar.hideIsolated')}</span>
                                         </div>
                                         <div className={`w-8 h-4 rounded-full transition-colors relative ${hideIsolated ? 'bg-primary' : 'bg-gray-300'}`}>
                                             <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${hideIsolated ? 'right-0.5' : 'left-0.5'}`} />
@@ -195,7 +197,7 @@ export function Navbar({
                                     </button>
                                 </div>
 
-                                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">Tipos de Propiedad</h3>
+                                <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">{t('dashboard.navbar.propertyTypes')}</h3>
                                 <div className="grid grid-cols-1 gap-1 max-h-64 overflow-y-auto custom-scrollbar pr-1">
                                     {propertyTypes.map((type) => {
                                         const isSelected = selectedPropertyTypes.has(type)
@@ -226,7 +228,7 @@ export function Navbar({
                                         )
                                     })}
                                     {propertyTypes.length === 0 && (
-                                        <p className="text-xs text-gray-400 text-center py-8 italic">No se encontraron propiedades</p>
+                                        <p className="text-xs text-gray-400 text-center py-8 italic">{t('dashboard.navbar.noPropsFound')}</p>
                                     )}
                                 </div>
                             </div>
@@ -258,7 +260,7 @@ export function Navbar({
                         <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
                             <div className="flex items-center gap-2 mb-4">
                                 <NotionIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Sincronización con Notion</h3>
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('dashboard.navbar.sync')}</h3>
                             </div>
                             <div className="space-y-4">
                                 {!isSynced ? (
@@ -285,10 +287,10 @@ export function Navbar({
                                             {loading ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                                    Sincronizando...
+                                                    {t('dashboard.syncStates.syncing')}
                                                 </>
                                             ) : (
-                                                "Sincronizar Ahora"
+                                                t('common.syncNow')
                                             )}
                                         </Button>
                                     </div>
@@ -296,7 +298,7 @@ export function Navbar({
                                     <div className="bg-green-50/50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 p-3 rounded-xl">
                                         <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-xs font-bold">
                                             <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                                            Sincronizado correctamente
+                                            {t('dashboard.syncStates.success')}
                                         </div>
                                     </div>
                                 )}
@@ -311,7 +313,7 @@ export function Navbar({
                                         }}
                                         disabled={loading}
                                     >
-                                        Desincronizar y volver a Demo
+                                        {t('dashboard.navbar.disconnect')}
                                     </Button>
                                 )}
                             </div>
@@ -321,7 +323,7 @@ export function Navbar({
 
                 <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1" />
 
-                <Tooltip content="Iniciar Tour de Ayuda" position="bottom">
+                <Tooltip content={t('dashboard.navbar.startTourTooltip')} position="bottom">
                     <Button
                         id="navbar-help"
                         variant="ghost"
@@ -334,9 +336,9 @@ export function Navbar({
                 </Tooltip>
 
                 <Tooltip content={
-                    syncStatus === 'saving' ? 'Guardando en la nube...' :
-                        syncStatus === 'saved' ? 'Sincronizado' :
-                            syncStatus === 'error' ? 'Error al guardar' : 'Sincronizar ahora con la nube'
+                    syncStatus === 'saving' ? t('dashboard.navbar.cloudSync.saving') :
+                        syncStatus === 'saved' ? t('dashboard.navbar.cloudSync.saved') :
+                            syncStatus === 'error' ? t('dashboard.navbar.cloudSync.error') : t('dashboard.navbar.cloudSync.idle')
                 } position="bottom">
                     <Button
                         variant="ghost"
@@ -361,7 +363,18 @@ export function Navbar({
                     </Button>
                 </Tooltip>
 
-                <Tooltip content={theme === 'light' ? 'Modo Oscuro' : 'Modo Claro'} position="bottom">
+                <Tooltip content={i18n.language === 'es' ? 'Switch to English' : 'Cambiar a Español'} position="bottom">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 font-bold text-xs"
+                        onClick={() => i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')}
+                    >
+                        {i18n.language.toUpperCase().split('-')[0]}
+                    </Button>
+                </Tooltip>
+
+                <Tooltip content={theme === 'light' ? t('dashboard.navbar.theme.dark') : t('dashboard.navbar.theme.light')} position="bottom">
                     <Button
                         id="navbar-theme"
                         variant="ghost"
@@ -374,7 +387,7 @@ export function Navbar({
                 </Tooltip>
 
                 {userRole === 'admin' && (
-                    <Tooltip content="Panel de Administración" position="bottom">
+                    <Tooltip content={t('dashboard.navbar.admin')} position="bottom">
                         <Button
                             variant="ghost"
                             size="icon"
@@ -386,13 +399,13 @@ export function Navbar({
                     </Tooltip>
                 )}
 
-                <Tooltip content="Compartir" position="bottom">
+                <Tooltip content={t('dashboard.navbar.share')} position="bottom">
                     <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10">
                         <Share2 size={20} />
                     </Button>
                 </Tooltip>
 
-                <Tooltip content="Configuración" position="bottom">
+                <Tooltip content={t('dashboard.navbar.settings')} position="bottom">
                     <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10">
                         <Settings size={20} />
                     </Button>
@@ -401,7 +414,7 @@ export function Navbar({
                 {/* Beta Badge instead of Pro CTA during Beta phase */}
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-xl mr-2">
                     <Star className="w-3.5 h-3.5 text-primary fill-primary/20" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter">BETA ABIERTA</span>
+                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter">{t('dashboard.navbar.betaBadge')}</span>
                 </div>
 
                 <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1" />
@@ -413,7 +426,7 @@ export function Navbar({
                                 {userPlan === 'pro' && (
                                     <span className="bg-primary/20 text-[9px] font-black text-primary px-1.5 py-0.5 rounded-md uppercase tracking-tighter">BETA</span>
                                 )}
-                                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider leading-none">Usuario</span>
+                                <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider leading-none">{t('dashboard.navbar.userLabel')}</span>
                             </div>
                             <span className="text-xs font-bold text-gray-700 dark:text-slate-200 truncate max-w-[120px]">
                                 {user.user_metadata?.username || user.user_metadata?.full_name || user.email?.split('@')[0]}
@@ -425,7 +438,7 @@ export function Navbar({
                     </div>
                 )}
 
-                <Tooltip content="Cerrar Sesión" position="bottom">
+                <Tooltip content={t('common.logout')} position="bottom">
                     <Button
                         variant="ghost"
                         size="icon"

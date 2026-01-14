@@ -1,32 +1,35 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
-const faqs = [
-    {
-        question: "¿Cómo protege Linka mi privacidad en Notion?",
-        answer: "Linka utiliza el protocolo oficial de integración de Notion. Solo solicitamos permisos para leer la estructura de tus bases de datos y páginas. Nunca almacenamos el contenido interno de tus documentos; solo visualizamos las conexiones entre ellos."
-    },
-    {
-        question: "¿La sincronización con Notion es automática?",
-        answer: "Para darte total control y optimizar el rendimiento, la sincronización es bajo demanda. Con un solo clic en el botón de 'Sincronizar', Linka traerá los últimos cambios y relaciones de tu espacio de trabajo."
-    },
-    {
-        question: "¿Puedo exportar mis gráficos para presentaciones?",
-        answer: "Sí, puedes exportar cualquier visualización en formato PNG de alta fidelidad. Esto es ideal para incluir tus mapas de datos en reportes, presentaciones de equipo o documentación técnica."
-    },
-    {
-        question: "¿Qué pasa si mis bases de datos son muy grandes?",
-        answer: "Linka está diseñado para manejar estructuras complejas. Contamos con filtros inteligentes que te permiten ocultar o mostrar bases de datos específicas, permitiéndote enfocarte en las relaciones que realmente importan."
-    },
-    {
-        question: "¿Cómo puedo obtener soporte si tengo dudas?",
-        answer: "Estamos aquí para ayudarte. Puedes contactarnos directamente escribiendo a soporte@linka.io o a través de nuestros canales oficiales. Respondemos a todas las consultas en menos de 24 horas."
-    }
-]
 
 export function FAQ() {
+    const { t } = useTranslation()
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
+
+    const faqs = [
+        {
+            question: t('landing.faq.q1.question'),
+            answer: t('landing.faq.q1.answer')
+        },
+        {
+            question: t('landing.faq.q2.question'),
+            answer: t('landing.faq.q2.answer')
+        },
+        {
+            question: t('landing.faq.q3.question'),
+            answer: t('landing.faq.q3.answer')
+        },
+        {
+            question: t('landing.faq.q4.question'),
+            answer: t('landing.faq.q4.answer')
+        },
+        {
+            question: t('landing.faq.q5.question'),
+            answer: t('landing.faq.q5.answer')
+        }
+    ]
 
     return (
         <section className="py-24 bg-gray-50/30">
@@ -34,10 +37,10 @@ export function FAQ() {
                 <div className="max-w-3xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold tracking-tight text-secondary sm:text-4xl">
-                            Preguntas Frecuentes
+                            {t('landing.faq.title')}
                         </h2>
                         <p className="mt-4 text-lg text-gray-600">
-                            Todo lo que necesitas saber sobre Linka.
+                            {t('landing.faq.subtitle')}
                         </p>
                     </div>
 

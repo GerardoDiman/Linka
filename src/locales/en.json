@@ -1,0 +1,342 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "logout": "Log Out",
+        "search": "Search...",
+        "syncNow": "Sync Now",
+        "name": "Name",
+        "backToList": "Back to list",
+        "hide": "Hide",
+        "selection": "Selection"
+    },
+    "landing": {
+        "nav": {
+            "features": "Features",
+            "access": "Request Access",
+            "dashboard": "Go to Dashboard",
+            "login": "Connect",
+            "getStarted": "Get Started",
+            "openMenu": "Open Menu",
+            "signIn": "Sign In",
+            "signUp": "Sign Up"
+        },
+        "hero": {
+            "badge": "Early Access",
+            "title1": "Visualize your data with",
+            "title2": "Intelligence",
+            "description": "Linka transforms your databases into an interactive canvas. Understand relations between your data in a graphical, intuitive, and powerful way.",
+            "cta": "Get Started Now",
+            "secondaryCta": "Register",
+            "intelTitle": "Intelligence",
+            "intelDesc": "Automatic detection of complex relations.",
+            "infoTitle": "Explore without limits",
+            "infoDesc": "Navigate your data like never before. Linka creates an automatic mental map of your Notion ecosystem.",
+            "syncTitle": "Synchronization",
+            "syncDesc": "Total control of your data with on-demand synchronization.",
+            "community": "Coming soon for the entire Notion community",
+            "avatarAlt": "Linka User",
+            "animation": {
+                "nodes": {
+                    "tasks": "Tasks",
+                    "users": "Users",
+                    "notifications": "Notifications",
+                    "comments": "Comments",
+                    "tags": "Tags",
+                    "files": "Files",
+                    "logs": "Logs"
+                },
+                "more": "View more"
+            }
+        },
+        "features": {
+            "title": "Your digital brain in high resolution",
+            "subtitle": "Explore the tools that redefine your Notion workflow.",
+            "tour": "Product Tour",
+            "badges": {
+                "visualCore": "Visual Core",
+                "intelligence": "Intelligence",
+                "private": "Private",
+                "fast": "Fast",
+                "design": "Design",
+                "toolkit": "Toolkit"
+            },
+            "cards": {
+                "visualMapping": {
+                    "title": "Intelligent Visual Mapping",
+                    "description": "Visualize your Notion ecosystem as a network of interconnected nodes. Find dependencies and organize your databases with total clarity."
+                },
+                "autoRelations": {
+                    "title": "Automatic Relations",
+                    "description": "Linka identifies and shows connections between your tables automatically, allowing you to navigate your multidimensional knowledge effortlessly."
+                },
+                "privacy": {
+                    "title": "Privacy & Security",
+                    "description": "Your data is only yours. We implement robust security practices to ensure your Notion information stays private and protected."
+                },
+                "sync": {
+                    "title": "On-Demand Sync",
+                    "description": "Reflect your Notion changes in seconds with a single click. No unnecessary waits to keep your graph always up to date."
+                },
+                "customization": {
+                    "title": "Advanced Customization",
+                    "description": "Adapt the graph to your liking. Customize colors, apply intelligent filters, and hide what you don't need to focus on what matters."
+                },
+                "qualityExport": {
+                    "title": "High Quality Export",
+                    "description": "Download your maps in high-fidelity PNG format, perfect for your reports, presentations, or technical documentation."
+                }
+            }
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "subtitle": "Everything you need to know about Linka.",
+            "q1": {
+                "question": "How does Linka protect my privacy in Notion?",
+                "answer": "Linka uses the official Notion integration protocol. We only request permissions to read the structure of your databases and pages. We never store the internal content of your documents; we only visualize the connections between them."
+            },
+            "q2": {
+                "question": "Is synchronization with Notion automatic?",
+                "answer": "To give you total control and optimize performance, synchronization is on-demand. With a single click on the 'Sync' button, Linka will bring the latest changes and relations from your workspace."
+            },
+            "q3": {
+                "question": "Can I export my graphs for presentations?",
+                "answer": "Yes, you can export any visualization in high-fidelity PNG format. This is ideal for including your data maps in reports, team presentations, or technical documentation."
+            },
+            "q4": {
+                "question": "What if my databases are very large?",
+                "answer": "Linka is designed to handle complex structures. We have intelligent filters that allow you to hide or show specific databases, allowing you to focus on the relations that really matter."
+            },
+            "q5": {
+                "question": "How can I get support if I have questions?",
+                "answer": "We are here to help. You can contact us directly by writing to support@linka.io or through our official channels. We respond to all queries in less than 24 hours."
+            }
+        },
+        "access": {
+            "title": "Request Access",
+            "subtitle": "Join the exclusive waitlist and be one of the first to experience Linka.",
+            "form": {
+                "emailLabel": "Your Best Email",
+                "emailPlaceholder": "name@example.com",
+                "commentsLabel": "What do you plan to build?",
+                "commentsPlaceholder": "Tell us a bit about your Notion ecosystem...",
+                "submit": "Join the waitlist",
+                "submitting": "Sending...",
+                "policy": "By joining, you agree to our privacy policy. We will notify you via email when we are ready to receive you."
+            },
+            "success": {
+                "title": "Request sent successfully!",
+                "desc": "Your request is under review. We will notify you by email when it's approved so you can register."
+            },
+            "error": "Error sending request"
+        },
+        "footer": {
+            "tagline": "Intelligent Visualization for Notion.",
+            "privacy": "Privacy",
+            "terms": "Terms"
+        }
+    },
+    "dashboard": {
+        "navbar": {
+            "sync": "Sync Notion",
+            "disconnect": "Disconnect",
+            "search": "Search databases...",
+            "pro": "PRO PLAN",
+            "free": "FREE PLAN",
+            "tour": "Help",
+            "betaBadge": "OPEN BETA",
+            "userLabel": "User",
+            "filters": "Filters",
+            "clear": "Clear",
+            "hideIsolated": "Hide without relations",
+            "propertyTypes": "Property Types",
+            "noPropsFound": "No properties found",
+            "startTourTooltip": "Start Help Tour",
+            "cloudSync": {
+                "saving": "Saving to cloud...",
+                "saved": "Synchronized",
+                "error": "Error saving",
+                "idle": "Sync now with cloud"
+            },
+            "theme": {
+                "dark": "Dark Mode",
+                "light": "Light Mode"
+            },
+            "admin": "Admin Panel",
+            "share": "Share",
+            "settings": "Settings"
+        },
+        "syncStates": {
+            "syncing": "Syncing...",
+            "success": "Synced successfully",
+            "syncingNotion": "Syncing Notion",
+            "fetchingDbs": "Fetching your databases..."
+        },
+        "controls": {
+            "zoomIn": "Zoom In",
+            "zoomOut": "Zoom Out",
+            "fitView": "Fit to screen",
+            "resetLayout": "Reset automatic layout"
+        },
+        "node": {
+            "openInNotionTooltip": "Open in Notion",
+            "properties": "Properties",
+            "relations": "Relations",
+            "outgoing": "Outgoing",
+            "incoming": "Incoming",
+            "created": "Created",
+            "updated": "Updated",
+            "viewProperties": "View Properties"
+        },
+        "demo": {
+            "users": "Users",
+            "tasks": "Tasks",
+            "comments": "Comments",
+            "tags": "Tags",
+            "files": "Files",
+            "logs": "Logs",
+            "config": "Config",
+            "notifications": "Notifications",
+            "props": {
+                "name": "Name",
+                "email": "Email",
+                "title": "Title",
+                "status": "Status",
+                "text": "Text",
+                "event": "Event",
+                "message": "Message"
+            }
+        },
+        "sidebar": {
+            "filters": "Property Filters",
+            "visibility": "Databases",
+            "hideIsolated": "Hide without relations",
+            "clearFilters": "Clear Filters",
+            "sortByName": "Sort by name",
+            "sortByProps": "Sort by properties",
+            "props": "Props",
+            "asc": "Ascending Order",
+            "desc": "Descending Order",
+            "collapse": "Collapse panel",
+            "expand": "Expand panel",
+            "showCanvas": "Show on canvas",
+            "hideCanvas": "Hide on canvas",
+            "viewProps": "View properties",
+            "noDbs": "No visible databases",
+            "betaTitle": "Unlimited Beta Access",
+            "betaDesc": "Thanks for being part of the beta! You have access to all colors and unlimited sync for free.",
+            "betaStatus": "BETA ACTIVE 💎",
+            "viewInNotion": "View in Notion",
+            "properties": "Properties",
+            "info": "Information",
+            "created": "Created",
+            "updated": "Updated",
+            "sortOptions": "Sort Options",
+            "sortBy": "Sort by",
+            "sortOrder": "Direction"
+        },
+        "selection": {
+            "selected_one": "one selected",
+            "selected_other": "{{count}} selected",
+            "proFeature": "Pro Feature",
+            "changeColor": "Change color",
+            "proUnlock": "Unlock colors with Pro! 🔒",
+            "hideSelected": "Hide selected"
+        },
+        "export": {
+            "tooltip": "Export graph",
+            "background": "Background",
+            "transparent": "Transparent",
+            "white": "White",
+            "dark": "Dark",
+            "black": "Black",
+            "quality": "Quality",
+            "standard": "Standard",
+            "high": "High",
+            "ultra": "Ultra",
+            "button": "Export PNG",
+            "exporting": "Exporting...",
+            "preparing": "Preparing export...",
+            "calculating": "Calculating dimensions...",
+            "capturing": "Capturing graph...",
+            "downloading": "Downloading...",
+            "fallbackInfo": "A basic capture has been exported due to technical limits.",
+            "criticalError": "Critical error. Try reducing your browser's zoom."
+        },
+        "pricing": {
+            "title": "Maximize your Vision",
+            "subtitle": "Unlock the full potential of Linka and organize your Notion databases without limits.",
+            "freePlan": "Free Plan",
+            "forever": "/forever",
+            "freeLimit": "Up to 4 databases",
+            "basicFilters": "Basic filters",
+            "manualSync": "Manual sync",
+            "currentPlan": "Your Current Plan",
+            "basePlan": "Base Plan",
+            "recommended": "Recommended",
+            "proPlan": "Pro Plan",
+            "perMonth": "/month",
+            "proLimit": "Unlimited databases",
+            "autoSync": "Automatic synchronization",
+            "customColors": "Pro custom colors",
+            "prioritySupport": "Priority support",
+            "futureFeatures": "Access to future features",
+            "starting": "Starting...",
+            "getPro": "Get Pro Now",
+            "questions": "Have questions? Contact us at support@linka.io",
+            "checkoutError": "Could not initiate checkout. Please try again."
+        },
+        "tour": {
+            "stepXofY": "Step {{current}} of {{total}}",
+            "prev": "Previous",
+            "next": "Next",
+            "complete": "Complete",
+            "steps": {
+                "intro": {
+                    "title": "Welcome to Linka!",
+                    "content": "This is your compass for navigating the complexity of your Notion databases. Let's take a quick tour."
+                },
+                "sync": {
+                    "title": "Connect with Notion",
+                    "content": "Here you can enter your Integration Token to bring in your real databases. Linka will remember your session."
+                },
+                "search": {
+                    "title": "Quick Search",
+                    "content": "Looking for a specific database? Type here to highlight nodes and filter your list instantly."
+                },
+                "filters": {
+                    "title": "Property Filters",
+                    "content": "Filter the map by property types (e.g., only see DBs that have Emails) or clear the noise by hiding isolated databases."
+                },
+                "inventory": {
+                    "title": "Your Inventory",
+                    "content": "Here you have all your databases. You can see how many properties they have and double-click to center one on the map."
+                },
+                "workspace": {
+                    "title": "Workspace",
+                    "content": "Collapse this panel if you need more space to explore your map. Linka is fully responsive."
+                },
+                "canvas": {
+                    "title": "Interactive Map",
+                    "content": "Drag nodes to organize them as you like. Zoom with the mouse wheel or use controls to navigate."
+                },
+                "layout": {
+                    "title": "Automatic Order",
+                    "content": "Did your map get chaotic? Click here and our forces algorithm will reorganize everything in a balanced way."
+                },
+                "theme": {
+                    "title": "Your Style",
+                    "content": "Switch between dark mode (for concentration) and light mode (for clarity) as you prefer."
+                }
+            }
+        },
+        "errors": {
+            "expiredSession": "Your session has expired. Please log out and back in.",
+            "missingToken": "Please enter a Notion token",
+            "syncError": "Error syncing with Notion"
+        }
+    }
+}

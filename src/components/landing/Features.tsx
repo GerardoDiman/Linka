@@ -10,8 +10,11 @@ import {
     Layout,
     ChevronLeft,
     ChevronRight,
-    Palette
+    Palette,
+    Star,
+    Languages
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 // --- Hero Visual Components (Redesigned for the Gallery) ---
 
@@ -330,60 +333,61 @@ const ExportVisualHero = () => (
 
 // --- Feature Data ---
 
-const galleryFeatures = [
-    {
-        name: "Mapeo Visual Inteligente",
-        description: "Visualiza tu ecosistema de Notion como una red de nodos interconectados. Encuentra dependencias y organiza tus bases de datos con total claridad.",
-        icon: Database,
-        visual: <NodeVisualHero />,
-        color: "bg-blue-600",
-        badge: "Visual Core"
-    },
-    {
-        name: "Relaciones Automáticas",
-        description: "Linka identifica y muestra las conexiones entre tus tablas automáticamente, permitiéndote navegar tu conocimiento multidimensional sin esfuerzo.",
-        icon: Share2,
-        visual: <RelationVisualHero />,
-        color: "bg-purple-600",
-        badge: "Intelligence"
-    },
-    {
-        name: "Privacidad y Seguridad",
-        description: "Tus datos son solo tuyos. Implementamos prácticas de seguridad robustas para asegurar que tu información de Notion se mantenga privada y protegida.",
-        icon: Lock,
-        visual: <SecurityVisualHero />,
-        color: "bg-emerald-600",
-        badge: "Private"
-    },
-    {
-        name: "Sincronización bajo Demanda",
-        description: "Refleja tus cambios de Notion en segundos con un solo clic. Sin esperas innecesarias para mantener tu gráfico siempre al día.",
-        icon: Zap,
-        visual: <SyncVisualHero />,
-        color: "bg-amber-500",
-        badge: "Fast"
-    },
-    {
-        name: "Personalización Avanzada",
-        description: "Adapta el gráfico a tu gusto. Personaliza colores, aplica filtros inteligentes y oculta lo que no necesites para enfocarte en lo importante.",
-        icon: Palette,
-        visual: <CustomizationVisualHero />,
-        color: "bg-rose-600",
-        badge: "Design"
-    },
-    {
-        name: "Exportación en Alta Calidad",
-        description: "Descarga tus mapas en formato PNG de alta fidelidad, perfecto para tus reportes, presentaciones o documentación técnica.",
-        icon: Download,
-        visual: <ExportVisualHero />,
-        color: "bg-indigo-600",
-        badge: "Toolkit"
-    }
-]
-
 export function Features() {
+    const { t } = useTranslation()
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
+
+    const galleryFeatures = [
+        {
+            name: t('landing.features.cards.visualMapping.title'),
+            description: t('landing.features.cards.visualMapping.description'),
+            icon: Database,
+            visual: <NodeVisualHero />,
+            color: "bg-blue-600",
+            badge: t('landing.features.badges.visualCore')
+        },
+        {
+            name: t('landing.features.cards.autoRelations.title'),
+            description: t('landing.features.cards.autoRelations.description'),
+            icon: Share2,
+            visual: <RelationVisualHero />,
+            color: "bg-purple-600",
+            badge: t('landing.features.badges.intelligence')
+        },
+        {
+            name: t('landing.features.cards.privacy.title'),
+            description: t('landing.features.cards.privacy.description'),
+            icon: Lock,
+            visual: <SecurityVisualHero />,
+            color: "bg-emerald-600",
+            badge: t('landing.features.badges.private')
+        },
+        {
+            name: t('landing.features.cards.sync.title'),
+            description: t('landing.features.cards.sync.description'),
+            icon: Zap,
+            visual: <SyncVisualHero />,
+            color: "bg-amber-500",
+            badge: t('landing.features.badges.fast')
+        },
+        {
+            name: t('landing.features.cards.customization.title'),
+            description: t('landing.features.cards.customization.description'),
+            icon: Palette,
+            visual: <CustomizationVisualHero />,
+            color: "bg-rose-600",
+            badge: t('landing.features.badges.design')
+        },
+        {
+            name: t('landing.features.cards.qualityExport.title'),
+            description: t('landing.features.cards.qualityExport.description'),
+            icon: Download,
+            visual: <ExportVisualHero />,
+            color: "bg-indigo-600",
+            badge: t('landing.features.badges.toolkit')
+        }
+    ]
 
     const handleScroll = () => {
         if (!scrollContainerRef.current) return;
@@ -420,17 +424,17 @@ export function Features() {
                             whileInView={{ opacity: 1, x: 0 }}
                             className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary tracking-widest uppercase mb-2"
                         >
-                            Tour de Producto
+                            {t('landing.features.tour')}
                         </motion.div>
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl mb-1 lg:mb-2 leading-tight"
                         >
-                            Tu cerebro digital en <span className="text-primary">alta resolución</span>
+                            {t('landing.features.title')}
                         </motion.h2>
                         <p className="text-sm text-slate-500 font-medium">
-                            Explora las herramientas que redefinen tu flujo de trabajo en Notion.
+                            {t('landing.features.subtitle')}
                         </p>
                     </div>
 
