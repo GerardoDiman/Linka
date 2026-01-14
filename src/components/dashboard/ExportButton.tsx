@@ -57,7 +57,6 @@ export function ExportButton() {
         if (!viewport) return
 
         const quality = selectedQuality
-        console.log(`🚀 Iniciando exportación PNG (${quality}) con fondo ${selectedBg}...`)
         setIsExporting(true)
         setExportProgress(t('dashboard.export.preparing'))
 

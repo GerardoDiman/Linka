@@ -483,14 +483,14 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
                 if (!error) data = clientData
             } catch (e) {
-                console.warn("⚠️ Falló carga vía cliente, intentando vía Fetch...")
+                // Secondary fetch fallback
             }
 
             if (!data) {
                 try {
                     data = await fetchViaFetch(session.user.id, session.access_token || '')
                 } catch (err) {
-                    console.error("❌ Falló carga de datos de la nube:", err)
+                    // Fail silently or handle accordingly
                 }
             }
 
@@ -550,7 +550,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 // ...
 
                 if (error) {
-                    console.error("Supabase error fetching plan:", error)
                     return
                 }
 
@@ -559,7 +558,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                     setUserPlan('pro')
                 }
             } catch (err) {
-                console.error("Error fetching plan:", err)
+                // Handle err
             }
         }
         fetchPlan()
@@ -734,7 +733,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         setSyncStatus('saving')
         setSelectedNode(null)
         try {
-            console.log("📡 handleSync: Fetching from Notion...")
             const data = await fetchNotionData(token)
 
             // Critical: Update state first
@@ -763,7 +761,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
             const hasAllPositions = newNodes.every(n => savedPositions[n.id])
             if (!hasAllPositions) {
-                console.log("🛰️ handleSync: Running layout...")
                 runForceLayout(newNodes, newEdges, searchQuery)
             } else {
                 setNodes(newNodes.map(n => ({

@@ -37,9 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             throw error || new Error("No data")
         } catch (err) {
-            console.warn('⚠️ Fetching role via client failed, using emergency Fetch fallback...')
             try {
-                // 2. Direct fetch fallback (more reliable during client hangs)
+                // Secondary fetch fallback (more reliable during client hangs)
                 const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=role`
                 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
                 const response = await fetch(url, {
