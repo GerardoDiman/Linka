@@ -302,6 +302,8 @@ const syncToCloud = async (userId: string, data: any, token?: string) => {
 }
 
 
+import { DashboardSkeleton } from "../components/dashboard/DashboardSkeleton"
+
 interface DashboardContentProps {
     userRole?: string | null
 }
@@ -312,11 +314,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const { session, loading } = useAuth()
     const { toast } = useToast()
 
-    if (loading || !session) return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-    )
+    if (loading || !session) return <DashboardSkeleton />
 
     const initialGraphData = useMemo(() => {
         if (!session) return { nodes: [], edges: [] }
