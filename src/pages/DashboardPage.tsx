@@ -30,121 +30,12 @@ import { SelectionActionBar } from "../components/dashboard/SelectionActionBar"
 import { ExportButton } from "../components/dashboard/ExportButton"
 import { Tooltip } from "../components/ui/Tooltip"
 import { fetchNotionData } from "../lib/notion"
-import { transformToGraphData, type RawDatabase, type RawRelation } from "../lib/graph"
+import { transformToGraphData, type RawRelation } from "../lib/graph"
 import { NODE_COLORS } from "../lib/colors"
 import { useTheme } from "../context/ThemeContext"
 import { useTranslation } from "react-i18next"
 
 
-// Raw Demo Data (Template)
-const demoDatabases: RawDatabase[] = [
-    {
-        id: '1',
-        title: 'Usuarios',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'nombre', type: 'title' },
-            { name: 'email', type: 'email' }
-        ],
-        color: NODE_COLORS[0],
-        icon: '👤',
-        url: 'https://notion.so/usuarios',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '2',
-        title: 'Tareas',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'titulo', type: 'title' },
-            { name: 'estado', type: 'status' }
-        ],
-        color: NODE_COLORS[1],
-        icon: '✅',
-        url: 'https://notion.so/tareas',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '3',
-        title: 'Comentarios',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'texto', type: 'rich_text' }
-        ],
-        color: NODE_COLORS[2],
-        icon: '💬',
-        url: 'https://notion.so/comentarios',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '4',
-        title: 'Etiquetas',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'nombre', type: 'title' }
-        ],
-        color: NODE_COLORS[3],
-        icon: '🏷️',
-        url: 'https://notion.so/etiquetas',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '5',
-        title: 'Archivos',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'url', type: 'url' }
-        ],
-        color: NODE_COLORS[4],
-        icon: '📁',
-        url: 'https://notion.so/archivos',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '6',
-        title: 'Logs',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'evento', type: 'rich_text' }
-        ],
-        color: NODE_COLORS[5],
-        icon: '📜',
-        url: 'https://notion.so/logs',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '7',
-        title: 'Config',
-        properties: [
-            { name: 'key', type: 'title' },
-            { name: 'value', type: 'rich_text' }
-        ],
-        color: NODE_COLORS[6],
-        icon: '⚙️',
-        url: 'https://notion.so/config',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-    {
-        id: '8',
-        title: 'Notificaciones',
-        properties: [
-            { name: 'id', type: 'unique_id' },
-            { name: 'mensaje', type: 'rich_text' }
-        ],
-        color: NODE_COLORS[7],
-        icon: '🔔',
-        url: 'https://notion.so/notificaciones',
-        createdTime: new Date().toISOString(),
-        lastEditedTime: new Date().toISOString()
-    },
-]
 
 
 
