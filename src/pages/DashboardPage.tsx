@@ -521,7 +521,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 // 3. Trigger Notion Sync if we have a token and weren't loaded
                 // PASS DATA EXPLICITLY to avoid race conditions with state updates
                 // skipDirty: true prevents the orange dot on initial load
-                const isShowingDemo = syncedDbs === demoDatabases || (syncedDbs.length > 0 && syncedDbs[0].id === '1')
+                const isShowingDemo = !data.notion_token
                 if (data.notion_token && isShowingDemo) {
                     handleSync(data.notion_token, {
                         filters: newFilters,
@@ -579,12 +579,12 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     // Update demo data language when it changes
     useEffect(() => {
-        const isShowingDemo = syncedDbs === demoDatabases || (syncedDbs.length > 0 && syncedDbs[0].id === '1')
+        const isShowingDemo = !notionToken
         if (isShowingDemo) {
             setSyncedDbs(localizedDemoDatabases)
             setSyncedRelations(localizedDemoRelations)
         }
-    }, [localizedDemoDatabases, localizedDemoRelations])
+    }, [localizedDemoDatabases, localizedDemoRelations, notionToken])
 
 
     // Map for quick title lookups without depending on nodes state
@@ -601,7 +601,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     // Derived state: visible database IDs based on selected property types AND manual toggles AND isolated filter
     const visibleDbIds = useMemo(() => {
         let filtered = syncedDbs
-        const isDemo = syncedDbs === demoDatabases
+        const isDemo = !notionToken
 
         // Apply 4-DB limit for Free users (ONLY on real data)
         if (!isDemo && userPlan === 'free' && filtered.length > 4) {
@@ -945,7 +945,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             <Navbar
                 onSync={handleSync}
                 onDisconnect={handleDisconnect}
-                isSynced={syncedDbs !== demoDatabases}
+                isSynced={!!notionToken}
                 loading={syncStatus === 'saving'}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
