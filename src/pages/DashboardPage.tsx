@@ -412,8 +412,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 // 3. Trigger Notion Sync if we have a token and weren't loaded
                 // PASS DATA EXPLICITLY to avoid race conditions with state updates
                 // skipDirty: true prevents the orange dot on initial load
-                const isShowingDemo = !data.notion_token
-                if (data.notion_token && isShowingDemo) {
+                const isCurrentlyShowingDemo = syncedDbs.length > 0 && syncedDbs[0].id === '1'
+                if (data.notion_token && isCurrentlyShowingDemo) {
                     handleSync(data.notion_token, {
                         filters: newFilters,
                         hidden_dbs: newHidden,
