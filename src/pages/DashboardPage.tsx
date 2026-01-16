@@ -759,7 +759,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 filters: Array.from(selectedPropertyTypes),
                 hidden_dbs: Array.from(hiddenDbIds),
                 hide_isolated: hideIsolated,
-                notion_token: notionToken || undefined
+                notion_token: notionToken
             }
 
 
