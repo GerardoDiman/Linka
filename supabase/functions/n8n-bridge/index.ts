@@ -60,42 +60,41 @@ Deno.serve(async (req: Request) => {
         if (link) {
             console.log("Normalizing provided link...");
             try {
-                // Surgical replacement for those who don't want to deal with URL object edge cases
-                // First, fix the 'redirect_to' parameter in the string directly if it contains localhost
-                if (link.includes('redirect_to=')) {
-                    const urlParts = link.split('redirect_to=');
-                    const beforeRedirect = urlParts[0];
-                    const afterRedirect = urlParts[1];
-                    // Find the end of the redirect_to value (next & or end of string)
-                    const endMatch = afterRedirect.match(/[&#]/);
-                    const endIdx = endMatch ? afterRedirect.indexOf(endMatch[0]) : afterRedirect.length;
-                    const redirectValue = decodeURIComponent(afterRedirect.substring(0, endIdx));
+                const urlObj = new URL(link);
 
-                    if (redirectValue.includes('localhost') || redirectValue.includes('127.0.0.1')) {
-                        console.log("Surgically fixing redirect_to parameter...");
-                        const fixedRedirect = redirectValue.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
-                        link = beforeRedirect + 'redirect_to=' + encodeURIComponent(fixedRedirect) + afterRedirect.substring(endIdx);
-                    }
-                }
-
-                // Second, fix the main Host if it's localhost
-                if (link.includes('://localhost') || link.includes('://127.0.0.1')) {
-                    console.log("Surgically fixing main host...");
-                    // We use regex to replace the protocol, host, and port with our Supabase Auth URL
-                    // but we keep the rest of the path and query
-                    link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, supabaseAuthUrl);
+                // 1. Force Host to Supabase Production if it's local
+                if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+                    console.log("Forcing host to Supabase Production.");
+                    const authBaseObj = new URL(supabaseAuthUrl);
+                    urlObj.protocol = authBaseObj.protocol;
+                    urlObj.host = authBaseObj.host;
 
                     // Supabase cloud expects /auth/v1/ - ensure it's there
-                    const urlObj = new URL(link);
                     if (!urlObj.pathname.startsWith('/auth/v1')) {
-                        const search = urlObj.search;
-                        const cleanPath = urlObj.pathname.startsWith('/') ? urlObj.pathname : '/' + urlObj.pathname;
-                        link = `${supabaseAuthUrl}${cleanPath}${search}`;
+                        const originalPath = urlObj.pathname.startsWith('/') ? urlObj.pathname : '/' + urlObj.pathname;
+                        urlObj.pathname = '/auth/v1' + originalPath;
                     }
                 }
+
+                // 2. Normalize 'redirect_to' parameter
+                let redirectTo = urlObj.searchParams.get('redirect_to');
+                if (redirectTo && (redirectTo.includes('localhost') || redirectTo.includes('127.0.0.1'))) {
+                    console.log("Normalizing redirect_to parameter...");
+                    const fixedRedirect = redirectTo.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
+                    urlObj.searchParams.set('redirect_to', fixedRedirect);
+                }
+
+                // 3. Cleanup redundant tokens if both are hash-like
+                const t = urlObj.searchParams.get('token');
+                const th = urlObj.searchParams.get('token_hash');
+                if (t && th && t === th && t.length > 20) {
+                    console.log("Cleaning up duplicate hash-token...");
+                    urlObj.searchParams.delete('token'); // Keep only token_hash for verify links
+                }
+
+                link = urlObj.toString();
             } catch (err: any) {
                 console.error("Link normalization failed:", err.message);
-                // Last ditch effort: simple regex
                 link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
             }
         }
@@ -106,13 +105,15 @@ Deno.serve(async (req: Request) => {
 
             const h = body.email_data?.token_hash || body.token || body.otp || body.email_data?.token;
             const queryParams = new URLSearchParams();
-            if (h) {
-                queryParams.set('token', h);
-                queryParams.set('token_hash', h);
-            }
-            queryParams.set('type', rawType || 'signup');
 
-            // Set redirect_to to production app
+            // If it's a long hash, use token_hash. If it's a short OTP, use token.
+            if (h.length > 20) {
+                queryParams.set('token_hash', h);
+            } else {
+                queryParams.set('token', h);
+            }
+
+            queryParams.set('type', rawType || 'signup');
             queryParams.set('redirect_to', envSiteUrl + "/login");
 
             link = `${supabaseAuthUrl}/verify?${queryParams.toString()}`;
