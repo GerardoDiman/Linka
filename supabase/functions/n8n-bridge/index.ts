@@ -54,25 +54,38 @@ Deno.serve(async (req: Request) => {
         // Configuration for normalization
         const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
         const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
-        const envSiteUrl = Deno.env.get('SITE_URL'); // Managed via 'supabase secrets set'
-        const productionBase = envSiteUrl || supabaseAuthUrl;
+        const envSiteUrl = Deno.env.get('SITE_URL') || "https://linka-six.vercel.app";
 
-        // CASE A: Link is provided but points to localhost (common in Auth Hooks during local testing)
-        if (link && (link.includes('localhost') || link.includes('127.0.0.1'))) {
-            console.log("Localhost link detected in production context. Normalizing to production base.");
+        // CASE A: Link is provided (Auth Hooks)
+        if (link) {
+            console.log("Normalizing provided link...");
             try {
                 const urlObj = new URL(link);
-                const prodBaseObj = new URL(productionBase);
-                urlObj.protocol = prodBaseObj.protocol;
-                urlObj.host = prodBaseObj.host;
+
+                // 1. Ensure the verification itself happens on Supabase API (never on Vercel/Localhost)
+                if (urlObj.pathname.includes('/verify')) {
+                    const authBaseObj = new URL(supabaseAuthUrl);
+                    urlObj.protocol = authBaseObj.protocol;
+                    urlObj.host = authBaseObj.host;
+                    urlObj.pathname = authBaseObj.pathname + (urlObj.pathname.endsWith('/verify') ? '/verify' : '');
+                }
+
+                // 2. Normalize the 'redirect_to' parameter to production app
+                let redirectTo = urlObj.searchParams.get('redirect_to');
+                if (redirectTo && (redirectTo.includes('localhost') || redirectTo.includes('127.0.0.1'))) {
+                    console.log("Normalizing redirect_to parameter to production...");
+                    const newRedirect = redirectTo.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
+                    urlObj.searchParams.set('redirect_to', newRedirect);
+                }
+
                 link = urlObj.toString();
             } catch (e) {
-                // Fallback: simple string replacement if URL object fails
-                link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, productionBase);
+                console.error("URL Normalization failed, using fallback regex.");
+                link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
             }
         }
 
-        // CASE B: Link is missing (common in some Auth Flow configurations) - Manual assembly needed
+        // CASE B: Link is missing - Manual assembly needed
         if (!link && (body.email_data?.token_hash || body.token || body.otp || body.email_data?.token)) {
             console.log("Link Construction: Manual assembly needed");
 
@@ -83,16 +96,11 @@ Deno.serve(async (req: Request) => {
                 queryParams.set('token_hash', h);
             }
             queryParams.set('type', rawType || 'signup');
-            if (body.email_data?.redirect_to) {
-                queryParams.set('redirect_to', body.email_data.redirect_to);
-            }
 
-            // Ensure we use the proper verification endpoint
-            const cleanBaseUrl = productionBase.includes('.supabase.co')
-                ? (productionBase.endsWith('/auth/v1') ? productionBase : (productionBase.endsWith('/') ? `${productionBase}auth/v1` : `${productionBase}/auth/v1`))
-                : productionBase;
+            // Set redirect_to to production app
+            queryParams.set('redirect_to', envSiteUrl + "/login");
 
-            link = `${cleanBaseUrl}/verify?${queryParams.toString()}`;
+            link = `${supabaseAuthUrl}/verify?${queryParams.toString()}`;
         }
 
         console.log(`Resolved Link: ${link || "NONE"}`);
