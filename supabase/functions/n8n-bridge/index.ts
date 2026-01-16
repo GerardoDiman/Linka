@@ -56,31 +56,46 @@ Deno.serve(async (req: Request) => {
         const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
         const envSiteUrl = Deno.env.get('SITE_URL') || "https://linka-six.vercel.app";
 
-        // CASE A: Link is provided (Auth Hooks)
+        // CASE A: Link is provided (Auth Hooks or manual call)
         if (link) {
             console.log("Normalizing provided link...");
             try {
-                const urlObj = new URL(link);
+                // Surgical replacement for those who don't want to deal with URL object edge cases
+                // First, fix the 'redirect_to' parameter in the string directly if it contains localhost
+                if (link.includes('redirect_to=')) {
+                    const urlParts = link.split('redirect_to=');
+                    const beforeRedirect = urlParts[0];
+                    const afterRedirect = urlParts[1];
+                    // Find the end of the redirect_to value (next & or end of string)
+                    const endMatch = afterRedirect.match(/[&#]/);
+                    const endIdx = endMatch ? afterRedirect.indexOf(endMatch[0]) : afterRedirect.length;
+                    const redirectValue = decodeURIComponent(afterRedirect.substring(0, endIdx));
 
-                // 1. Ensure the verification itself happens on Supabase API (never on Vercel/Localhost)
-                if (urlObj.pathname.includes('/verify')) {
-                    const authBaseObj = new URL(supabaseAuthUrl);
-                    urlObj.protocol = authBaseObj.protocol;
-                    urlObj.host = authBaseObj.host;
-                    urlObj.pathname = authBaseObj.pathname + (urlObj.pathname.endsWith('/verify') ? '/verify' : '');
+                    if (redirectValue.includes('localhost') || redirectValue.includes('127.0.0.1')) {
+                        console.log("Surgically fixing redirect_to parameter...");
+                        const fixedRedirect = redirectValue.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
+                        link = beforeRedirect + 'redirect_to=' + encodeURIComponent(fixedRedirect) + afterRedirect.substring(endIdx);
+                    }
                 }
 
-                // 2. Normalize the 'redirect_to' parameter to production app
-                let redirectTo = urlObj.searchParams.get('redirect_to');
-                if (redirectTo && (redirectTo.includes('localhost') || redirectTo.includes('127.0.0.1'))) {
-                    console.log("Normalizing redirect_to parameter to production...");
-                    const newRedirect = redirectTo.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
-                    urlObj.searchParams.set('redirect_to', newRedirect);
-                }
+                // Second, fix the main Host if it's localhost
+                if (link.includes('://localhost') || link.includes('://127.0.0.1')) {
+                    console.log("Surgically fixing main host...");
+                    // We use regex to replace the protocol, host, and port with our Supabase Auth URL
+                    // but we keep the rest of the path and query
+                    link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, supabaseAuthUrl);
 
-                link = urlObj.toString();
-            } catch (e) {
-                console.error("URL Normalization failed, using fallback regex.");
+                    // Supabase cloud expects /auth/v1/ - ensure it's there
+                    const urlObj = new URL(link);
+                    if (!urlObj.pathname.startsWith('/auth/v1')) {
+                        const search = urlObj.search;
+                        const cleanPath = urlObj.pathname.startsWith('/') ? urlObj.pathname : '/' + urlObj.pathname;
+                        link = `${supabaseAuthUrl}${cleanPath}${search}`;
+                    }
+                }
+            } catch (err: any) {
+                console.error("Link normalization failed:", err.message);
+                // Last ditch effort: simple regex
                 link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
             }
         }
