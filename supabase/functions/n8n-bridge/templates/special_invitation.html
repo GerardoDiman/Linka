@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're invited!</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrapper {
+            padding: 40px 20px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .header {
+            background-color: #4f46e5;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 80px;
+            height: auto;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 1;
+        }
+
+        .content {
+            padding: 40px;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .content h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 0;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background-color: #4f46e5;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            padding: 24px;
+            background-color: #f8fafc;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a !important;
+            }
+
+            .container {
+                background-color: #1e293b !important;
+                border-color: #334155 !important;
+            }
+
+            .content {
+                color: #e2e8f0 !important;
+            }
+
+            .content h2 {
+                color: #ffffff !important;
+            }
+
+            .footer {
+                background-color: #1e293b !important;
+                color: #94a3b8 !important;
+                border-color: #334155 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <img src="https://gnuedinkyheevdkfyujm.supabase.co/storage/v1/object/public/assets/linka_logo.png"
+                    alt="Linka Logo" class="logo-img">
+                <h1>LINKA</h1>
+            </div>
+            <div class="content">
+                <h2>Special Invitation!</h2>
+                <p>Hello {{fullName}}, you've been selected for exclusive early access to Linka. Claim your invitation
+                    below:</p>
+                <div class="btn-container"><a href="https://linka-six.vercel.app/register" class="btn">Claim Access</a>
+                </div>
+            </div>
+            <div class="footer">
+                <p>&copy; 2024 Linka. Exclusive Invitation.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
