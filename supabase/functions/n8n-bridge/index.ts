@@ -48,28 +48,35 @@ Deno.serve(async (req: Request) => {
             }
         }
 
-        // 3. Construct the verification/target link
+        // 3. Construct and Normalize the verification/target link
         let link = body.link || body.confirmation_url || body.email_data?.confirmation_url;
 
+        // Configuration for normalization
+        const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
+        const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
+        const envSiteUrl = Deno.env.get('SITE_URL'); // Managed via 'supabase secrets set'
+        const productionBase = envSiteUrl || supabaseAuthUrl;
+
+        // CASE A: Link is provided but points to localhost (common in Auth Hooks during local testing)
+        if (link && (link.includes('localhost') || link.includes('127.0.0.1'))) {
+            console.log("Localhost link detected in production context. Normalizing to production base.");
+            try {
+                const urlObj = new URL(link);
+                const prodBaseObj = new URL(productionBase);
+                urlObj.protocol = prodBaseObj.protocol;
+                urlObj.host = prodBaseObj.host;
+                link = urlObj.toString();
+            } catch (e) {
+                // Fallback: simple string replacement if URL object fails
+                link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, productionBase);
+            }
+        }
+
+        // CASE B: Link is missing (common in some Auth Flow configurations) - Manual assembly needed
         if (!link && (body.email_data?.token_hash || body.token || body.otp || body.email_data?.token)) {
             console.log("Link Construction: Manual assembly needed");
 
-            // Normalize Project Reference (User's project is gnuedinkyheevdkfyujm)
-            const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
-            const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
-
-            // Robust Base URL detection
-            const envSiteUrl = Deno.env.get('SITE_URL');
-            let baseUrl = body.email_data?.site_url || envSiteUrl || supabaseAuthUrl;
-
-            // Logic to prevent localhost links in production
-            if (baseUrl.includes('localhost')) {
-                console.log("WARNING: Localhost detected in production context. Normalizing to Supabase Auth URL.");
-                baseUrl = envSiteUrl || supabaseAuthUrl;
-            }
-
             const h = body.email_data?.token_hash || body.token || body.otp || body.email_data?.token;
-
             const queryParams = new URLSearchParams();
             if (h) {
                 queryParams.set('token', h);
@@ -80,10 +87,10 @@ Deno.serve(async (req: Request) => {
                 queryParams.set('redirect_to', body.email_data.redirect_to);
             }
 
-            // Ensure we always use the /auth/v1/verify endpoint on the Supabase project for maximum reliability
-            const cleanBaseUrl = baseUrl.includes('.supabase.co')
-                ? (baseUrl.endsWith('/auth/v1') ? baseUrl : (baseUrl.endsWith('/') ? `${baseUrl}auth/v1` : `${baseUrl}/auth/v1`))
-                : supabaseAuthUrl; // Fallback to Supabase for non-supabase baseUrls during verification
+            // Ensure we use the proper verification endpoint
+            const cleanBaseUrl = productionBase.includes('.supabase.co')
+                ? (productionBase.endsWith('/auth/v1') ? productionBase : (productionBase.endsWith('/') ? `${productionBase}auth/v1` : `${productionBase}/auth/v1`))
+                : productionBase;
 
             link = `${cleanBaseUrl}/verify?${queryParams.toString()}`;
         }
