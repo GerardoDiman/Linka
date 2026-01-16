@@ -53,8 +53,21 @@ Deno.serve(async (req: Request) => {
 
         if (!link && (body.email_data?.token_hash || body.token || body.otp || body.email_data?.token)) {
             console.log("Link Construction: Manual assembly needed");
-            const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || body.email_data?.site_url?.split('//')[1]?.split('.')[0];
-            const baseUrl = body.email_data?.site_url || `https://${projectRef}.supabase.co/auth/v1`;
+
+            // Normalize Project Reference (User's project is gnuedinkyheevdkfyujm)
+            const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
+            const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
+
+            // Robust Base URL detection
+            const envSiteUrl = Deno.env.get('SITE_URL');
+            let baseUrl = body.email_data?.site_url || envSiteUrl || supabaseAuthUrl;
+
+            // Logic to prevent localhost links in production
+            if (baseUrl.includes('localhost')) {
+                console.log("WARNING: Localhost detected in production context. Normalizing to Supabase Auth URL.");
+                baseUrl = envSiteUrl || supabaseAuthUrl;
+            }
+
             const h = body.email_data?.token_hash || body.token || body.otp || body.email_data?.token;
 
             const queryParams = new URLSearchParams();
@@ -66,7 +79,12 @@ Deno.serve(async (req: Request) => {
             if (body.email_data?.redirect_to) {
                 queryParams.set('redirect_to', body.email_data.redirect_to);
             }
-            const cleanBaseUrl = baseUrl.endsWith('/auth/v1') ? baseUrl : `${baseUrl}/auth/v1`;
+
+            // Ensure we always use the /auth/v1/verify endpoint on the Supabase project for maximum reliability
+            const cleanBaseUrl = baseUrl.includes('.supabase.co')
+                ? (baseUrl.endsWith('/auth/v1') ? baseUrl : (baseUrl.endsWith('/') ? `${baseUrl}auth/v1` : `${baseUrl}/auth/v1`))
+                : supabaseAuthUrl; // Fallback to Supabase for non-supabase baseUrls during verification
+
             link = `${cleanBaseUrl}/verify?${queryParams.toString()}`;
         }
 
