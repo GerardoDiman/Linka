@@ -56,67 +56,64 @@ Deno.serve(async (req: Request) => {
         const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
         const envSiteUrl = Deno.env.get('SITE_URL') || "https://linka-six.vercel.app";
 
-        // CASE A: Link is provided (Auth Hooks or manual call)
+        // Step 3a: Manual assembly if link is missing
+        if (!link && (body.email_data?.token_hash || body.token || body.otp || body.email_data?.token)) {
+            console.log("Link Construction: Manual assembly needed");
+            const h = body.email_data?.token_hash || body.token || body.otp || body.email_data?.token;
+            const q = new URLSearchParams();
+            if (h.length > 20) {
+                // It's a hash
+                q.set('token_hash', h);
+                q.set('token', h); // Set both for maximum compatibility
+            } else {
+                // It's an OTP
+                q.set('token', h);
+            }
+            q.set('type', rawType || 'signup');
+            q.set('redirect_to', envSiteUrl + "/login");
+            link = `${supabaseAuthUrl}/verify?${q.toString()}`;
+        }
+
+        // Step 3b: Universal Normalization (covers both Hook-provided and manually assembled links)
         if (link) {
-            console.log("Normalizing provided link...");
+            console.log("Normalizing link URL...");
             try {
                 const urlObj = new URL(link);
 
-                // 1. Force Host to Supabase Production if it's local
-                if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
-                    console.log("Forcing host to Supabase Production.");
-                    const authBaseObj = new URL(supabaseAuthUrl);
-                    urlObj.protocol = authBaseObj.protocol;
-                    urlObj.host = authBaseObj.host;
-
-                    // Supabase cloud expects /auth/v1/ - ensure it's there
-                    if (!urlObj.pathname.startsWith('/auth/v1')) {
-                        const originalPath = urlObj.pathname.startsWith('/') ? urlObj.pathname : '/' + urlObj.pathname;
-                        urlObj.pathname = '/auth/v1' + originalPath;
-                    }
+                // 1. Force Production Host (Handshake host) for links pointing to localhost
+                if (urlObj.hostname.includes('localhost') || urlObj.hostname.includes('127.0.0.1')) {
+                    const authBase = new URL(supabaseAuthUrl);
+                    urlObj.protocol = authBase.protocol;
+                    urlObj.host = authBase.host;
                 }
 
-                // 2. Normalize 'redirect_to' parameter
+                // 2. Ensure /auth/v1 prefix for Supabase Cloud links
+                if (urlObj.hostname.endsWith('.supabase.co') && !urlObj.pathname.startsWith('/auth/v1')) {
+                    const path = urlObj.pathname.startsWith('/') ? urlObj.pathname : '/' + urlObj.pathname;
+                    urlObj.pathname = '/auth/v1' + path;
+                }
+
+                // 3. Force Production Redirect (Landing host)
                 let redirectTo = urlObj.searchParams.get('redirect_to');
                 if (redirectTo && (redirectTo.includes('localhost') || redirectTo.includes('127.0.0.1'))) {
-                    console.log("Normalizing redirect_to parameter...");
-                    const fixedRedirect = redirectTo.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
-                    urlObj.searchParams.set('redirect_to', fixedRedirect);
+                    urlObj.searchParams.set('redirect_to', redirectTo.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl));
                 }
 
-                // 3. Cleanup redundant tokens if both are hash-like
+                // 4. Parameter insurance: ensure token_hash is there if we have a hash
                 const t = urlObj.searchParams.get('token');
                 const th = urlObj.searchParams.get('token_hash');
-                if (t && th && t === th && t.length > 20) {
-                    console.log("Cleaning up duplicate hash-token...");
-                    urlObj.searchParams.delete('token'); // Keep only token_hash for verify links
+                const anyHash = (t && t.length > 20) ? t : (th && th.length > 20 ? th : null);
+                if (anyHash) {
+                    urlObj.searchParams.set('token_hash', anyHash);
+                    // We also keep/set token=hash for legacy compatibility
+                    urlObj.searchParams.set('token', anyHash);
                 }
 
                 link = urlObj.toString();
             } catch (err: any) {
-                console.error("Link normalization failed:", err.message);
+                console.error("Link normalization failed, using fallback regex:", err.message);
                 link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
             }
-        }
-
-        // CASE B: Link is missing - Manual assembly needed
-        if (!link && (body.email_data?.token_hash || body.token || body.otp || body.email_data?.token)) {
-            console.log("Link Construction: Manual assembly needed");
-
-            const h = body.email_data?.token_hash || body.token || body.otp || body.email_data?.token;
-            const queryParams = new URLSearchParams();
-
-            // If it's a long hash, use token_hash. If it's a short OTP, use token.
-            if (h.length > 20) {
-                queryParams.set('token_hash', h);
-            } else {
-                queryParams.set('token', h);
-            }
-
-            queryParams.set('type', rawType || 'signup');
-            queryParams.set('redirect_to', envSiteUrl + "/login");
-
-            link = `${supabaseAuthUrl}/verify?${queryParams.toString()}`;
         }
 
         console.log(`Resolved Link: ${link || "NONE"}`);
