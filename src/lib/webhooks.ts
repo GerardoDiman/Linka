@@ -1,4 +1,5 @@
 import { supabase } from "./supabase"
+import logger from "./logger"
 
 export type WebhookAction =
     | "user_registration"
@@ -32,13 +33,13 @@ export async function sendN8NWebhook(action: WebhookAction, data: Omit<WebhookPa
         })
 
         if (error) {
-            console.error(`Webhook Bridge Error:`, error)
+            logger.error(`Webhook Bridge Error:`, error)
             return false
         }
 
         return true
     } catch (error) {
-        console.error("Webhook unexpected error:", error)
+        logger.error("Webhook unexpected error:", error)
         return false
     }
 }

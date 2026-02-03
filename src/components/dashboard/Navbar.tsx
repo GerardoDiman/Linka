@@ -1,13 +1,14 @@
 import { useState, useMemo } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import { NotionIcon } from "../ui/NotionIcon"
 import {
-    Settings, LogOut, Loader2, Share2, Search, Filter,
+    Settings, LogOut, Loader2, Search, Filter,
     Type, AlignLeft, Hash, List, Layers, Calendar, Users,
     File, CheckSquare, Link, Mail, Phone, Variable, GitBranch,
     Combine, Clock, UserPlus, History, UserCheck, Activity,
-    Fingerprint, ShieldCheck, Database, X, Sun, Moon, HelpCircle,
-    Star
+    Fingerprint, ShieldCheck, Database, X, Sun, Moon,
+    Keyboard, Languages, PlayCircle
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
@@ -16,17 +17,10 @@ import { useTheme } from "../../context/ThemeContext"
 import { Logo } from "../ui/Logo"
 import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
+import { ConfirmationModal } from "../ui/ConfirmationModal"
+import logger from "../../lib/logger"
 
-const NotionIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-    <svg
-        viewBox="0 0 24 24"
-        className={className}
-        fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path fillRule="evenodd" clipRule="evenodd" d="M15.257.055l-13.31.98C.874 1.128.5 1.83.5 2.667v14.559c0 .654.233 1.213.794 1.96l3.129 4.06c.513.653.98.794 1.962.745l15.457-.932c1.307-.093 1.681-.7 1.681-1.727V4.954c0-.53-.21-.684-.829-1.135l-.106-.078L18.34.755c-1.027-.746-1.45-.84-3.083-.7zm-8.521 4.63c-1.263.086-1.549.105-2.266-.477L2.647 2.76c-.186-.187-.092-.42.375-.466l12.796-.933c1.074-.094 1.634.28 2.054.606l2.195 1.587c.093.047.326.326.047.326l-13.216.794-.162.01zM5.263 21.193V7.287c0-.606.187-.886.748-.933l15.176-.886c.515-.047.748.28.748.886v13.81c0 .609-.093 1.122-.934 1.168l-14.523.84c-.842.047-1.215-.232-1.215-.98zm14.338-13.16c.093.422 0 .842-.422.89l-.699.139v10.264c-.608.327-1.168.513-1.635.513-.747 0-.934-.232-1.495-.932l-4.576-7.185v6.952l1.448.327s0 .84-1.169.84l-3.221.186c-.094-.187 0-.654.327-.747l.84-.232V9.853L7.832 9.76c-.093-.42.14-1.026.794-1.073l3.456-.232 4.763 7.279v-6.44l-1.214-.14c-.094-.513.28-.887.747-.933l3.223-.187z" />
-    </svg>
-)
+// NotionIcon is now imported from ../ui/NotionIcon
 
 interface NavbarProps {
     onSync?: (token: string) => void
@@ -47,6 +41,7 @@ interface NavbarProps {
     onManualSync?: () => void
     syncStatus?: 'idle' | 'saving' | 'saved' | 'error'
     isDirty?: boolean
+    onShowShortcuts?: () => void
 }
 
 const PROPERTY_TYPE_ICONS: Record<string, any> = {
@@ -89,21 +84,25 @@ export function Navbar({
     onToggleHideIsolated,
     userRole,
     onStartTour,
-    userPlan = 'free',
     onManualSync,
     syncStatus = 'idle',
-    isDirty = false
+    isDirty = false,
+    onShowShortcuts
 }: NavbarProps) {
     const navigate = useNavigate()
     const { t, i18n } = useTranslation()
     const { theme, toggleTheme } = useTheme()
     const { user, signOut } = useAuth()
     const [token, setToken] = useState("")
+    const [tokenError, setTokenError] = useState<string | null>(null)
     const [showSyncPopover, setShowSyncPopover] = useState(false)
     const [showFilterPopover, setShowFilterPopover] = useState(false)
+    const [showSettingsPopover, setShowSettingsPopover] = useState(false)
+    const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false)
 
     const filterPopoverRef = useClickOutside(() => setShowFilterPopover(false))
     const syncPopoverRef = useClickOutside(() => setShowSyncPopover(false))
+    const settingsPopoverRef = useClickOutside(() => setShowSettingsPopover(false))
 
     const propertyTypes = useMemo(() => {
         const types = new Set<string>()
@@ -266,7 +265,7 @@ export function Navbar({
                                 {!isSynced ? (
                                     <div className="space-y-3">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Integration Token</label>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('notion.integrationToken')}</label>
                                             <Input
                                                 placeholder="secret_..."
                                                 type="password"
@@ -276,13 +275,23 @@ export function Navbar({
                                                 disabled={loading}
                                             />
                                         </div>
+                                        {tokenError && (
+                                            <p className="text-[10px] text-red-500 font-medium">{tokenError}</p>
+                                        )}
                                         <Button
                                             className="w-full h-9 text-xs font-bold"
                                             onClick={() => {
+                                                // Validate token format (legacy: secret_, new: ntn_)
+                                                const isValidFormat = token.startsWith('secret_') || token.startsWith('ntn_')
+                                                if (!isValidFormat) {
+                                                    setTokenError(t('notion.errors.invalidToken'))
+                                                    return
+                                                }
+                                                setTokenError(null)
                                                 onSync?.(token)
                                                 if (!loading) setShowSyncPopover(false)
                                             }}
-                                            disabled={loading}
+                                            disabled={loading || !token.trim()}
                                         >
                                             {loading ? (
                                                 <>
@@ -308,8 +317,8 @@ export function Navbar({
                                         variant="outline"
                                         className="w-full h-9 text-xs font-bold text-gray-500 dark:text-slate-400 border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-gray-600 dark:hover:text-gray-200 transition-all"
                                         onClick={() => {
-                                            onDisconnect?.()
                                             setShowSyncPopover(false)
+                                            setShowDisconnectConfirm(true)
                                         }}
                                         disabled={loading}
                                     >
@@ -321,19 +330,7 @@ export function Navbar({
                     )}
                 </div>
 
-                <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1" />
 
-                <Tooltip content={t('dashboard.navbar.startTourTooltip')} position="bottom">
-                    <Button
-                        id="navbar-help"
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-xl text-primary animate-pulse hover:animate-none hover:bg-primary/5 dark:hover:bg-primary/10 transition-all"
-                        onClick={onStartTour}
-                    >
-                        <HelpCircle size={20} className="fill-primary/10" />
-                    </Button>
-                </Tooltip>
 
                 <Tooltip content={
                     syncStatus === 'saving' ? t('dashboard.navbar.cloudSync.saving') :
@@ -363,70 +360,126 @@ export function Navbar({
                     </Button>
                 </Tooltip>
 
-                <Tooltip content={i18n.language === 'es' ? 'Switch to English' : 'Cambiar a Español'} position="bottom">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 font-bold text-xs"
-                        onClick={() => i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')}
-                    >
-                        {i18n.language.toUpperCase().split('-')[0]}
-                    </Button>
-                </Tooltip>
-
-                <Tooltip content={theme === 'light' ? t('dashboard.navbar.theme.dark') : t('dashboard.navbar.theme.light')} position="bottom">
-                    <Button
-                        id="navbar-theme"
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10"
-                        onClick={toggleTheme}
-                    >
-                        {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                    </Button>
-                </Tooltip>
-
-                {userRole === 'admin' && (
-                    <Tooltip content={t('dashboard.navbar.admin')} position="bottom">
+                <div className="relative flex items-center" ref={settingsPopoverRef}>
+                    <Tooltip content={t('dashboard.navbar.settings')} position="bottom">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 rounded-xl text-primary hover:bg-primary/5 dark:hover:bg-primary/10"
-                            onClick={() => navigate("/admin")}
+                            className={`h-10 w-10 rounded-xl transition-all ${showSettingsPopover ? 'bg-primary/10 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10'}`}
+                            onClick={() => {
+                                setShowSettingsPopover(!showSettingsPopover)
+                                setShowFilterPopover(false)
+                                setShowSyncPopover(false)
+                            }}
                         >
-                            <ShieldCheck size={20} />
+                            <Settings size={20} />
                         </Button>
                     </Tooltip>
-                )}
 
-                <Tooltip content={t('dashboard.navbar.share')} position="bottom">
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10">
-                        <Share2 size={20} />
-                    </Button>
-                </Tooltip>
+                    {showSettingsPopover && (
+                        <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 py-2">
+                                {t('dashboard.navbar.settings')}
+                            </div>
 
-                <Tooltip content={t('dashboard.navbar.settings')} position="bottom">
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10">
-                        <Settings size={20} />
-                    </Button>
-                </Tooltip>
+                            {/* Keyboard Shortcuts */}
+                            <button
+                                onClick={() => {
+                                    onShowShortcuts?.()
+                                    setShowSettingsPopover(false)
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left"
+                            >
+                                <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800">
+                                    <Keyboard size={16} />
+                                </div>
+                                <div className="flex-1">
+                                    <span className="text-sm font-medium">{t('dashboard.settings.shortcuts')}</span>
+                                </div>
+                            </button>
 
-                {/* Beta Badge instead of Pro CTA during Beta phase */}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-xl mr-2">
-                    <Star className="w-3.5 h-3.5 text-primary fill-primary/20" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter">{t('dashboard.navbar.betaBadge')}</span>
+                            {/* Help Tour */}
+                            <button
+                                onClick={() => {
+                                    onStartTour?.()
+                                    setShowSettingsPopover(false)
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left"
+                            >
+                                <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800">
+                                    <PlayCircle size={16} />
+                                </div>
+                                <span className="text-sm font-medium">{t('dashboard.settings.helpTour')}</span>
+                            </button>
+
+                            <div className="h-px bg-gray-100 dark:bg-slate-800 my-2" />
+
+                            {/* Language Toggle */}
+                            <button
+                                onClick={() => {
+                                    i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')
+                                }}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left"
+                            >
+                                <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800">
+                                    <Languages size={16} />
+                                </div>
+                                <div className="flex-1 flex items-center justify-between">
+                                    <span className="text-sm font-medium">{t('dashboard.settings.language')}</span>
+                                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                                        {i18n.language === 'es' ? 'ES' : 'EN'}
+                                    </span>
+                                </div>
+                            </button>
+
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left"
+                            >
+                                <div className="p-1.5 rounded-lg bg-gray-100 dark:bg-slate-800">
+                                    {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                                </div>
+                                <div className="flex-1 flex items-center justify-between">
+                                    <span className="text-sm font-medium">{t('dashboard.settings.theme')}</span>
+                                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 capitalize">
+                                        {theme === 'light' ? t('dashboard.navbar.theme.light') : t('dashboard.navbar.theme.dark')}
+                                    </span>
+                                </div>
+                            </button>
+
+                            {/* Admin Panel - only for admins */}
+                            {userRole === 'admin' && (
+                                <>
+                                    <div className="h-px bg-gray-100 dark:bg-slate-800 my-2" />
+                                    <button
+                                        onClick={() => {
+                                            navigate('/admin')
+                                            setShowSettingsPopover(false)
+                                        }}
+                                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-left"
+                                    >
+                                        <div className="p-1.5 rounded-lg bg-primary/10">
+                                            <ShieldCheck size={16} />
+                                        </div>
+                                        <span className="text-sm font-medium">{t('dashboard.settings.admin')}</span>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
+
+
 
                 <div className="h-6 w-px bg-gray-200 dark:bg-slate-800 mx-1" />
 
                 {user && (
                     <div className="flex items-center gap-3 px-2 py-1 bg-gray-50/50 dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-slate-800/50">
-                        <div className="flex flex-col items-end hidden md:flex">
+                        <div className="flex flex-col items-start hidden md:flex">
                             <div className="flex items-center gap-1.5">
-                                {userPlan === 'pro' && (
-                                    <span className="bg-primary/20 text-[9px] font-black text-primary px-1.5 py-0.5 rounded-md uppercase tracking-tighter">BETA</span>
-                                )}
                                 <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider leading-none">{t('dashboard.navbar.userLabel')}</span>
+                                <span className="bg-primary/20 text-[9px] font-black text-primary px-1.5 py-0.5 rounded-md uppercase tracking-tighter">BETA</span>
                             </div>
                             <span className="text-xs font-bold text-gray-700 dark:text-slate-200 truncate max-w-[120px]">
                                 {user.user_metadata?.username || user.user_metadata?.full_name || user.email?.split('@')[0]}
@@ -448,7 +501,7 @@ export function Navbar({
                                 await signOut()
                                 navigate("/", { replace: true })
                             } catch (err) {
-                                console.error("Error during log out:", err)
+                                logger.error("Error during log out:", err)
                                 // Fallback navigation
                                 window.location.href = "/"
                             }
@@ -458,6 +511,18 @@ export function Navbar({
                     </Button>
                 </Tooltip>
             </div>
+
+            {/* Disconnect Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showDisconnectConfirm}
+                onClose={() => setShowDisconnectConfirm(false)}
+                onConfirm={() => onDisconnect?.()}
+                title={t('dashboard.navbar.confirmModal.title')}
+                message={t('dashboard.navbar.confirmModal.message')}
+                confirmText={t('dashboard.navbar.confirmModal.confirm')}
+                cancelText={t('dashboard.navbar.confirmModal.cancel')}
+                variant="warning"
+            />
         </nav>
     )
 }

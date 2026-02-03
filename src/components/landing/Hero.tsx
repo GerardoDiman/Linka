@@ -13,7 +13,7 @@ export function Hero() {
     const { t } = useTranslation()
 
     return (
-        <section className="relative isolate pt-20 pb-16 sm:pt-24 sm:pb-24 overflow-hidden bg-white">
+        <section className="relative isolate pt-20 pb-16 sm:pt-24 sm:pb-24 overflow-hidden bg-white dark:bg-slate-900">
             {/* ... (background elements unchanged) ... */}
             <div className="absolute inset-0 -z-10 overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
@@ -30,7 +30,7 @@ export function Hero() {
                             y={-1}
                             patternUnits="userSpaceOnUse"
                         >
-                            <path d="M80 160V.5M.5 .5H160" fill="none" stroke="rgba(0,0,0,0.05)" />
+                            <path d="M80 160V.5M.5 .5H160" fill="none" stroke="currentColor" className="text-black/5 dark:text-white/5" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" strokeWidth={0} fill="url(#hero-grid)" />
@@ -87,7 +87,7 @@ export function Hero() {
                         </div>
                     </motion.div>
 
-                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl mb-4 lg:mb-6 leading-[1.1] lg:leading-[1.05]">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-6xl lg:text-7xl mb-4 lg:mb-6 leading-[1.1] lg:leading-[1.05]">
                         <SplitText
                             text={t('landing.hero.title1')}
                             display="block"
@@ -102,7 +102,7 @@ export function Hero() {
                         />
                     </h1>
 
-                    <p className="mt-10 text-xl leading-8 text-gray-600 max-w-2xl mx-auto font-medium">
+                    <p className="mt-10 text-xl leading-8 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto font-medium">
                         {t('landing.hero.description')}
                     </p>
 
@@ -126,7 +126,7 @@ export function Hero() {
                                 size="lg"
                                 onClick={() => navigate("/register")}
                                 aria-label={t('landing.hero.secondaryCta')}
-                                className="w-full sm:w-auto h-14 px-10 text-lg rounded-full hover:bg-slate-50 transition-all border-2 font-bold"
+                                className="w-full sm:w-auto h-14 px-10 text-lg rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 dark:border-slate-600 dark:text-white transition-all border-2 font-bold"
                             >
                                 {t('landing.hero.secondaryCta')}
                             </Button>
@@ -144,25 +144,25 @@ export function Hero() {
                         {/* Left Column: Info */}
                         <div className="text-left space-y-8 order-2 lg:order-1">
                             <div className="space-y-4">
-                                <h3 className="text-2xl font-bold text-gray-900">{t('landing.hero.infoTitle')}</h3>
-                                <p className="text-gray-600 leading-relaxed">
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{t('landing.hero.infoTitle')}</h3>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                                     {t('landing.hero.infoDesc')}
                                 </p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
-                                <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100 flex flex-col justify-center">
-                                    <h4 className="font-bold text-blue-700 mb-1">{t('landing.hero.syncTitle')}</h4>
-                                    <p className="text-sm text-blue-600/80 leading-snug">{t('landing.hero.syncDesc')}</p>
+                                <div className="p-5 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 flex flex-col justify-center">
+                                    <h4 className="font-bold text-blue-700 dark:text-blue-400 mb-1">{t('landing.hero.syncTitle')}</h4>
+                                    <p className="text-sm text-blue-600/80 dark:text-blue-300/80 leading-snug">{t('landing.hero.syncDesc')}</p>
                                 </div>
-                                <div className="p-5 rounded-2xl bg-purple-50/50 border border-purple-100 flex flex-col justify-center">
-                                    <h4 className="font-bold text-purple-700 mb-1">{t('landing.hero.intelTitle')}</h4>
-                                    <p className="text-sm text-purple-600/80 leading-snug">{t('landing.hero.intelDesc')}</p>
+                                <div className="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 flex flex-col justify-center">
+                                    <h4 className="font-bold text-purple-700 dark:text-purple-400 mb-1">{t('landing.hero.intelTitle')}</h4>
+                                    <p className="text-sm text-purple-600/80 dark:text-purple-300/80 leading-snug">{t('landing.hero.intelDesc')}</p>
                                 </div>
                             </div>
 
                             <div className="pt-4">
-                                <div className="flex items-center gap-4 text-sm font-medium text-gray-500">
+                                <div className="flex items-center gap-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                                     <div className="flex -space-x-2">
                                         {[1, 2, 3, 4].map((i) => (
                                             <img key={i} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i}`} alt={`${t('landing.hero.avatarAlt')} ${i}`} />
@@ -177,7 +177,7 @@ export function Hero() {
                         <div className="relative group order-1 lg:order-2 w-full max-w-2xl mx-auto lg:mr-0">
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-violet-600 rounded-2xl blur opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200"></div>
                             <div className="relative rounded-2xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10">
-                                <div className="rounded-xl bg-white shadow-2xl ring-1 ring-gray-900/10 overflow-hidden relative">
+                                <div className="rounded-xl bg-white dark:bg-slate-800 shadow-2xl ring-1 ring-gray-900/10 dark:ring-slate-700 overflow-hidden relative">
                                     <div className="w-full relative pb-[70%] sm:pb-[56.25%]">
                                         <div className="absolute inset-0">
                                             <DataAnimation />

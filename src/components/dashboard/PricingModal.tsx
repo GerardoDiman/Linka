@@ -2,6 +2,7 @@ import { useState } from "react"
 import { X, Check, Star, Zap, Loader2 } from "lucide-react"
 import { Button } from "../ui/button"
 import { supabase } from "../../lib/supabase"
+import logger from "../../lib/logger"
 import { useToast } from "../../context/ToastContext"
 import { useTranslation } from "react-i18next"
 
@@ -28,7 +29,7 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
                 window.location.href = data.url
             }
         } catch (err) {
-            console.error("Error initiating checkout:", err)
+            logger.error("Error initiating checkout:", err)
             toast.error(t('dashboard.pricing.checkoutError'))
         } finally {
             setLoading(false)

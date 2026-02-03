@@ -18,13 +18,18 @@ export const SplitText = ({
 }: SplitTextProps) => {
     const controls = useAnimation();
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-100px" });
+    const isInView = useInView(ref, { once: false, margin: "-100px" });
 
     useEffect(() => {
+        // Reset and re-animate when text changes
+        controls.set("hidden");
         if (isInView) {
-            controls.start("visible");
+            const timer = setTimeout(() => {
+                controls.start("visible");
+            }, 50);
+            return () => clearTimeout(timer);
         }
-    }, [controls, isInView]);
+    }, [controls, isInView, text]);
 
     const words = text.split(" ");
 

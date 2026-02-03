@@ -1,5 +1,6 @@
 import type { RawDatabase, RawRelation } from "./graph"
 import { getNextColor } from "./colors"
+import logger from "./logger"
 
 export async function fetchNotionData(token: string): Promise<{ databases: RawDatabase[], relations: RawRelation[] }> {
 
@@ -22,7 +23,7 @@ export async function fetchNotionData(token: string): Promise<{ databases: RawDa
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
-            console.error("Notion API error details:", errorData)
+            logger.error("Notion API error details:", errorData)
 
             if (response.status === 401) {
                 throw new Error("Token inválido. Por favor verifica tu token de integración.")
@@ -90,7 +91,7 @@ export async function fetchNotionData(token: string): Promise<{ databases: RawDa
         return { databases, relations }
 
     } catch (error) {
-        console.error("Error fetching from Notion:", error)
+        logger.error("Error fetching from Notion:", error)
         throw error
     }
 }

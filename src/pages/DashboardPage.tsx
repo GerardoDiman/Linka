@@ -19,6 +19,7 @@ import {
     Maximize, ZoomIn, ZoomOut
 } from "lucide-react"
 import { supabase } from "../lib/supabase"
+import logger from "../lib/logger"
 import { useAuth } from "../context/AuthContext"
 import { useToast } from "../context/ToastContext"
 
@@ -34,6 +35,9 @@ import { transformToGraphData, type RawRelation } from "../lib/graph"
 import { NODE_COLORS } from "../lib/colors"
 import { useTheme } from "../context/ThemeContext"
 import { useTranslation } from "react-i18next"
+import { useKeyboardShortcuts, createShortcuts } from "../hooks/useKeyboardShortcuts"
+import { useUndoRedo } from "../hooks/useUndoRedo"
+import { ShortcutsHelpModal } from "../components/dashboard/ShortcutsHelpModal"
 
 
 
@@ -143,7 +147,7 @@ const syncViaFetch = async (payload: any, token: string) => {
                     throw new Error("Could not refresh session")
                 }
             } catch (err) {
-                console.error("❌ Emergency refresh failed. Needs manual login.")
+                logger.error("❌ Emergency refresh failed. Needs manual login.")
                 // Note: We can't use 't' easily in a helper function outside component without passing it
                 throw new Error("Tu sesión ha expirado. Por favor cierra sesión y vuelve a entrar.")
             }
@@ -181,7 +185,7 @@ const syncToCloud = async (userId: string, data: any, token?: string) => {
             // Use the token passed from the component
             await syncViaFetch(payload, token || '')
         } catch (fetchErr: any) {
-            console.error("❌ Falló tanto el cliente como el fallback:", fetchErr.message)
+            logger.error("❌ Falló tanto el cliente como el fallback:", fetchErr.message)
             throw fetchErr
         }
     }
@@ -312,14 +316,12 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         { source: '8', target: '1' },
     ], [])
 
-    if (loading || !session) return <DashboardSkeleton />
-
     const initialGraphData = useMemo(() => {
         if (!session) return { nodes: [], edges: [] }
         const saved = getSavedPositions(session.user.id)
         const custom = getSavedCustomColors(session.user.id)
         return transformToGraphData(localizedDemoDatabases, localizedDemoRelations, saved, custom)
-    }, [session?.user.id, localizedDemoDatabases, localizedDemoRelations])
+    }, [session, localizedDemoDatabases, localizedDemoRelations])
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialGraphData.nodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialGraphData.edges)
@@ -339,6 +341,86 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const [userPlan, setUserPlan] = useState<'free' | 'pro'>('pro') // Forced to pro for Beta
     const [isDirty, setIsDirty] = useState(false)
     const [notionToken, setNotionToken] = useState<string | null>(() => session ? localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN)) : null)
+    const [showShortcutsModal, setShowShortcutsModal] = useState(false)
+
+    // Undo/Redo for node positions
+    const { undo, redo, saveState: saveUndoState } = useUndoRedo()
+
+    // Keyboard shortcuts
+    useKeyboardShortcuts([
+        createShortcuts.search(() => {
+            // Focus the search input in Navbar
+            const searchInput = document.querySelector('input[placeholder]') as HTMLInputElement
+            if (searchInput) {
+                searchInput.focus()
+                searchInput.select()
+            }
+        }),
+        createShortcuts.save(async () => {
+            // Force save to cloud
+            if (!session) return
+
+            const payload = {
+                positions: Object.fromEntries(
+                    nodes.map(n => [n.id, { x: n.position.x, y: n.position.y }])
+                ),
+                custom_colors: customColors,
+                filters: Array.from(selectedPropertyTypes),
+                hidden_dbs: Array.from(hiddenDbIds),
+                hide_isolated: hideIsolated,
+                notion_token: notionToken
+            }
+
+            try {
+                setCloudSyncStatus('saving')
+                await syncToCloud(session.user.id, payload, session.access_token)
+                setIsDirty(false)
+                setCloudSyncStatus('saved')
+                toast.success(t('dashboard.keyboard.saved'))
+            } catch (err) {
+                setCloudSyncStatus('error')
+                toast.error(t('dashboard.keyboard.saveError'))
+            }
+        }),
+        createShortcuts.info(() => {
+            // Show sync status info
+            if (isDirty) {
+                toast.info(t('dashboard.keyboard.syncPending'))
+            } else {
+                toast.success(t('dashboard.keyboard.allSynced'))
+            }
+        }),
+        createShortcuts.fitView(() => {
+            fitView()
+        }),
+        createShortcuts.escape(() => {
+            setSelectedNode(null)
+            setSelectedNodeIds(new Set())
+            setShowShortcutsModal(false)
+        }),
+        // Undo/Redo shortcuts
+        createShortcuts.undo(() => {
+            const previousNodes = undo()
+            if (previousNodes) {
+                setNodes(previousNodes)
+                toast.info(t('dashboard.keyboard.undo'))
+            }
+        }),
+        createShortcuts.redo(() => {
+            const nextNodes = redo()
+            if (nextNodes) {
+                setNodes(nextNodes)
+                toast.info(t('dashboard.keyboard.redo'))
+            }
+        }),
+        // Help overlay shortcut (?)
+        createShortcuts.help(() => {
+            setShowShortcutsModal(prev => !prev)
+        })
+    ])
+
+    // Early return AFTER all hooks are declared (React rules of hooks)
+    if (loading || !session) return <DashboardSkeleton />
 
 
     // Fetch cloud data on mount
@@ -678,7 +760,9 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     const onNodeDragStop = useCallback(() => {
         setIsDirty(true)
-    }, [])
+        // Save current state to undo history
+        saveUndoState(nodes)
+    }, [nodes, saveUndoState])
 
     const handleResetLayout = useCallback(() => {
         setIsDirty(true)
@@ -852,6 +936,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 onManualSync={handleManualSync}
                 syncStatus={cloudSyncStatus}
                 isDirty={isDirty}
+                onShowShortcuts={() => setShowShortcutsModal(true)}
             />
 
             <div className={`flex flex-1 overflow-hidden transition-all duration-500`}>
@@ -1005,6 +1090,11 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 userPlan={userPlan}
                 isSidebarCollapsed={isSidebarCollapsed}
                 activeColor={selectedNodeIds.size === 1 ? customColors[Array.from(selectedNodeIds)[0]] || nodes.find(n => n.id === Array.from(selectedNodeIds)[0])?.data?.color : undefined}
+            />
+
+            <ShortcutsHelpModal
+                isOpen={showShortcutsModal}
+                onClose={() => setShowShortcutsModal(false)}
             />
         </div>
     )

@@ -143,6 +143,12 @@
         "navbar": {
             "sync": "Sincronizar Notion",
             "disconnect": "Desconectar",
+            "confirmModal": {
+                "title": "¿Desconectar de Notion?",
+                "message": "Esto eliminará tu token guardado y desconectará la sincronización con Notion.",
+                "confirm": "Sí, desconectar",
+                "cancel": "Cancelar"
+            },
             "search": "Buscar bases de datos...",
             "pro": "PLAN PRO",
             "free": "PLAN GRATIS",
@@ -169,6 +175,13 @@
             "share": "Compartir",
             "settings": "Configuración"
         },
+        "settings": {
+            "shortcuts": "Atajos de Teclado",
+            "helpTour": "Iniciar Tour de Ayuda",
+            "language": "Idioma",
+            "theme": "Tema",
+            "admin": "Panel de Admin"
+        },
         "syncStates": {
             "syncing": "Sincronizando...",
             "success": "Sincronizado con éxito",
@@ -180,6 +193,26 @@
             "zoomOut": "Alejar",
             "fitView": "Ajustar a la pantalla",
             "resetLayout": "Reiniciar disposición automática"
+        },
+        "keyboard": {
+            "syncPending": "Hay cambios pendientes por sincronizar...",
+            "allSynced": "✓ Todo está sincronizado",
+            "saved": "✓ Cambios guardados",
+            "saveError": "Error al guardar cambios",
+            "undo": "Deshacer aplicado",
+            "redo": "Rehacer aplicado"
+        },
+        "shortcuts": {
+            "title": "Atajos de Teclado",
+            "search": "Buscar nodos",
+            "save": "Guardar cambios",
+            "info": "Estado de sincronización",
+            "undo": "Deshacer",
+            "redo": "Rehacer",
+            "fitView": "Ajustar vista",
+            "deselect": "Deseleccionar todo",
+            "help": "Mostrar atajos",
+            "footer": "Presiona ? en cualquier momento para ver esta ayuda"
         },
         "node": {
             "openInNotionTooltip": "Abrir en Notion",
@@ -264,7 +297,14 @@
             "capturing": "Capturando gráfico...",
             "downloading": "Descargando...",
             "fallbackInfo": "Se ha exportado una captura básica debido a límites técnicos.",
-            "criticalError": "Error crítico. Prueba a reducir el zoom de tu navegador."
+            "criticalError": "Error crítico. Prueba a reducir el zoom de tu navegador.",
+            "image": "Imagen",
+            "mermaidDesc": "Exporta el grafo como código Mermaid para documentación o diagramas.",
+            "mermaidCopied": "Código Mermaid copiado",
+            "mermaidDownloaded": "Archivo .mmd descargado",
+            "copied": "¡Copiado!",
+            "copyCode": "Copiar código",
+            "downloadMmd": "Descargar .mmd"
         },
         "pricing": {
             "title": "Maximiza tu Visión",
@@ -338,5 +378,87 @@
             "missingToken": "Por favor ingresa un token de Notion",
             "syncError": "Error al sincronizar con Notion"
         }
+    },
+    "auth": {
+        "login": {
+            "title": "Bienvenido de nuevo",
+            "subtitle": "Ingresa a tu cuenta para continuar",
+            "email": "Email",
+            "password": "Contraseña",
+            "forgotPassword": "¿Olvidaste tu contraseña?",
+            "submit": "Iniciar Sesión",
+            "submitting": "Iniciando...",
+            "noAccount": "¿No tienes cuenta?",
+            "register": "Regístrate",
+            "noAccess": "¿Aún no tienes acceso?",
+            "requestAccess": "Solicitar Acceso",
+            "error": "Error al iniciar sesión"
+        },
+        "register": {
+            "title": "Crea tu cuenta",
+            "subtitle": "Comienza a visualizar tus datos hoy",
+            "fullName": "Nombre Completo",
+            "fullNamePlaceholder": "Juan Pérez",
+            "username": "Usuario",
+            "usernamePlaceholder": "juanp",
+            "email": "Email",
+            "emailPlaceholder": "tu@email.com",
+            "password": "Contraseña",
+            "confirmPassword": "Confirmar Contraseña",
+            "submit": "Registrarse",
+            "submitting": "Creando cuenta...",
+            "hasAccount": "¿Ya tienes cuenta?",
+            "login": "Inicia Sesión",
+            "noAccess": "¿Aún no tienes acceso?",
+            "requestAccess": "Solicitar Acceso",
+            "success": "¡Registro exitoso! Por favor revisa tu email para confirmar tu cuenta.",
+            "errors": {
+                "passwordMismatch": "Las contraseñas no coinciden",
+                "notOnWaitlist": "Este correo no ha solicitado acceso o no se encuentra en la lista de espera.",
+                "notApproved": "Tu solicitud de acceso aún no ha sido aprobada. Te avisaremos por correo.",
+                "technical": "Ocurrió un error técnico al verificar tu acceso. Por favor contacta a soporte.",
+                "generic": "Error al registrarse"
+            },
+            "passwordRequirements": {
+                "minLength": "Mínimo 10 caracteres",
+                "uppercase": "Una letra mayúscula",
+                "lowercase": "Una letra minúscula",
+                "number": "Un número",
+                "special": "Un carácter especial (@$!%*?&)"
+            }
+        },
+        "recovery": {
+            "title": "Recuperar Contraseña",
+            "subtitle": "Te enviaremos un enlace para restablecerla",
+            "email": "Email",
+            "submit": "Enviar enlace",
+            "submitting": "Enviando...",
+            "success": "¡Correo enviado! Revisa tu bandeja de entrada.",
+            "back": "Volver",
+            "backToLogin": "Volver al inicio de sesión",
+            "error": "Error al enviar el correo"
+        },
+        "reset": {
+            "title": "Nueva Contraseña",
+            "subtitle": "Crea una contraseña segura para tu cuenta",
+            "password": "Nueva Contraseña",
+            "confirmPassword": "Confirmar Nueva Contraseña",
+            "submit": "Restablecer Contraseña",
+            "submitting": "Actualizando...",
+            "success": "¡Contraseña actualizada con éxito! Redirigiendo al inicio de sesión...",
+            "errors": {
+                "requirements": "La contraseña no cumple con todos los requisitos",
+                "mismatch": "Las contraseñas no coinciden",
+                "generic": "Error al restablecer la contraseña"
+            }
+        }
+    },
+    "notion": {
+        "errors": {
+            "invalidToken": "Token inválido. Debe comenzar con 'secret_' o 'ntn_'.",
+            "apiError": "Error de Notion ({{status}}): {{message}}",
+            "untitled": "Sin título"
+        },
+        "integrationToken": "Token de Integración"
     }
 }

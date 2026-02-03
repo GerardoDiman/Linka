@@ -143,6 +143,12 @@
         "navbar": {
             "sync": "Sync Notion",
             "disconnect": "Disconnect",
+            "confirmModal": {
+                "title": "Disconnect from Notion?",
+                "message": "This will remove your saved token and disconnect Notion synchronization.",
+                "confirm": "Yes, disconnect",
+                "cancel": "Cancel"
+            },
             "search": "Search databases...",
             "pro": "PRO PLAN",
             "free": "FREE PLAN",
@@ -169,6 +175,13 @@
             "share": "Share",
             "settings": "Settings"
         },
+        "settings": {
+            "shortcuts": "Keyboard Shortcuts",
+            "helpTour": "Start Help Tour",
+            "language": "Language",
+            "theme": "Theme",
+            "admin": "Admin Panel"
+        },
         "syncStates": {
             "syncing": "Syncing...",
             "success": "Synced successfully",
@@ -180,6 +193,26 @@
             "zoomOut": "Zoom Out",
             "fitView": "Fit to screen",
             "resetLayout": "Reset automatic layout"
+        },
+        "keyboard": {
+            "syncPending": "There are pending changes to sync...",
+            "allSynced": "✓ Everything is synced",
+            "saved": "✓ Changes saved",
+            "saveError": "Error saving changes",
+            "undo": "Undo applied",
+            "redo": "Redo applied"
+        },
+        "shortcuts": {
+            "title": "Keyboard Shortcuts",
+            "search": "Search nodes",
+            "save": "Save changes",
+            "info": "Sync status",
+            "undo": "Undo",
+            "redo": "Redo",
+            "fitView": "Fit to view",
+            "deselect": "Deselect all",
+            "help": "Show shortcuts",
+            "footer": "Press ? anytime to show this help"
         },
         "node": {
             "openInNotionTooltip": "Open in Notion",
@@ -264,7 +297,14 @@
             "capturing": "Capturing graph...",
             "downloading": "Downloading...",
             "fallbackInfo": "A basic capture has been exported due to technical limits.",
-            "criticalError": "Critical error. Try reducing your browser's zoom."
+            "criticalError": "Critical error. Try reducing your browser's zoom.",
+            "image": "Image",
+            "mermaidDesc": "Export the graph as Mermaid code for documentation or diagrams.",
+            "mermaidCopied": "Mermaid code copied",
+            "mermaidDownloaded": ".mmd file downloaded",
+            "copied": "Copied!",
+            "copyCode": "Copy code",
+            "downloadMmd": "Download .mmd"
         },
         "pricing": {
             "title": "Maximize your Vision",
@@ -338,5 +378,87 @@
             "missingToken": "Please enter a Notion token",
             "syncError": "Error syncing with Notion"
         }
+    },
+    "auth": {
+        "login": {
+            "title": "Welcome back",
+            "subtitle": "Sign in to your account to continue",
+            "email": "Email",
+            "password": "Password",
+            "forgotPassword": "Forgot your password?",
+            "submit": "Sign In",
+            "submitting": "Signing in...",
+            "noAccount": "Don't have an account?",
+            "register": "Sign up",
+            "noAccess": "Don't have access yet?",
+            "requestAccess": "Request Access",
+            "error": "Error signing in"
+        },
+        "register": {
+            "title": "Create your account",
+            "subtitle": "Start visualizing your data today",
+            "fullName": "Full Name",
+            "fullNamePlaceholder": "John Doe",
+            "username": "Username",
+            "usernamePlaceholder": "johnd",
+            "email": "Email",
+            "emailPlaceholder": "your@email.com",
+            "password": "Password",
+            "confirmPassword": "Confirm Password",
+            "submit": "Sign Up",
+            "submitting": "Creating account...",
+            "hasAccount": "Already have an account?",
+            "login": "Sign in",
+            "noAccess": "Don't have access yet?",
+            "requestAccess": "Request Access",
+            "success": "Registration successful! Please check your email to confirm your account.",
+            "errors": {
+                "passwordMismatch": "Passwords don't match",
+                "notOnWaitlist": "This email hasn't requested access or isn't on the waitlist.",
+                "notApproved": "Your access request hasn't been approved yet. We'll notify you by email.",
+                "technical": "A technical error occurred while verifying your access. Please contact support.",
+                "generic": "Error signing up"
+            },
+            "passwordRequirements": {
+                "minLength": "Minimum 10 characters",
+                "uppercase": "One uppercase letter",
+                "lowercase": "One lowercase letter",
+                "number": "One number",
+                "special": "One special character (@$!%*?&)"
+            }
+        },
+        "recovery": {
+            "title": "Recover Password",
+            "subtitle": "We'll send you a link to reset it",
+            "email": "Email",
+            "submit": "Send link",
+            "submitting": "Sending...",
+            "success": "Email sent! Check your inbox.",
+            "back": "Back",
+            "backToLogin": "Back to login",
+            "error": "Error sending email"
+        },
+        "reset": {
+            "title": "New Password",
+            "subtitle": "Create a secure password for your account",
+            "password": "New Password",
+            "confirmPassword": "Confirm New Password",
+            "submit": "Reset Password",
+            "submitting": "Updating...",
+            "success": "Password updated successfully! Redirecting to login...",
+            "errors": {
+                "requirements": "Password doesn't meet all requirements",
+                "mismatch": "Passwords don't match",
+                "generic": "Error resetting password"
+            }
+        }
+    },
+    "notion": {
+        "errors": {
+            "invalidToken": "Invalid token. Must start with 'secret_' or 'ntn_'.",
+            "apiError": "Notion Error ({{status}}): {{message}}",
+            "untitled": "Untitled"
+        },
+        "integrationToken": "Integration Token"
     }
 }

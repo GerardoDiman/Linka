@@ -26,7 +26,12 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const showToast = useCallback((message: string, type: ToastType = 'info', duration: number = 5000) => {
         const id = Math.random().toString(36).substring(2, 9);
-        setToasts((prev) => [...prev, { id, message, type, duration }]);
+
+        setToasts((prev) => {
+            // Remove any existing toast with the same message to prevent stacking
+            const filtered = prev.filter((t) => t.message !== message);
+            return [...filtered, { id, message, type, duration }];
+        });
 
         if (duration > 0) {
             setTimeout(() => {

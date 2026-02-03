@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import logger from '../lib/logger'
 
 interface AuthContextType {
     session: Session | null
@@ -56,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     return data[0].role
                 }
             } catch (fetchErr) {
-                console.error('❌ Role fallback failed:', fetchErr)
+                logger.error('❌ Role fallback failed:', fetchErr)
             }
 
             // 3. Last resort default
@@ -149,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // 3. Inform Supabase
             await supabase.auth.signOut()
         } catch (err) {
-            console.error('Sign out error:', err)
+            logger.error('Sign out error:', err)
         } finally {
             // Force a hard reload if the SPA state is sticky
             window.location.href = '/';
