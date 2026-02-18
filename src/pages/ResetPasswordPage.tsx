@@ -57,8 +57,8 @@ export default function ResetPasswordPage() {
             setTimeout(() => {
                 navigate("/login")
             }, 3000)
-        } catch (err: any) {
-            setError(err.message || t('auth.reset.errors.generic'))
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t('auth.reset.errors.generic'))
         } finally {
             setLoading(false)
         }

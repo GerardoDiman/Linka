@@ -59,8 +59,8 @@ export const syncViaFetch = async (payload: CloudSyncPayload, token: string): Pr
             try {
                 const { data: { session } } = await Promise.race([
                     supabase.auth.refreshSession(),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
-                ]) as any // eslint-disable-line @typescript-eslint/no-explicit-any
+                    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
+                ])
 
                 if (session?.access_token) {
                     response = await sendRequest(session.access_token)
@@ -98,15 +98,15 @@ export const syncToCloud = async (userId: string, data: Omit<CloudSyncPayload, '
         // Short timeout to trigger REST fallback quickly if the JS client hangs
         const { error } = await Promise.race([
             supabase.from('user_graph_data').upsert(payload),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT_CLIENT")), 4000))
-        ]) as any // eslint-disable-line @typescript-eslint/no-explicit-any
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT_CLIENT")), 4000))
+        ])
 
         if (error) throw error
-    } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch {
         try {
             await syncViaFetch(payload, token || '')
-        } catch (fetchErr: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-            logger.error("❌ Falló tanto el cliente como el fallback:", fetchErr.message)
+        } catch (fetchErr: unknown) {
+            logger.error("❌ Falló tanto el cliente como el fallback:", fetchErr instanceof Error ? fetchErr.message : fetchErr)
             throw fetchErr
         }
     }
@@ -124,8 +124,8 @@ export const fetchCloudGraphData = async (userId: string, accessToken: string): 
                 .select('id, positions, custom_colors, filters, hidden_dbs, hide_isolated, notion_token')
                 .eq('id', userId)
                 .maybeSingle(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
-        ]) as any // eslint-disable-line @typescript-eslint/no-explicit-any
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
+        ])
 
         if (!error) data = clientData
     } catch {

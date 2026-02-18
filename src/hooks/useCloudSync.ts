@@ -3,7 +3,7 @@
  * performing manual saves, and handling Notion sync.
  */
 import { useState, useCallback, useEffect } from 'react'
-import type { Node } from 'reactflow'
+import type { Node, Edge } from 'reactflow'
 import { supabase } from '../lib/supabase'
 import { fetchCloudGraphData, syncToCloud } from '../lib/cloudSync'
 import {
@@ -14,12 +14,13 @@ import {
 } from '../lib/storage'
 import { fetchNotionData } from '../lib/notion'
 import { transformToGraphData, type RawRelation } from '../lib/graph'
+import type { DatabaseNodeData, DatabaseInfo } from '../types'
 
 interface UseCloudSyncOptions {
-    session: { user: { id: string; user_metadata?: Record<string, any> }; access_token?: string } | null // eslint-disable-line @typescript-eslint/no-explicit-any
+    session: { user: { id: string; user_metadata?: Record<string, unknown> }; access_token?: string } | null
     // Graph state setters
     setNodes: (nodes: Node[] | ((prev: Node[]) => Node[])) => void
-    setEdges: (edges: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    setEdges: (edges: Edge[] | ((prev: Edge[]) => Edge[])) => void
     nodes: Node[]
     // Filter state
     customColors: Record<string, string>
@@ -32,17 +33,17 @@ interface UseCloudSyncOptions {
     setHideIsolated: (value: boolean) => void
     setIsDirty: (dirty: boolean) => void
     // Synced data
-    syncedDbs: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
-    setSyncedDbs: (dbs: any[]) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    syncedDbs: DatabaseInfo[]
+    setSyncedDbs: (dbs: DatabaseInfo[]) => void
     setSyncedRelations: (rels: RawRelation[]) => void
     // Layout
-    runForceLayout: (nodes: Node[], edges: any[], search?: string) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    runForceLayout: (nodes: Node[], edges: Edge[], search?: string) => void
     fitView: (options?: { padding?: number; duration?: number; maxZoom?: number; nodes?: { id: string }[] }) => void
-    handleSelectNode: (nodeData: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    handleSelectNode: (nodeData: DatabaseNodeData) => void
     searchQuery: string
     // UI feedback
     setSyncStatus: (status: 'idle' | 'saving' | 'saved' | 'error') => void
-    setSelectedNode: (node: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    setSelectedNode: (node: DatabaseNodeData | null) => void
     toast: {
         success: (msg: string) => void
         error: (msg: string) => void
@@ -174,7 +175,7 @@ export function useCloudSync({
         setSyncStatus('saving')
         setSelectedNode(null)
         try {
-            const data = await fetchNotionData(token)
+            const data = await fetchNotionData(token, session.access_token || '')
 
             setSyncedDbs(data.databases)
             setSyncedRelations(data.relations)
@@ -211,9 +212,9 @@ export function useCloudSync({
                     fitView({ padding: 0.2, duration: 800, maxZoom: 1 })
                 }, 100)
             }
-        } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+        } catch (error: unknown) {
             console.error("❌ handleSync Error:", error)
-            toast.error(error.message || t('dashboard.errors.syncError'))
+            toast.error(error instanceof Error ? error.message : t('dashboard.errors.syncError'))
         } finally {
             setSyncStatus('idle')
         }

@@ -3,13 +3,21 @@
  */
 import { useCallback } from 'react'
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide, forceX, forceY } from 'd3-force'
+import type { SimulationNodeDatum } from 'd3-force'
 import type { Node, Edge } from 'reactflow'
+import type { DatabaseNodeData } from '../types'
+
+interface SimulationNode extends SimulationNodeDatum {
+    id: string
+    position: { x: number; y: number }
+    data: DatabaseNodeData
+}
 
 interface UseGraphLayoutOptions {
     setNodes: (nodes: Node[] | ((prev: Node[]) => Node[])) => void
     setEdges: (edges: Edge[] | ((prev: Edge[]) => Edge[])) => void
     fitView: (options?: { padding?: number; duration?: number; maxZoom?: number }) => void
-    handleSelectNode: (nodeData: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    handleSelectNode: (nodeData: DatabaseNodeData) => void
     customColors: Record<string, string>
 }
 
@@ -36,8 +44,8 @@ export function useGraphLayout({
             target: edge.target,
         }))
 
-        const simulation = forceSimulation(simulationNodes as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-            .force("link", forceLink(simulationLinks).id((d: any) => d.id).distance(350)) // eslint-disable-line @typescript-eslint/no-explicit-any
+        const simulation = forceSimulation<SimulationNode>(simulationNodes as SimulationNode[])
+            .force("link", forceLink(simulationLinks).id((d) => (d as SimulationNode).id).distance(350))
             .force("charge", forceManyBody().strength(-500))
             .force("center", forceCenter(0, 0))
             .force("collide", forceCollide(200))
@@ -48,10 +56,10 @@ export function useGraphLayout({
         for (let i = 0; i < 300; ++i) simulation.tick()
 
         const layoutedNodes = nodesToLayout.map((node, index) => {
-            const simNode = simulationNodes[index] as any // eslint-disable-line @typescript-eslint/no-explicit-any
+            const simNode = simulationNodes[index] as SimulationNode
             return {
                 ...node,
-                position: { x: simNode.x, y: simNode.y },
+                position: { x: simNode.x ?? 0, y: simNode.y ?? 0 },
                 data: {
                     ...node.data,
                     onSelect: handleSelectNode,

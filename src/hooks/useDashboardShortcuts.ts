@@ -6,11 +6,13 @@ import { useState } from 'react'
 import type { Node } from 'reactflow'
 import { useKeyboardShortcuts, createShortcuts } from './useKeyboardShortcuts'
 import { useUndoRedo } from './useUndoRedo'
+import type { DatabaseNodeData } from '../types'
 
 interface UseDashboardShortcutsOptions {
     session: { user: { id: string }; access_token?: string } | null
     setNodes: (nodes: Node[] | ((prev: Node[]) => Node[])) => void
-    setSelectedNode: (node: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+    setSelectedNode: (node: DatabaseNodeData | null) => void
+
     setSelectedNodeIds: (ids: Set<string>) => void
     isDirty: boolean
     onSave: () => Promise<void>

@@ -35,8 +35,8 @@ export function AccessRequestForm() {
             })
 
             setSubmitted(true)
-        } catch (err: any) {
-            setError(err.message || t('landing.access.error'))
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t('landing.access.error'))
         } finally {
             setLoading(false)
         }

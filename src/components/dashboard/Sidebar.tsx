@@ -4,29 +4,21 @@ import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
 import { NotionIcon } from "../ui/NotionIcon"
 import { useTranslation } from "react-i18next"
+import type { DatabaseInfo, DatabaseNodeData } from "../../types"
 
 // NotionIcon is now imported from ../ui/NotionIcon
 
 interface SidebarProps {
-    databases?: {
-        id: string;
-        title: string;
-        color?: string;
-        icon?: string;
-        properties?: { name: string; type: string }[]
-        url?: string;
-        createdTime?: string;
-        lastEditedTime?: string;
-    }[]
+    databases?: DatabaseInfo[]
     onFitView?: () => void
-    selectedNode?: any
+    selectedNode?: DatabaseNodeData | null
     onClearSelection?: () => void
     searchQuery?: string
     visibleDbIds?: Set<string>
     hiddenDbIds?: Set<string>
     onToggleVisibility?: (dbId: string) => void
     onFocusNode?: (nodeId: string) => void
-    onSelectNode?: (node: any) => void
+    onSelectNode?: (node: DatabaseNodeData) => void
     isCollapsed?: boolean
     onToggleCollapse?: () => void
 }
@@ -88,7 +80,7 @@ export function Sidebar({
                     isHidden
                 }
             })
-            .sort((a: any, b: any) => {
+            .sort((a, b) => {
                 if (a.matches !== b.matches) return a.matches ? -1 : 1
                 if (searchQuery && a.priority !== b.priority) return b.priority - a.priority
                 let comparison = 0
@@ -330,16 +322,16 @@ export function Sidebar({
                                     </h3>
                                     <div className="space-y-2">
                                         {selectedNode?.properties
-                                            ?.map((prop: any) => ({
+                                            ?.map((prop: { name: string; type: string }) => ({
                                                 ...prop,
                                                 priority: getPriority(prop.name, searchQuery),
                                                 matches: !searchQuery || prop.name.toLowerCase().includes(searchQuery.toLowerCase())
                                             }))
-                                            .sort((a: any, b: any) => {
+                                            .sort((a, b) => {
                                                 if (a.priority !== b.priority) return b.priority - a.priority
                                                 return a.name.localeCompare(b.name)
                                             })
-                                            .map((prop: any, idx: number) => (
+                                            .map((prop, idx: number) => (
                                                 <div
                                                     key={idx}
                                                     className={`group bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-primary/30 hover:bg-blue-50/30 dark:hover:bg-primary/5 transition-all ${!prop.matches ? 'opacity-40 grayscale-[0.5]' : ''
@@ -364,11 +356,11 @@ export function Sidebar({
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-xs">
                                             <span className="text-gray-500 dark:text-gray-400">{t('dashboard.sidebar.created')}</span>
-                                            <span className="text-gray-700 dark:text-gray-200 font-medium">{new Date(selectedNode?.createdTime).toLocaleDateString()}</span>
+                                            <span className="text-gray-700 dark:text-gray-200 font-medium">{new Date(selectedNode?.createdTime || '').toLocaleDateString()}</span>
                                         </div>
                                         <div className="flex justify-between text-xs">
                                             <span className="text-gray-500 dark:text-gray-400">{t('dashboard.sidebar.updated')}</span>
-                                            <span className="text-gray-700 dark:text-gray-200 font-medium">{new Date(selectedNode?.lastEditedTime).toLocaleDateString()}</span>
+                                            <span className="text-gray-700 dark:text-gray-200 font-medium">{new Date(selectedNode?.lastEditedTime || '').toLocaleDateString()}</span>
                                         </div>
                                     </div>
                                 </div>

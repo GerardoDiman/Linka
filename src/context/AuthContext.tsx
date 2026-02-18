@@ -29,8 +29,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // 1. Try via standard client with a timeout race
             const { data, error } = await Promise.race([
                 supabase.from('profiles').select('role').eq('id', userId).single(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
-            ]) as any
+                new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
+            ])
 
             if (!error && data?.role) {
                 setRole(data.role)

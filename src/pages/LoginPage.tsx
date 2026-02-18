@@ -30,8 +30,8 @@ export default function LoginPage() {
             if (error) throw error
 
             // Redirection is handled by App.tsx observing session change
-        } catch (err: any) {
-            setError(err.message || t('auth.login.error'))
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t('auth.login.error'))
         } finally {
             setLoading(false)
         }

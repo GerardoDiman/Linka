@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 interface SchemaNode {
     id: string
     title: string
-    icon: any
+    icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>
     color: string
     x: number
     y: number

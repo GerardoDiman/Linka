@@ -2,8 +2,9 @@ import { Handle, Position } from "reactflow"
 import { ExternalLink, Database, Calendar, Clock, ArrowUpRight, ArrowDownLeft, List, Check } from "lucide-react"
 import { Tooltip } from "../ui/Tooltip"
 import { useTranslation } from "react-i18next"
+import type { DatabaseNodeData } from "../../types"
 
-export function DatabaseNode({ data, selected }: { data: any, selected?: boolean }) {
+export function DatabaseNode({ data, selected }: { data: DatabaseNodeData, selected?: boolean }) {
     const { t } = useTranslation()
     const matchesSearch = !data.searchQuery || data.label.toLowerCase().includes(data.searchQuery.toLowerCase())
 

@@ -86,8 +86,8 @@ export default function RegisterPage() {
 
             toast.success(t('auth.register.success'))
             navigate("/login")
-        } catch (err: any) {
-            setError(err.message || t('auth.register.errors.generic'))
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t('auth.register.errors.generic'))
         } finally {
             setLoading(false)
         }

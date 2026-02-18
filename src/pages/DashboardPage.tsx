@@ -12,6 +12,7 @@ import ReactFlow, {
     ReactFlowProvider,
     Panel
 } from "reactflow"
+import type { DatabaseInfo, DatabaseNodeData } from "../types"
 import "reactflow/dist/style.css"
 import {
     LayoutTemplate, Loader2,
@@ -75,9 +76,9 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialGraphData.nodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialGraphData.edges)
     const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-    const [selectedNode, setSelectedNode] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [selectedNode, setSelectedNode] = useState<DatabaseNodeData | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
-    const [syncedDbs, setSyncedDbs] = useState<any[]>(localizedDemoDatabases) // eslint-disable-line @typescript-eslint/no-explicit-any
+    const [syncedDbs, setSyncedDbs] = useState<DatabaseInfo[]>(localizedDemoDatabases)
     const [syncedRelations, setSyncedRelations] = useState(localizedDemoRelations)
     const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set())
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -85,7 +86,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     // ─── Graph filters ──────────────────────────────────────────────────
 
-    const handleSelectNode = useCallback((nodeData: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const handleSelectNode = useCallback((nodeData: DatabaseNodeData) => {
         setSelectedNode(nodeData)
     }, [])
 
@@ -147,12 +148,12 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         }
 
         if (filters.selectedPropertyTypes.size > 0) {
-            filtered = filtered.filter((db: any) => // eslint-disable-line @typescript-eslint/no-explicit-any
-                db.properties?.some((p: any) => filters.selectedPropertyTypes.has(p.type)) // eslint-disable-line @typescript-eslint/no-explicit-any
+            filtered = filtered.filter((db) =>
+                db.properties?.some((p) => filters.selectedPropertyTypes.has(p.type))
             )
         }
 
-        filtered = filtered.filter((db: any) => !filters.hiddenDbIds.has(db.id)) // eslint-disable-line @typescript-eslint/no-explicit-any
+        filtered = filtered.filter((db) => !filters.hiddenDbIds.has(db.id))
 
         if (filters.hideIsolated) {
             const connectedDbIds = new Set<string>()
@@ -160,10 +161,10 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 connectedDbIds.add(rel.source)
                 connectedDbIds.add(rel.target)
             })
-            filtered = filtered.filter((db: any) => connectedDbIds.has(db.id)) // eslint-disable-line @typescript-eslint/no-explicit-any
+            filtered = filtered.filter((db) => connectedDbIds.has(db.id))
         }
 
-        return new Set(filtered.map((db: any) => db.id)) // eslint-disable-line @typescript-eslint/no-explicit-any
+        return new Set(filtered.map((db) => db.id))
     }, [syncedDbs, filters.selectedPropertyTypes, filters.hiddenDbIds, filters.hideIsolated, syncedRelations, cloudSync.userPlan, cloudSync.notionToken])
 
     // ─── Save handler for keyboard shortcuts ────────────────────────────
@@ -225,7 +226,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     const dbTitles = useMemo(() => {
         const map = new Map<string, string>()
-        syncedDbs.forEach((db: any) => map.set(db.id, db.title)) // eslint-disable-line @typescript-eslint/no-explicit-any
+        syncedDbs.forEach((db) => map.set(db.id, db.title))
         return map
     }, [syncedDbs])
 

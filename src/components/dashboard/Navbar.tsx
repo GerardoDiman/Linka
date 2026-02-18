@@ -19,6 +19,7 @@ import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
 import { ConfirmationModal } from "../ui/ConfirmationModal"
 import logger from "../../lib/logger"
+import type { DatabaseInfo } from "../../types"
 
 // NotionIcon is now imported from ../ui/NotionIcon
 
@@ -29,7 +30,7 @@ interface NavbarProps {
     loading?: boolean
     searchQuery?: string
     onSearchChange?: (query: string) => void
-    databases?: any[]
+    databases?: DatabaseInfo[]
     selectedPropertyTypes?: Set<string>
     onTogglePropertyType?: (type: string) => void
     onClearFilters?: () => void
@@ -44,7 +45,7 @@ interface NavbarProps {
     onShowShortcuts?: () => void
 }
 
-const PROPERTY_TYPE_ICONS: Record<string, any> = {
+const PROPERTY_TYPE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
     title: Type,
     rich_text: AlignLeft,
     number: Hash,
@@ -107,7 +108,7 @@ export function Navbar({
     const propertyTypes = useMemo(() => {
         const types = new Set<string>()
         databases.forEach(db => {
-            db.properties?.forEach((p: any) => types.add(p.type))
+            db.properties?.forEach((p: { name: string; type: string }) => types.add(p.type))
         })
         return Array.from(types).sort()
     }, [databases])

@@ -93,7 +93,7 @@ export function ExportButton() {
 
             const bgColor = getBgColor(selectedBg)
 
-            const options: any = {
+            const options: Record<string, unknown> = {
                 backgroundColor: bgColor,
                 width: configWidth,
                 height: configHeight,

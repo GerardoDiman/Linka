@@ -27,8 +27,8 @@ export default function RecoveryPage() {
             if (error) throw error
 
             setSubmitted(true)
-        } catch (err: any) {
-            setError(err.message || t('auth.recovery.error'))
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t('auth.recovery.error'))
         } finally {
             setLoading(false)
         }

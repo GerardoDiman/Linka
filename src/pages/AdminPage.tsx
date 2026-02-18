@@ -110,8 +110,8 @@ export default function AdminPage() {
             setInviteEmail("")
             fetchEntries()
             toast.success("Invitación especial enviada con éxito")
-        } catch (err: any) {
-            toast.error(err.message || "Error al enviar la invitación")
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Error al enviar la invitación")
         } finally {
             setInviting(false)
         }
