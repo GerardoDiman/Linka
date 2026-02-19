@@ -194,13 +194,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         t
     })
 
-    // ─── Early return AFTER all hooks are declared ──────────────────────
-
-    if (loading || !session) return <DashboardSkeleton />
-
     // ─── Auto-onboarding on first visit ─────────────────────────────────
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         if (!session) return
         const hasSeenLocalOnboarding = localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.ONBOARDING))
@@ -213,7 +208,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     }, [session?.user.id, session?.user.user_metadata?.has_seen_onboarding])
 
     // Update demo data language when it changes
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const isShowingDemo = !cloudSync.notionToken
         if (isShowingDemo) {
@@ -306,7 +300,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
 
     // ─── Effects for visibility/search updates ──────────────────────────
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         setNodes((nds) => nds.map((node) => {
             const isVisible = visibleDbIds.has(node.id)
@@ -342,13 +335,16 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     }, [searchQuery, visibleDbIds, dbTitles, setNodes, setEdges])
 
     // Separate effect for fitView
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fitView({ padding: 0.2, duration: 400, maxZoom: 1 })
         }, 150)
         return () => clearTimeout(timeoutId)
     }, [visibleDbIds, fitView])
+
+    // ─── Early return AFTER all hooks are declared ──────────────────────
+
+    if (loading || !session) return <DashboardSkeleton />
 
     // ─── Render ─────────────────────────────────────────────────────────
 
