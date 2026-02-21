@@ -41,7 +41,7 @@ export function SidebarSkeleton({ count = 5 }: SidebarSkeletonProps) {
                             {/* Database name skeleton */}
                             <div
                                 className="h-3 bg-gray-200 dark:bg-slate-700 rounded animate-pulse"
-                                style={{ width: `${60 + Math.random() * 30}%` }}
+                                style={{ width: `${60 + (i * 15 % 30)}%` }}
                             />
                             {/* Properties count skeleton */}
                             <div className="h-2 w-16 bg-gray-100 dark:bg-slate-800 rounded animate-pulse" />

@@ -1,0 +1,323 @@
+﻿
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\DashboardSkeleton.tsx
+  17:46  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\DashboardSkeleton.tsx:17:46
+  15 |                         <div key={i} className="flex items-center gap-3 px-2">
+  16 |                             <Skeleton variant="rectangle" width={24} height={24} className="rounded" />
+> 17 |                             <Skeleton width={Math.random() * 40 + 60} height={16} />
+     |                                              ^^^^^^^^^^^^^ Cannot call impure function
+  18 |                         </div>
+  19 |                     ))}
+  20 |                 </div>  react-hooks/purity
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\ExportButton.tsx
+  166:22  error  'fallbackErr' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\OnboardingTour.tsx
+  88:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\OnboardingTour.tsx:88:13
+  86 |         if (isOpen && currentStep === STEPS.length - 1) {
+  87 |             // If the user previously finished it and is opening it again via "Help"
+> 88 |             setCurrentStep(0)
+     |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  89 |         }
+  90 |     }, [isOpen])
+  91 |  react-hooks/set-state-in-effect
+  90:8   warning  React Hook useEffect has missing dependencies: 'STEPS.length' and 'currentStep'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\SidebarSkeleton.tsx
+  44:57  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\dashboard\SidebarSkeleton.tsx:44:57
+  42 |                             <div
+  43 |                                 className="h-3 bg-gray-200 dark:bg-slate-700 rounded animate-pulse"
+> 44 |                                 style={{ width: `${60 + Math.random() * 30}%` }}
+     |                                                         ^^^^^^^^^^^^^ Cannot call impure function
+  45 |                             />
+  46 |                             {/* Properties count skeleton */}
+  47 |                             <div className="h-2 w-16 bg-gray-100 dark:bg-slate-800 rounded animate-pulse" />  react-hooks/purity
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\DataAnimation.tsx
+   72:28  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\DataAnimation.tsx:72:28
+  70 |                     className="absolute w-1 h-1 bg-primary/20 rounded-full"
+  71 |                     initial={{
+> 72 |                         x: Math.random() * 100 + "%",
+     |                            ^^^^^^^^^^^^^ Cannot call impure function
+  73 |                         y: Math.random() * 100 + "%",
+  74 |                         opacity: 0
+  75 |                     }}                                react-hooks/purity
+   73:28  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\DataAnimation.tsx:73:28
+  71 |                     initial={{
+  72 |                         x: Math.random() * 100 + "%",
+> 73 |                         y: Math.random() * 100 + "%",
+     |                            ^^^^^^^^^^^^^ Cannot call impure function
+  74 |                         opacity: 0
+  75 |                     }}
+  76 |                     animate={{                                                                             react-hooks/purity
+   81:39  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\DataAnimation.tsx:81:39
+  79 |                     }}
+  80 |                     transition={{
+> 81 |                         duration: 5 + Math.random() * 5,
+     |                                       ^^^^^^^^^^^^^ Cannot call impure function
+  82 |                         repeat: Infinity,
+  83 |                         ease: "linear",
+  84 |                         delay: Math.random() * 5                                                 react-hooks/purity
+   84:32  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\DataAnimation.tsx:84:32
+  82 |                         repeat: Infinity,
+  83 |                         ease: "linear",
+> 84 |                         delay: Math.random() * 5
+     |                                ^^^^^^^^^^^^^ Cannot call impure function
+  85 |                     }}
+  86 |                 />
+  87 |             ))}                                                                                                                react-hooks/purity
+  160:43  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\DataAnimation.tsx:160:43
+  158 |                         opacity: { duration: 0.6, delay: index * 0.1 },
+  159 |                         y: {
+> 160 |                             duration: 3 + Math.random() * 2,
+      |                                           ^^^^^^^^^^^^^ Cannot call impure function
+  161 |                             repeat: Infinity,
+  162 |                             ease: "easeInOut"
+  163 |                         }  react-hooks/purity
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx
+   84:34  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:84:34
+  82 |                     key={i}
+  83 |                     initial={{
+> 84 |                         left: `${Math.random() * 100}%`,
+     |                                  ^^^^^^^^^^^^^ Cannot call impure function
+  85 |                         top: `${Math.random() * 100}%`,
+  86 |                         opacity: 0
+  87 |                     }}                                                                                                  react-hooks/purity
+   85:33  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:85:33
+  83 |                     initial={{
+  84 |                         left: `${Math.random() * 100}%`,
+> 85 |                         top: `${Math.random() * 100}%`,
+     |                                 ^^^^^^^^^^^^^ Cannot call impure function
+  86 |                         opacity: 0
+  87 |                     }}
+  88 |                     animate={{                                                                                                react-hooks/purity
+   93:39  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:93:39
+  91 |                     }}
+  92 |                     transition={{
+> 93 |                         duration: 8 + Math.random() * 8,
+     |                                       ^^^^^^^^^^^^^ Cannot call impure function
+  94 |                         repeat: Infinity,
+  95 |                         delay: Math.random() * 5
+  96 |                     }}                                                                                               react-hooks/purity
+   95:32  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:95:32
+  93 |                         duration: 8 + Math.random() * 8,
+  94 |                         repeat: Infinity,
+> 95 |                         delay: Math.random() * 5
+     |                                ^^^^^^^^^^^^^ Cannot call impure function
+  96 |                     }}
+  97 |                     className="absolute w-1 lg:w-1.5 h-1 lg:h-1.5 bg-primary/30 rounded-full blur-[1px]"
+  98 |                 />                                   react-hooks/purity
+  184:41  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:184:41
+  182 |                     }}
+  183 |                     transition={{
+> 184 |                         duration: 0.8 + Math.random() * 1,
+      |                                         ^^^^^^^^^^^^^ Cannot call impure function
+  185 |                         repeat: Infinity,
+  186 |                         delay: i * 0.2,
+  187 |                         ease: "linear"                                                                            react-hooks/purity
+  198:33  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:198:33
+  196 |                     key={`part-${i}`}
+  197 |                     style={{
+> 198 |                         top: `${Math.random() * 100}%`,
+      |                                 ^^^^^^^^^^^^^ Cannot call impure function
+  199 |                         left: `${Math.random() * 100}%`
+  200 |                     }}
+  201 |                     animate={{                                                                                        react-hooks/purity
+  199:34  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:199:34
+  197 |                     style={{
+  198 |                         top: `${Math.random() * 100}%`,
+> 199 |                         left: `${Math.random() * 100}%`
+      |                                  ^^^^^^^^^^^^^ Cannot call impure function
+  200 |                     }}
+  201 |                     animate={{
+  202 |                         x: i % 2 === 0 ? [0, 300] : [0, -300],                                                              react-hooks/purity
+  207:41  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:207:41
+  205 |                     }}
+  206 |                     transition={{
+> 207 |                         duration: 0.5 + Math.random() * 1.5,
+      |                                         ^^^^^^^^^^^^^ Cannot call impure function
+  208 |                         repeat: Infinity,
+  209 |                         delay: Math.random() * 3,
+  210 |                         ease: "linear"                                                                react-hooks/purity
+  209:32  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:209:32
+  207 |                         duration: 0.5 + Math.random() * 1.5,
+  208 |                         repeat: Infinity,
+> 209 |                         delay: Math.random() * 3,
+      |                                ^^^^^^^^^^^^^ Cannot call impure function
+  210 |                         ease: "linear"
+  211 |                     }}
+  212 |                     className={`absolute rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]  react-hooks/purity
+  285:29  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:285:29
+  283 |                     opacity: [0, 0.5, 0],
+  284 |                     scale: [0, 1, 0],
+> 285 |                     x: [0, (Math.random() - 0.5) * 100],
+      |                             ^^^^^^^^^^^^^ Cannot call impure function
+  286 |                     y: [0, (Math.random() - 0.5) * 100]
+  287 |                 }}
+  288 |                 transition={{                                                                                   react-hooks/purity
+  286:29  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:286:29
+  284 |                     scale: [0, 1, 0],
+  285 |                     x: [0, (Math.random() - 0.5) * 100],
+> 286 |                     y: [0, (Math.random() - 0.5) * 100]
+      |                             ^^^^^^^^^^^^^ Cannot call impure function
+  287 |                 }}
+  288 |                 transition={{
+  289 |                     duration: 3 + Math.random() * 2,                                                                        react-hooks/purity
+  289:35  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:289:35
+  287 |                 }}
+  288 |                 transition={{
+> 289 |                     duration: 3 + Math.random() * 2,
+      |                                   ^^^^^^^^^^^^^ Cannot call impure function
+  290 |                     repeat: Infinity,
+  291 |                     delay: Math.random() * 5
+  292 |                 }}                                                                                                                   react-hooks/purity
+  291:28  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\landing\Features.tsx:291:28
+  289 |                     duration: 3 + Math.random() * 2,
+  290 |                     repeat: Infinity,
+> 291 |                     delay: Math.random() * 5
+      |                            ^^^^^^^^^^^^^ Cannot call impure function
+  292 |                 }}
+  293 |                 className="absolute w-1.5 h-1.5 bg-rose-400 rounded-full blur-[1px]"
+  294 |             />                                                                       react-hooks/purity
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\ui\input.tsx
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\components\ui\textarea.tsx
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\context\AuthContext.tsx
+   40:18  error  'err' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+   84:22  error  'err' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+   97:22  error  'err' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+  167:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\context\ThemeContext.tsx
+  36:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\context\ToastContext.tsx
+  50:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\lib\cloudSync.ts
+  70:22  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Users\gerar\Documentos\Dimancio\Linka\src\pages\DashboardPage.tsx
+  213:8   warning  React Hook useEffect has a missing dependency: 'session'. Either include it or remove the dependency array                                                                                     react-hooks/exhaustive-deps
+  227:22  error    React Hook "useMemo" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?      react-hooks/rules-of-hooks
+  235:23  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  243:28  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  246:8   warning  React Hook useCallback has a missing dependency: 'shortcuts'. Either include it or remove the dependency array                                                                                 react-hooks/exhaustive-deps
+  248:31  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  253:35  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  257:36  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  280:29  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  288:29  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+  292:30  error    React Hook "useCallback" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+E:\Users\gerar\Documentos\Dimancio\Linka\supabase\functions\create-checkout-session\index.ts
+  56:13  error  'customerId' is never reassigned. Use 'const' instead  prefer-const
+
+E:\Users\gerar\Documentos\Dimancio\Linka\supabase\functions\n8n-bridge\index.ts
+   33:13  error  'rawType' is never reassigned. Use 'const' instead     prefer-const
+   97:21  error  'redirectTo' is never reassigned. Use 'const' instead  prefer-const
+  113:27  error  Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
+  163:30  error  Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
+  174:21  error  Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
+
+E:\Users\gerar\Documentos\Dimancio\Linka\supabase\functions\notion-sync\index.ts
+  103:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:90  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  132:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Ô£û 52 problems (49 errors, 3 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

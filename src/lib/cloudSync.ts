@@ -67,7 +67,7 @@ export const syncViaFetch = async (payload: CloudSyncPayload, token: string): Pr
                 } else {
                     throw new Error("Could not refresh session")
                 }
-            } catch (err) {
+            } catch {
                 logger.error("❌ Emergency refresh failed. Needs manual login.")
                 throw new Error("Tu sesión ha expirado. Por favor cierra sesión y vuelve a entrar.")
             }

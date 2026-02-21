@@ -3,8 +3,10 @@ import ReactFlow, {
     Background,
     MiniMap,
     addEdge,
-    useNodesState,
-    useEdgesState,
+    applyNodeChanges,
+    applyEdgeChanges,
+    type NodeChange,
+    type EdgeChange,
     type Connection,
     type Edge,
     type Node,
@@ -12,7 +14,8 @@ import ReactFlow, {
     ReactFlowProvider,
     Panel
 } from "reactflow"
-import type { DatabaseInfo, DatabaseNodeData } from "../types"
+import { useGraphStore } from "../stores/useGraphStore"
+import type { DatabaseNodeData } from "../types"
 import "reactflow/dist/style.css"
 import {
     LayoutTemplate, Loader2,
@@ -71,18 +74,38 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         return transformToGraphData(localizedDemoDatabases, localizedDemoRelations, saved, custom)
     }, [session, localizedDemoDatabases, localizedDemoRelations])
 
-    // ─── ReactFlow state (stays here — tightly coupled to render) ───────
+    // ─── ReactFlow & Global state ───────────────────────────────────────
 
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialGraphData.nodes)
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialGraphData.edges)
-    const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+    const nodes = useGraphStore(state => state.nodes)
+    const setNodes = useGraphStore(state => state.setNodes)
+    const edges = useGraphStore(state => state.edges)
+    const setEdges = useGraphStore(state => state.setEdges)
+    const syncStatus = useGraphStore(state => state.syncStatus)
+    const searchQuery = useGraphStore(state => state.searchQuery)
+    const setSearchQuery = useGraphStore(state => state.setSearchQuery)
+    const syncedDbs = useGraphStore(state => state.syncedDbs)
+    const setSyncedDbs = useGraphStore(state => state.setSyncedDbs)
+    const syncedRelations = useGraphStore(state => state.syncedRelations)
+    const setSyncedRelations = useGraphStore(state => state.setSyncedRelations)
+    const userPlan = useGraphStore(state => state.userPlan)
+
+    const onNodesChange = useCallback((changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)), [setNodes])
+    const onEdgesChange = useCallback((changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)), [setEdges])
+
     const [selectedNode, setSelectedNode] = useState<DatabaseNodeData | null>(null)
-    const [searchQuery, setSearchQuery] = useState("")
-    const [syncedDbs, setSyncedDbs] = useState<DatabaseInfo[]>(localizedDemoDatabases)
-    const [syncedRelations, setSyncedRelations] = useState(localizedDemoRelations)
     const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set())
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [showTour, setShowTour] = useState(false)
+
+    // Initialize store with demo data if empty
+    useEffect(() => {
+        if (nodes.length === 0 && initialGraphData.nodes.length > 0) {
+            setNodes(initialGraphData.nodes)
+            setEdges(initialGraphData.edges)
+            setSyncedDbs(localizedDemoDatabases)
+            setSyncedRelations(localizedDemoRelations)
+        }
+    }, [initialGraphData, nodes.length, setNodes, setEdges, setSyncedDbs, setSyncedRelations, localizedDemoDatabases, localizedDemoRelations])
 
     // ─── Graph filters ──────────────────────────────────────────────────
 
@@ -90,12 +113,24 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         setSelectedNode(nodeData)
     }, [])
 
-    const filters = useGraphFilters({
+    const {
+        selectedPropertyTypes,
+        hiddenDbIds,
+        hideIsolated,
+        customColors,
+        isDirty,
+        setIsDirty,
+        visibleDbIds,
+        togglePropertyType,
+        toggleDbVisibility,
+        toggleHideIsolated,
+        clearPropertyFilters,
+        setCustomColors,
+        setHiddenDbIds
+    } = useGraphFilters({
         userId: session?.user.id ?? null,
         syncedDbs,
-        syncedRelations,
-        notionToken: null, // Will be overridden below
-        userPlan: 'pro' // Will be overridden by cloudSync
+        syncedRelations
     })
 
     // ─── Graph layout ───────────────────────────────────────────────────
@@ -105,80 +140,44 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         setEdges,
         fitView,
         handleSelectNode,
-        customColors: filters.customColors
+        customColors: customColors
     })
 
     // ─── Cloud sync ─────────────────────────────────────────────────────
 
     const cloudSync = useCloudSync({
         session,
-        setNodes,
-        setEdges,
-        nodes,
-        customColors: filters.customColors,
-        selectedPropertyTypes: filters.selectedPropertyTypes,
-        hiddenDbIds: filters.hiddenDbIds,
-        hideIsolated: filters.hideIsolated,
-        setCustomColors: filters.setCustomColors,
-        setSelectedPropertyTypes: filters.setSelectedPropertyTypes,
-        setHiddenDbIds: filters.setHiddenDbIds,
-        setHideIsolated: filters.setHideIsolated,
-        setIsDirty: filters.setIsDirty,
-        syncedDbs,
-        setSyncedDbs,
-        setSyncedRelations,
+        customColors: customColors,
+        selectedPropertyTypes: selectedPropertyTypes,
+        hiddenDbIds: hiddenDbIds,
+        hideIsolated: hideIsolated,
+        setCustomColors: setCustomColors,
+        setSelectedPropertyTypes: clearPropertyFilters, // Note: Not directly manipulated by sync
+        setHiddenDbIds: setHiddenDbIds,
+        setHideIsolated: clearPropertyFilters, // ...
         runForceLayout,
         fitView,
         handleSelectNode,
-        searchQuery,
-        setSyncStatus,
         setSelectedNode,
         toast,
         t
     })
 
     // Override notionToken/userPlan for the filters visibleDbIds calculation
-    // by recomputing with the actual values from cloudSync
-    const visibleDbIds = useMemo(() => {
-        let filtered = syncedDbs
-        const isDemo = !cloudSync.notionToken
-
-        if (!isDemo && cloudSync.userPlan === 'free' && filtered.length > 4) {
-            filtered = filtered.slice(0, 4)
-        }
-
-        if (filters.selectedPropertyTypes.size > 0) {
-            filtered = filtered.filter((db) =>
-                db.properties?.some((p) => filters.selectedPropertyTypes.has(p.type))
-            )
-        }
-
-        filtered = filtered.filter((db) => !filters.hiddenDbIds.has(db.id))
-
-        if (filters.hideIsolated) {
-            const connectedDbIds = new Set<string>()
-            syncedRelations.forEach(rel => {
-                connectedDbIds.add(rel.source)
-                connectedDbIds.add(rel.target)
-            })
-            filtered = filtered.filter((db) => connectedDbIds.has(db.id))
-        }
-
-        return new Set(filtered.map((db) => db.id))
-    }, [syncedDbs, filters.selectedPropertyTypes, filters.hiddenDbIds, filters.hideIsolated, syncedRelations, cloudSync.userPlan, cloudSync.notionToken])
+    // Now done directly inside useGraphFilters using cloudSync.notionToken!
 
     // ─── Save handler for keyboard shortcuts ────────────────────────────
 
     const handleKeyboardSave = useCallback(async () => {
         if (!session) return
         try {
-            filters.setIsDirty(false)
+            setIsDirty(false)
             await cloudSync.handleManualSync()
             toast.success(t('dashboard.keyboard.saved'))
         } catch {
             toast.error(t('dashboard.keyboard.saveError'))
         }
-    }, [session, cloudSync, filters, toast, t])
+    }, [session, cloudSync, setIsDirty, toast, t])
 
     // ─── Keyboard shortcuts ─────────────────────────────────────────────
 
@@ -187,20 +186,15 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         setNodes,
         setSelectedNode,
         setSelectedNodeIds,
-        isDirty: filters.isDirty,
+        isDirty: isDirty,
         onSave: handleKeyboardSave,
         onFitView: () => fitView(),
         toast,
         t
     })
 
-    // ─── Early return AFTER all hooks are declared ──────────────────────
-
-    if (loading || !session) return <DashboardSkeleton />
-
     // ─── Auto-onboarding on first visit ─────────────────────────────────
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         if (!session) return
         const hasSeenLocalOnboarding = localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.ONBOARDING))
@@ -210,17 +204,18 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             const timeout = setTimeout(() => setShowTour(true), 1500)
             return () => clearTimeout(timeout)
         }
-    }, [session?.user.id, session?.user.user_metadata?.has_seen_onboarding])
+    }, [session])
 
     // Update demo data language when it changes
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const isShowingDemo = !cloudSync.notionToken
         if (isShowingDemo) {
-            setSyncedDbs(localizedDemoDatabases)
-            setSyncedRelations(localizedDemoRelations)
+            setTimeout(() => {
+                setSyncedDbs(localizedDemoDatabases)
+                setSyncedRelations(localizedDemoRelations)
+            }, 0)
         }
-    }, [localizedDemoDatabases, localizedDemoRelations, cloudSync.notionToken])
+    }, [localizedDemoDatabases, localizedDemoRelations, cloudSync.notionToken, setSyncedDbs, setSyncedRelations])
 
     // ─── Derived state ──────────────────────────────────────────────────
 
@@ -241,26 +236,26 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     }, [setEdges, nodes])
 
     const onNodeDragStop = useCallback(() => {
-        filters.setIsDirty(true)
+        setIsDirty(true)
         shortcuts.saveUndoState(nodes)
-    }, [nodes, shortcuts.saveUndoState, filters])
+    }, [nodes, shortcuts, setIsDirty])
 
     const handleResetLayout = useCallback(() => {
-        filters.setIsDirty(true)
+        setIsDirty(true)
         runForceLayout(nodes, edges, searchQuery)
-    }, [nodes, edges, searchQuery, runForceLayout, filters])
+    }, [nodes, edges, searchQuery, runForceLayout, setIsDirty])
 
     const handleSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: Node[] }) => {
         setSelectedNodeIds(new Set(selectedNodes.map(n => n.id)))
     }, [])
 
     const handleBatchColorChange = useCallback((color: string) => {
-        const newColors = { ...filters.customColors }
+        const newColors = { ...customColors }
         selectedNodeIds.forEach(id => {
             newColors[id] = color
         })
-        filters.setCustomColors(newColors)
-        filters.setIsDirty(true)
+        setCustomColors(newColors)
+        setIsDirty(true)
 
         setNodes(nds => nds.map(n => {
             if (selectedNodeIds.has(n.id)) {
@@ -275,15 +270,15 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             }
             return e
         }))
-    }, [selectedNodeIds, filters, setNodes, setEdges])
+    }, [selectedNodeIds, customColors, setCustomColors, setIsDirty, setNodes, setEdges])
 
     const handleBatchHide = useCallback(() => {
-        const newHidden = new Set(filters.hiddenDbIds)
+        const newHidden = new Set(hiddenDbIds)
         selectedNodeIds.forEach(id => newHidden.add(id))
-        filters.setHiddenDbIds(newHidden)
-        filters.setIsDirty(true)
+        setHiddenDbIds(newHidden)
+        setIsDirty(true)
         setSelectedNodeIds(new Set())
-    }, [selectedNodeIds, filters])
+    }, [selectedNodeIds, hiddenDbIds, setHiddenDbIds, setIsDirty])
 
     const handleFocusNode = useCallback((nodeId: string) => {
         fitView({ nodes: [{ id: nodeId }], duration: 800, padding: 0.5, maxZoom: 1.2 })
@@ -294,19 +289,14 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         setSyncedRelations(localizedDemoRelations)
         setNodes(transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}).nodes)
         setEdges(transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}).edges)
-        filters.setSelectedPropertyTypes(new Set())
-        filters.setHiddenDbIds(new Set())
-        filters.setHideIsolated(false)
-        filters.setCustomColors({})
+        clearPropertyFilters()
         cloudSync.setNotionToken(null)
-        filters.setIsDirty(true)
         const initialGraph = transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {})
         runForceLayout(initialGraph.nodes, initialGraph.edges)
-    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, filters, cloudSync])
+    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, clearPropertyFilters, cloudSync, setSyncedDbs, setSyncedRelations])
 
     // ─── Effects for visibility/search updates ──────────────────────────
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         setNodes((nds) => nds.map((node) => {
             const isVisible = visibleDbIds.has(node.id)
@@ -342,7 +332,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     }, [searchQuery, visibleDbIds, dbTitles, setNodes, setEdges])
 
     // Separate effect for fitView
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fitView({ padding: 0.2, duration: 400, maxZoom: 1 })
@@ -351,6 +340,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     }, [visibleDbIds, fitView])
 
     // ─── Render ─────────────────────────────────────────────────────────
+
+    if (loading || !session) return <DashboardSkeleton />
 
     return (
         <div className="flex flex-col h-screen w-full bg-gray-50 dark:bg-slate-900 overflow-hidden">
@@ -362,17 +353,17 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 databases={syncedDbs}
-                selectedPropertyTypes={filters.selectedPropertyTypes}
-                onTogglePropertyType={filters.togglePropertyType}
-                onClearFilters={filters.clearPropertyFilters}
-                hideIsolated={filters.hideIsolated}
-                onToggleHideIsolated={filters.toggleHideIsolated}
+                selectedPropertyTypes={selectedPropertyTypes}
+                onTogglePropertyType={togglePropertyType}
+                onClearFilters={clearPropertyFilters}
+                hideIsolated={hideIsolated}
+                onToggleHideIsolated={toggleHideIsolated}
                 userRole={userRole}
                 onStartTour={() => setShowTour(true)}
-                userPlan={cloudSync.userPlan}
+                userPlan={userPlan}
                 onManualSync={cloudSync.handleManualSync}
                 syncStatus={cloudSync.cloudSyncStatus}
-                isDirty={filters.isDirty}
+                isDirty={isDirty}
                 onShowShortcuts={() => shortcuts.setShowShortcutsModal(true)}
             />
 
@@ -383,8 +374,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                     onClearSelection={() => setSelectedNode(null)}
                     searchQuery={searchQuery}
                     visibleDbIds={visibleDbIds}
-                    hiddenDbIds={filters.hiddenDbIds}
-                    onToggleVisibility={filters.toggleDbVisibility}
+                    hiddenDbIds={hiddenDbIds}
+                    onToggleVisibility={toggleDbVisibility}
                     onFocusNode={handleFocusNode}
                     onSelectNode={handleSelectNode}
                     isCollapsed={isSidebarCollapsed}
@@ -522,9 +513,9 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 selectedCount={selectedNodeIds.size}
                 onBatchColorChange={handleBatchColorChange}
                 onBatchHide={handleBatchHide}
-                userPlan={cloudSync.userPlan}
+                userPlan={userPlan}
                 isSidebarCollapsed={isSidebarCollapsed}
-                activeColor={selectedNodeIds.size === 1 ? filters.customColors[Array.from(selectedNodeIds)[0]] || nodes.find(n => n.id === Array.from(selectedNodeIds)[0])?.data?.color : undefined}
+                activeColor={selectedNodeIds.size === 1 ? customColors[Array.from(selectedNodeIds)[0]] || nodes.find(n => n.id === Array.from(selectedNodeIds)[0])?.data?.color : undefined}
             />
 
             <ShortcutsHelpModal

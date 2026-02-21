@@ -53,7 +53,7 @@ serve(async (req) => {
             console.warn("Error buscando perfil:", profileError)
         }
 
-        let customerId = profile?.stripe_customer_id
+        const customerId = profile?.stripe_customer_id
         console.log(`Customer ID actual: ${customerId || 'Ninguno'}`)
 
         // 2. Prepare Stripe Checkout Session parameters

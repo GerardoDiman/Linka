@@ -14,7 +14,7 @@ export function DashboardSkeleton() {
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="flex items-center gap-3 px-2">
                             <Skeleton variant="rectangle" width={24} height={24} className="rounded" />
-                            <Skeleton width={Math.random() * 40 + 60} height={16} />
+                            <Skeleton width={60 + (i * 15 % 40)} height={16} />
                         </div>
                     ))}
                 </div>

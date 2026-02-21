@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
@@ -37,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return data.role
             }
             throw error || new Error("No data")
-        } catch (err) {
+        } catch {
             try {
                 // Secondary fetch fallback (more reliable during client hangs)
                 const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=role`
@@ -81,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setUser(null)
                     setRole(null)
                 }
-            } catch (err) {
+            } catch {
                 // Silently handle or use generic error log in production if needed
             } finally {
                 if (mounted) {
@@ -94,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 const { data: { session } } = await supabase.auth.getSession()
                 await handleAuthChange(session)
-            } catch (err) {
+            } catch {
                 if (mounted) setLoading(false)
             }
         }

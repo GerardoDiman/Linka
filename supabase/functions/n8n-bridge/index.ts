@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { populateTemplate, templates } from "./utils.ts"
 
 const corsHeaders = {
@@ -30,7 +31,7 @@ Deno.serve(async (req: Request) => {
         // 2. Determine Action and Template
         let action = body.action || 'user_registration';
         let templateKey: keyof typeof templates = 'user_registration';
-        let rawType = body.email_data?.email_action_type || body.mailer?.otp_type || body.otc_type || body.otp_type;
+        const rawType = body.email_data?.email_action_type || body.mailer?.otp_type || body.otc_type || body.otp_type;
 
         if (isAuthHook) {
             console.log("Context: Supabase Auth Hook");
@@ -94,7 +95,7 @@ Deno.serve(async (req: Request) => {
                 }
 
                 // 3. Force Production Redirect (Landing host)
-                let redirectTo = urlObj.searchParams.get('redirect_to');
+                const redirectTo = urlObj.searchParams.get('redirect_to');
                 if (redirectTo && (redirectTo.includes('localhost') || redirectTo.includes('127.0.0.1'))) {
                     urlObj.searchParams.set('redirect_to', redirectTo.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl));
                 }

@@ -37,9 +37,18 @@ body {
   min-height: 100vh;
 }
 
-/* Smooth theme transition */
-* {
-  transition: background-color 0.4s ease-out, border-color 0.4s ease-out, color 0.1s ease-out;
+/* Smooth theme transition - Targeted to prevent React Flow lag */
+body, 
+#root, 
+.bg-white, 
+.bg-gray-50, 
+.bg-slate-900, 
+.bg-slate-800,
+.text-gray-900, 
+.text-white {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.4s, 0.4s, 0.1s;
+  transition-timing-function: ease-out;
 }
 
 .react-flow__renderer {

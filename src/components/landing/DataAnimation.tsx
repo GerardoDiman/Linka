@@ -69,8 +69,8 @@ export function DataAnimation() {
                     key={`particle-${i}`}
                     className="absolute w-1 h-1 bg-primary/20 rounded-full"
                     initial={{
-                        x: Math.random() * 100 + "%",
-                        y: Math.random() * 100 + "%",
+                        x: (i * 17 % 100) + "%",
+                        y: (i * 23 % 100) + "%",
                         opacity: 0
                     }}
                     animate={{
@@ -78,10 +78,10 @@ export function DataAnimation() {
                         opacity: [0, 1, 0]
                     }}
                     transition={{
-                        duration: 5 + Math.random() * 5,
+                        duration: 5 + (i * 2 % 5),
                         repeat: Infinity,
                         ease: "linear",
-                        delay: Math.random() * 5
+                        delay: (i * 1.5 % 5)
                     }}
                 />
             ))}
@@ -157,7 +157,7 @@ export function DataAnimation() {
                         scale: { duration: 0.3, ease: "easeOut" },
                         opacity: { duration: 0.6, delay: index * 0.1 },
                         y: {
-                            duration: 3 + Math.random() * 2,
+                            duration: 3 + (index % 2),
                             repeat: Infinity,
                             ease: "easeInOut"
                         }

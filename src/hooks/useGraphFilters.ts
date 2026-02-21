@@ -3,6 +3,7 @@
  * isolated-node filter, custom colors, and the derived visibleDbIds set.
  */
 import { useState, useMemo, useCallback } from 'react'
+import { useGraphStore } from '../stores/useGraphStore'
 import type { RawRelation } from '../lib/graph'
 import {
     getSavedFilters,
@@ -20,16 +21,12 @@ interface UseGraphFiltersOptions {
     userId: string | null
     syncedDbs: RawDatabase[]
     syncedRelations: RawRelation[]
-    notionToken: string | null
-    userPlan: 'free' | 'pro'
 }
 
 export function useGraphFilters({
     userId,
     syncedDbs,
-    syncedRelations,
-    notionToken,
-    userPlan
+    syncedRelations
 }: UseGraphFiltersOptions) {
     const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<Set<string>>(
         () => new Set(userId ? getSavedFilters(userId) : [])
@@ -43,7 +40,10 @@ export function useGraphFilters({
     const [customColors, setCustomColors] = useState<Record<string, string>>(
         () => userId ? getSavedCustomColors(userId) : {}
     )
-    const [isDirty, setIsDirty] = useState(false)
+    const isDirty = useGraphStore(state => state.isDirty)
+    const setIsDirty = useGraphStore(state => state.setIsDirty)
+    const notionToken = useGraphStore(state => state.notionToken)
+    const userPlan = useGraphStore(state => state.userPlan)
 
     // Derived state: visible database IDs based on all active filters
     const visibleDbIds = useMemo(() => {
@@ -89,7 +89,7 @@ export function useGraphFilters({
             setIsDirty(true)
             return next
         })
-    }, [])
+    }, [setIsDirty])
 
     const toggleDbVisibility = useCallback((dbId: string) => {
         setHiddenDbIds(prev => {
@@ -102,7 +102,7 @@ export function useGraphFilters({
             setIsDirty(true)
             return next
         })
-    }, [])
+    }, [setIsDirty])
 
     const toggleHideIsolated = useCallback(() => {
         setHideIsolated((prev: boolean) => {
@@ -110,13 +110,13 @@ export function useGraphFilters({
             setIsDirty(true)
             return next
         })
-    }, [])
+    }, [setIsDirty])
 
     const clearPropertyFilters = useCallback(() => {
         setSelectedPropertyTypes(new Set())
         setHideIsolated(false)
         setIsDirty(true)
-    }, [])
+    }, [setIsDirty])
 
     return {
         selectedPropertyTypes,

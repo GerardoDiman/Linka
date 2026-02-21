@@ -85,8 +85,9 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
     useEffect(() => {
         if (isOpen && currentStep === STEPS.length - 1) {
             // If the user previously finished it and is opening it again via "Help"
-            setCurrentStep(0)
+            setTimeout(() => setCurrentStep(0), 0)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen])
 
     useEffect(() => {

@@ -81,8 +81,8 @@ const NodeVisualHero = () => (
                 <motion.div
                     key={i}
                     initial={{
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        left: `${(i * 13) % 100}%`,
+                        top: `${(i * 29) % 100}%`,
                         opacity: 0
                     }}
                     animate={{
@@ -90,9 +90,9 @@ const NodeVisualHero = () => (
                         opacity: [0, 0.4, 0]
                     }}
                     transition={{
-                        duration: 8 + Math.random() * 8,
+                        duration: 8 + (i % 8),
                         repeat: Infinity,
-                        delay: Math.random() * 5
+                        delay: (i * 1.5) % 5
                     }}
                     className="absolute w-1 lg:w-1.5 h-1 lg:h-1.5 bg-primary/30 rounded-full blur-[1px]"
                 />
@@ -181,7 +181,7 @@ const SyncVisualHero = () => (
                         opacity: [0, 0.6, 0]
                     }}
                     transition={{
-                        duration: 0.8 + Math.random() * 1,
+                        duration: 0.8 + (i * 0.2 % 1),
                         repeat: Infinity,
                         delay: i * 0.2,
                         ease: "linear"
@@ -195,8 +195,8 @@ const SyncVisualHero = () => (
                 <motion.div
                     key={`part-${i}`}
                     style={{
-                        top: `${Math.random() * 100}%`,
-                        left: `${Math.random() * 100}%`
+                        top: `${(i * 17) % 100}%`,
+                        left: `${(i * 31) % 100}%`
                     }}
                     animate={{
                         x: i % 2 === 0 ? [0, 300] : [0, -300],
@@ -204,9 +204,9 @@ const SyncVisualHero = () => (
                         scale: [0.5, 1, 0.5]
                     }}
                     transition={{
-                        duration: 0.5 + Math.random() * 1.5,
+                        duration: 0.5 + (i * 0.3 % 1.5),
                         repeat: Infinity,
-                        delay: Math.random() * 3,
+                        delay: (i * 0.7 % 3),
                         ease: "linear"
                     }}
                     className={`absolute rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]
@@ -282,13 +282,13 @@ const CustomizationVisualHero = () => (
                 animate={{
                     opacity: [0, 0.5, 0],
                     scale: [0, 1, 0],
-                    x: [0, (Math.random() - 0.5) * 100],
-                    y: [0, (Math.random() - 0.5) * 100]
+                    x: [0, ((i * 13 % 100) - 50)],
+                    y: [0, ((i * 23 % 100) - 50)]
                 }}
                 transition={{
-                    duration: 3 + Math.random() * 2,
+                    duration: 3 + (i % 2),
                     repeat: Infinity,
-                    delay: Math.random() * 5
+                    delay: (i * 0.8 % 5)
                 }}
                 className="absolute w-1.5 h-1.5 bg-rose-400 rounded-full blur-[1px]"
             />

@@ -5,6 +5,7 @@ import { ThemeProvider } from "./context/ThemeContext"
 import { AuthProvider, useAuth } from "./context/AuthContext"
 import { ToastProvider } from "./context/ToastContext"
 import { ToastContainer } from "./components/ui/Toast"
+import { ErrorBoundary } from "./components/ui/ErrorBoundary"
 
 // Lazy loaded pages for code splitting
 const LandingPage = lazy(() => import("./pages/LandingPage"))
@@ -133,9 +134,11 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <Router>
-            <Suspense fallback={<LoadingSpinner />}>
-              <AnimatedRoutes />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingSpinner />}>
+                <AnimatedRoutes />
+              </Suspense>
+            </ErrorBoundary>
           </Router>
           <ToastContainer />
         </ThemeProvider>

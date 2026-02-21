@@ -163,7 +163,7 @@ export function ExportButton() {
                     download(blob, `linka-graph-basic-${new Date().getTime()}.png`)
                     toast.info(t('dashboard.export.fallbackInfo'))
                 }
-            } catch (fallbackErr) {
+            } catch {
                 toast.error(t('dashboard.export.criticalError'))
             }
         } finally {
