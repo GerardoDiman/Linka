@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 // ─── Color palette (mirrors src/lib/colors.ts) ────────────────────────────────
@@ -101,10 +100,38 @@ Deno.serve(async (req: Request) => {
         const databases: ParsedDatabase[] = []
         const relations: ParsedRelation[] = []
 
-        results.forEach((db: any, index: number) => {
+        interface NotionProperty {
+            id: string;
+            name: string;
+            type: string;
+            relation?: {
+                database_id: string;
+                synced_property_name: string;
+                synced_property_id: string;
+            }
+        }
+
+        interface NotionIcon {
+            type: 'emoji' | 'external' | 'file';
+            emoji?: string;
+            external?: { url: string };
+            file?: { url: string; expiry_time: string };
+        }
+
+        interface NotionDatabase {
+            id: string;
+            title?: Array<{ plain_text: string }>;
+            properties: Record<string, NotionProperty>;
+            icon?: NotionIcon;
+            url?: string;
+            created_time?: string;
+            last_edited_time?: string;
+        }
+
+        results.forEach((db: NotionDatabase, index: number) => {
             const title = db.title?.[0]?.plain_text || "Sin título"
 
-            const properties = Object.entries(db.properties).map(([name, prop]: [string, any]) => ({
+            const properties = Object.entries(db.properties).map(([name, prop]) => ({
                 name,
                 type: prop.type
             }))
@@ -113,9 +140,9 @@ Deno.serve(async (req: Request) => {
 
             let icon = ""
             if (db.icon) {
-                if (db.icon.type === 'emoji') icon = db.icon.emoji
-                else if (db.icon.type === 'external') icon = db.icon.external.url
-                else if (db.icon.type === 'file') icon = db.icon.file.url
+                if (db.icon.type === 'emoji' && db.icon.emoji) icon = db.icon.emoji
+                else if (db.icon.type === 'external' && db.icon.external) icon = db.icon.external.url
+                else if (db.icon.type === 'file' && db.icon.file) icon = db.icon.file.url
             }
 
             databases.push({
@@ -130,7 +157,7 @@ Deno.serve(async (req: Request) => {
             })
 
             // Extract relations
-            Object.values(db.properties).forEach((prop: any) => {
+            Object.values(db.properties).forEach((prop) => {
                 if (prop.type === 'relation' && prop.relation?.database_id) {
                     relations.push({
                         source: db.id,
@@ -148,8 +175,9 @@ Deno.serve(async (req: Request) => {
         })
 
     } catch (error) {
-        console.error("notion-sync error:", error.message)
-        return new Response(JSON.stringify({ error: error.message }), {
+        const errorMsg = error instanceof Error ? error.message : "Unknown error occurred"
+        console.error("notion-sync error:", errorMsg)
+        return new Response(JSON.stringify({ error: errorMsg }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         })

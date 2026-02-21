@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { populateTemplate, templates } from "./utils.ts"
 
 const corsHeaders = {
@@ -21,7 +20,35 @@ Deno.serve(async (req: Request) => {
         const headers = Object.fromEntries(req.headers.entries());
         console.log("Headers:", JSON.stringify(headers, null, 2));
 
-        const body = await req.json();
+        interface AuthHookPayload {
+            user?: {
+                email?: string;
+                user_metadata?: { full_name?: string };
+            };
+            email_data?: {
+                email_action_type?: string;
+                confirmation_url?: string;
+                token_hash?: string;
+                token?: string;
+            };
+            mailer?: { otp_type?: string };
+            otc_type?: string;
+            otp_type?: string;
+            confirmation_url?: string;
+            otp?: string;
+        }
+
+        interface ManualPayload {
+            action?: string;
+            link?: string;
+            token?: string;
+            fullName?: string;
+            email?: string;
+        }
+
+        type WebhookPayload = AuthHookPayload & ManualPayload;
+
+        const body: WebhookPayload = await req.json();
         console.log("--- REQUEST BODY RECEIVED ---");
         console.log(JSON.stringify(body, null, 2));
 
@@ -62,11 +89,11 @@ Deno.serve(async (req: Request) => {
             console.log("Link Construction: Manual assembly needed");
             const h = body.email_data?.token_hash || body.token || body.otp || body.email_data?.token;
             const q = new URLSearchParams();
-            if (h.length > 20) {
+            if (h && h.length > 20) {
                 // It's a hash
                 q.set('token_hash', h);
                 q.set('token', h); // Set both for maximum compatibility
-            } else {
+            } else if (h) {
                 // It's an OTP
                 q.set('token', h);
             }
@@ -111,8 +138,9 @@ Deno.serve(async (req: Request) => {
                 }
 
                 link = urlObj.toString();
-            } catch (err: any) {
-                console.error("Link normalization failed, using fallback regex:", err.message);
+            } catch (err) {
+                const errMsg = err instanceof Error ? err.message : "Unknown URL error"
+                console.error("Link normalization failed, using fallback regex:", errMsg);
                 link = link.replace(/http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/g, envSiteUrl);
             }
         }
@@ -161,9 +189,10 @@ Deno.serve(async (req: Request) => {
             } else {
                 console.log("n8n delivery successful");
             }
-        } catch (fetchError: any) {
+        } catch (fetchError) {
             clearTimeout(timeoutId);
-            console.error("n8n transmission failed:", fetchError.message);
+            const fetchErrMsg = fetchError instanceof Error ? fetchError.message : "Unknown fetch error"
+            console.error("n8n transmission failed:", fetchErrMsg);
             // We don't throw here to avoid failing the whole function if n8n is just slow/down
         }
 
@@ -172,9 +201,10 @@ Deno.serve(async (req: Request) => {
             status: 200,
         });
 
-    } catch (error: any) {
-        console.error("FATAL ERROR:", error.message);
-        return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : "Unknown fatal error"
+        console.error("FATAL ERROR:", errorMsg);
+        return new Response(JSON.stringify({ error: errorMsg }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
         });
