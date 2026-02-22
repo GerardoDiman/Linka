@@ -88,7 +88,7 @@ export function AccessRequestForm() {
                             required
                             value={email}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                            className="h-14 rounded-2xl border-slate-200 bg-white/50 focus:ring-primary/20 transition-all text-base px-6"
+                            className="h-14 rounded-2xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 focus:ring-primary/20 transition-all text-base px-6 dark:text-white"
                         />
                     </div>
 
@@ -98,7 +98,7 @@ export function AccessRequestForm() {
                             placeholder={t('landing.access.form.commentsPlaceholder')}
                             value={comments}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComments(e.target.value)}
-                            className="min-h-[120px] rounded-2xl border-slate-200 bg-white/50 focus:ring-primary/20 transition-all text-base p-6 resize-none"
+                            className="min-h-[120px] rounded-2xl border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 focus:ring-primary/20 transition-all text-base p-6 resize-none dark:text-white"
                         />
                     </div>
 

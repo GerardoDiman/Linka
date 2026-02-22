@@ -5,6 +5,7 @@ import { Sun, Moon, LogOut } from "lucide-react"
 import { Hero } from "../components/landing/Hero"
 import { Features } from "../components/landing/Features"
 import { FAQ } from "../components/landing/FAQ"
+// import { Testimonials } from "../components/landing/Testimonials"
 import { AccessRequestForm } from "../components/landing/AccessRequestForm"
 import { Logo } from "../components/ui/Logo"
 import { useAuth } from "../context/AuthContext"
@@ -72,7 +73,7 @@ export default function LandingPage() {
                     <div className="flex lg:flex-1">
                         <a href="#" className="flex items-center gap-2 group transition-transform hover:scale-105 active:scale-95">
                             <Logo size={32} />
-                            <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600 tracking-tight">
+                            <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-tight">
                                 Linka
                             </span>
                         </a>
@@ -206,6 +207,8 @@ export default function LandingPage() {
                 >
                     <Features />
                 </motion.div>
+
+                {/* <Testimonials /> */}
 
                 <FAQ />
 

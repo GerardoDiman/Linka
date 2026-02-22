@@ -66,28 +66,28 @@
             },
             "cards": {
                 "visualMapping": {
-                    "title": "Mapeo Visual Inteligente",
-                    "description": "Visualiza tu ecosistema de Notion como una red de nodos interconectados. Encuentra dependencias y organiza tus bases de datos con total claridad."
+                    "title": "Mapeo Visual Inteligente de Bases de Datos",
+                    "description": "Visualiza tu ecosistema de Notion como una red de nodos interconectados de alta fidelidad. Encuentra dependencias ocultas, audita arquitecturas complejas y organiza cientos de bases de datos con total claridad y un nivel de detalle incomparable visualmente atractivo."
                 },
                 "autoRelations": {
-                    "title": "Relaciones Automáticas",
-                    "description": "Linka identifica y muestra las conexiones entre tus tablas automáticamente, permitiéndote navegar tu conocimiento multidimensional sin esfuerzo."
+                    "title": "Detección de Relaciones Automáticas",
+                    "description": "Linka detecta proactivamente y dibuja las conexiones entre tus tablas automáticamente, permitiéndote navegar por el tejido de tu conocimiento multidimensional sin requerir configuración manual. Simplemente conecta tu entorno de Notion y observa la magia desplegarse."
                 },
                 "privacy": {
-                    "title": "Privacidad y Seguridad",
-                    "description": "Tus datos son solo tuyos. Implementamos prácticas de seguridad robustas para asegurar que tu información de Notion se mantenga privada y protegida."
+                    "title": "Máxima Privacidad y Seguridad por Diseño",
+                    "description": "Tus datos confidenciales son absoluta y exclusivamente tuyos. Implementamos prácticas de seguridad robustas de nivel empresarial para asegurar que la estructura estratégica de tu entorno de Notion se mantenga siempre privada, encriptada y debidamente protegida contra terceros."
                 },
                 "sync": {
-                    "title": "Sincronización bajo Demanda",
-                    "description": "Refleja tus cambios de Notion en segundos con un solo clic. Sin esperas innecesarias para mantener tu gráfico siempre al día."
+                    "title": "Sincronización Ultrarrápida bajo Demanda",
+                    "description": "Refleja tus cambios estructurales de Notion en cuestión de segundos con tan solo presionar un botón. Diseñado con una arquitectura de rendimiento optimizada para garantizar una latencia casi nula, manteniendo las ramificaciones de tu Knowledge Graph siempre sincronizadas y al día."
                 },
                 "customization": {
-                    "title": "Personalización Avanzada",
-                    "description": "Adapta el gráfico a tu gusto. Personaliza colores, aplica filtros inteligentes y oculta lo que no necesites para enfocarte en lo importante."
+                    "title": "Personalización Visual Avanzada",
+                    "description": "Adapta el motor gráfico enteramente a tu estilo. Modifica esquemas de color vibrantes, aplica filtros algorítmicos inteligentes y despeja el ruido visual aislando únicamente los vértices de interés."
                 },
                 "qualityExport": {
-                    "title": "Exportación en Alta Calidad",
-                    "description": "Descarga tus mapas en formato PNG de alta fidelidad, perfecto para tus reportes, presentaciones o documentación técnica."
+                    "title": "Exportación Fotográfica de Alta Resolución",
+                    "description": "Descarga tus diagramas de arquitectura en formatos de ultra-alta fidelidad y fondos transparentes. Las representaciones ideales para potenciar el prestigio técnico en tus reportes directivos y presentaciones ejecutivas."
                 }
             }
         },
@@ -137,6 +137,24 @@
             "tagline": "Visualización Inteligente para Notion.",
             "privacy": "Privacidad",
             "terms": "Términos"
+        },
+        "testimonials": {
+            "title": "Lo que dicen nuestros usuarios",
+            "t1": {
+                "content": "Linka ha cambiado por completo la forma en que gestionamos nuestros proyectos en Notion. La visualización de nodos es simplemente increíble.",
+                "author": "Carlos Rodríguez",
+                "role": "Product Manager en TechFlow"
+            },
+            "t2": {
+                "content": "Poder ver las relaciones entre mis bases de datos me ha ahorrado horas de navegación innecesaria. Es una herramienta esencial.",
+                "author": "Elena Martínez",
+                "role": "Consultora de Productividad"
+            },
+            "t3": {
+                "content": "La interfaz es limpia, rápida y muy intuitiva. La integración con Notion fue instantánea. ¡Altamente recomendado!",
+                "author": "David Soto",
+                "role": "Desarrollador Fullstack"
+            }
         }
     },
     "dashboard": {

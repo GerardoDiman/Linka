@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { DataAnimation } from "./DataAnimation"
 import { SplitText } from "../animations/SplitText"
 import { ShinyText } from "../animations/ShinyText"
-import { Magnetic } from "../animations/Magnetic"
 
 export function Hero() {
     const navigate = useNavigate()
@@ -15,58 +14,42 @@ export function Hero() {
     return (
         <section className="relative isolate pt-20 pb-16 sm:pt-24 sm:pb-24 overflow-hidden bg-white dark:bg-slate-900">
             {/* ... (background elements unchanged) ... */}
-            <div className="absolute inset-0 -z-10 overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),rgba(255,255,255,0))]" />
+            <div className="absolute inset-0 -z-10 overflow-hidden bg-white dark:bg-slate-950">
+                {/* Clean Modern Engineering Grid */}
                 <svg
-                    className="absolute left-[50%] top-0 h-[64rem] w-[128rem] -translate-x-[50%] [mask-image:radial-gradient(64rem_64rem_at_top,white,transparent)] opacity-40"
+                    className="absolute inset-0 h-full w-full stroke-slate-200/50 dark:stroke-slate-800/50 [mask-image:radial-gradient(100%_100%_at_top_center,white,transparent)]"
                     aria-hidden="true"
                 >
                     <defs>
                         <pattern
                             id="hero-grid"
-                            width={80}
-                            height={80}
+                            width={60}
+                            height={60}
                             x="50%"
                             y={-1}
                             patternUnits="userSpaceOnUse"
                         >
-                            <path d="M80 160V.5M.5 .5H160" fill="none" stroke="currentColor" className="text-black/5 dark:text-white/5" />
+                            <path d="M.5 60V.5H60" fill="none" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" strokeWidth={0} fill="url(#hero-grid)" />
                 </svg>
 
-                {/* Floating Blobs */}
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        x: [0, 50, 0],
-                        y: [0, -30, 0],
-                        opacity: [0.3, 0.5, 0.3]
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-[-10%] left-[10%] w-[30rem] h-[30rem] bg-primary/20 rounded-full blur-[100px]"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1, 1.3, 1],
-                        x: [0, -60, 0],
-                        y: [0, 40, 0],
-                        opacity: [0.2, 0.4, 0.2]
-                    }}
-                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[10%] right-[10%] w-[35rem] h-[35rem] bg-violet-300/20 rounded-full blur-[120px]"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        x: [0, 40, 0],
-                        y: [0, 60, 0],
-                        opacity: [0.1, 0.3, 0.1]
-                    }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                    className="absolute top-[20%] right-[20%] w-[25rem] h-[25rem] bg-blue-200/20 rounded-full blur-[100px]"
-                />
+                {/* Sweeping Aurora / Glows */}
+                <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3">
+                    <motion.div
+                        animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.05, 1] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-[40rem] h-[40rem] bg-secondary/20 dark:bg-secondary/30 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen will-change-transform"
+                    />
+                </div>
+                <div className="absolute top-0 left-0 -translate-y-1/4 -translate-x-1/4">
+                    <motion.div
+                        animate={{ opacity: [0.2, 0.4, 0.2], scale: [1, 1.1, 1] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="w-[50rem] h-[50rem] bg-primary/20 dark:bg-primary/20 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen will-change-transform"
+                    />
+                </div>
             </div>
 
             <div className="container mx-auto px-4 text-center">
@@ -74,7 +57,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="mx-auto max-w-4xl"
+                    className="mx-auto max-w-4xl will-change-transform"
                 >
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -96,9 +79,9 @@ export function Hero() {
                         />
                         <SplitText
                             text={t('landing.hero.title2')}
-                            delay={1.2}
+                            delay={0.2}
                             display="block"
-                            className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-600 to-primary pb-2"
+                            className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary pb-2"
                         />
                     </h1>
 
@@ -106,8 +89,9 @@ export function Hero() {
                         {t('landing.hero.description')}
                     </p>
 
-                    <div className="mt-10 lg:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
-                        <Magnetic amount={1.2}>
+                    <div className="mt-10 lg:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                        <div className="relative group w-full sm:w-auto">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-40 group-hover:opacity-100 transition duration-700"></div>
                             <Button
                                 size="lg"
                                 onClick={() => {
@@ -115,22 +99,20 @@ export function Hero() {
                                     element?.scrollIntoView({ behavior: 'smooth' });
                                 }}
                                 aria-label={t('landing.hero.cta')}
-                                className="w-full sm:w-auto h-14 px-10 text-lg rounded-full shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all font-bold"
+                                className="relative w-full sm:w-auto h-14 px-10 text-lg rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 transition-all font-black hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.2)] active:translate-y-0"
                             >
-                                {t('landing.hero.cta')} <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+                                {t('landing.hero.cta')} <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                             </Button>
-                        </Magnetic>
-                        <Magnetic amount={1.2}>
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                onClick={() => navigate("/register")}
-                                aria-label={t('landing.hero.secondaryCta')}
-                                className="w-full sm:w-auto h-14 px-10 text-lg rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 dark:border-slate-600 dark:text-white transition-all border-2 font-bold"
-                            >
-                                {t('landing.hero.secondaryCta')}
-                            </Button>
-                        </Magnetic>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={() => navigate("/register")}
+                            aria-label={t('landing.hero.secondaryCta')}
+                            className="w-full sm:w-auto h-14 px-10 text-lg rounded-full border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold backdrop-blur-sm bg-white/50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-1 hover:shadow-lg active:translate-y-0 transition-all"
+                        >
+                            {t('landing.hero.secondaryCta')}
+                        </Button>
                     </div>
                 </motion.div>
 
@@ -163,9 +145,14 @@ export function Hero() {
 
                             <div className="pt-4">
                                 <div className="flex items-center gap-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    <div className="flex -space-x-2">
-                                        {[1, 2, 3, 4].map((i) => (
-                                            <img key={i} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" src={`https://i.pravatar.cc/100?u=${i}`} alt={`${t('landing.hero.avatarAlt')} ${i}`} />
+                                    <div className="flex -space-x-3">
+                                        {['Alex', 'Sam', 'Jordan', 'Taylor'].map((seed, i) => (
+                                            <img
+                                                key={i}
+                                                className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 shadow-md hover:scale-110 hover:z-10 transition-transform relative cursor-default object-cover bg-slate-100 dark:bg-slate-800"
+                                                src={`https://api.dicebear.com/9.x/notionists/svg?seed=${seed}&backgroundColor=transparent`}
+                                                alt={`${t('landing.hero.avatarAlt')} ${i + 1}`}
+                                            />
                                         ))}
                                     </div>
                                     <span>{t('landing.hero.community')}</span>

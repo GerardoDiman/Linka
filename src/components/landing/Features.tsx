@@ -1,4 +1,3 @@
-import { useRef, useState } from "react"
 import { motion } from "framer-motion"
 import {
     Database,
@@ -8,8 +7,6 @@ import {
     Download,
     FileText,
     Layout,
-    ChevronLeft,
-    ChevronRight,
     Palette
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -333,204 +330,167 @@ const ExportVisualHero = () => (
 
 export function Features() {
     const { t } = useTranslation()
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const [activeIndex, setActiveIndex] = useState(0);
 
-    const galleryFeatures = [
+    const bentoFeatures = [
+        // Row 1: Large (Left) | Medium (Right Top) | Medium (Right Bottom)
         {
             name: t('landing.features.cards.visualMapping.title'),
             description: t('landing.features.cards.visualMapping.description'),
             icon: Database,
             visual: <NodeVisualHero />,
-            color: "bg-blue-600",
-            badge: t('landing.features.badges.visualCore')
+            badge: t('landing.features.badges.visualCore'),
+            iconClass: "bg-blue-600 text-white shadow-blue-500/30",
+            bgGlass: "bg-blue-500/[0.03] lg:bg-blue-500/[0.05] border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800",
+            borderClass: "hover:border-blue-400/50 dark:hover:border-blue-500/50",
+            className: "md:col-span-2 lg:col-span-2 flex-col",
+            textClass: "flex-none justify-start",
+            visualClass: "flex-1 min-h-[160px] lg:min-h-[200px]"
         },
         {
             name: t('landing.features.cards.autoRelations.title'),
             description: t('landing.features.cards.autoRelations.description'),
             icon: Share2,
             visual: <RelationVisualHero />,
-            color: "bg-purple-600",
-            badge: t('landing.features.badges.intelligence')
+            badge: t('landing.features.badges.intelligence'),
+            iconClass: "bg-purple-600 text-white shadow-purple-500/30",
+            bgGlass: "bg-purple-500/[0.03] lg:bg-purple-500/[0.05] border-t border-slate-100 dark:border-slate-800",
+            borderClass: "hover:border-purple-400/50 dark:hover:border-purple-500/50",
+            className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
+            textClass: "flex-none justify-start",
+            visualClass: "flex-1 min-h-[120px] lg:min-h-[160px]"
         },
         {
             name: t('landing.features.cards.privacy.title'),
             description: t('landing.features.cards.privacy.description'),
             icon: Lock,
             visual: <SecurityVisualHero />,
-            color: "bg-emerald-600",
-            badge: t('landing.features.badges.private')
+            badge: t('landing.features.badges.private'),
+            iconClass: "bg-emerald-600 text-white shadow-emerald-500/30",
+            bgGlass: "bg-emerald-500/[0.03] lg:bg-emerald-500/[0.05] border-t border-slate-100 dark:border-slate-800",
+            borderClass: "hover:border-emerald-400/50 dark:hover:border-emerald-500/50",
+            className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
+            textClass: "flex-none justify-start",
+            visualClass: "flex-1 min-h-[120px] lg:min-h-[160px]"
         },
+
+        // Row 2: Medium (Left) | Small (Right Top) | Small (Right Bottom)
+        // Note: To match the exact request `Med | Small, Small`, 
+        // Sync becomes Medium (col-span-2 but one row), Customization and Export become Small (col-span-1 each).
         {
             name: t('landing.features.cards.sync.title'),
             description: t('landing.features.cards.sync.description'),
             icon: Zap,
             visual: <SyncVisualHero />,
-            color: "bg-amber-500",
-            badge: t('landing.features.badges.fast')
+            badge: t('landing.features.badges.fast'),
+            iconClass: "bg-amber-500 text-white shadow-amber-500/30",
+            bgGlass: "bg-amber-500/[0.03] lg:bg-amber-500/[0.05] border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800",
+            borderClass: "hover:border-amber-400/50 dark:hover:border-amber-500/50",
+            className: "md:col-span-2 lg:col-span-2 flex-col lg:flex-row",
+            textClass: "flex-none lg:w-[45%] lg:justify-center",
+            visualClass: "flex-1 lg:w-[55%] min-h-[100px] lg:min-h-0 lg:h-full"
         },
         {
             name: t('landing.features.cards.customization.title'),
             description: t('landing.features.cards.customization.description'),
             icon: Palette,
             visual: <CustomizationVisualHero />,
-            color: "bg-rose-600",
-            badge: t('landing.features.badges.design')
+            badge: t('landing.features.badges.design'),
+            iconClass: "bg-rose-600 text-white shadow-rose-500/30",
+            bgGlass: "bg-rose-500/[0.03] lg:bg-rose-500/[0.05] border-t border-slate-100 dark:border-slate-800",
+            borderClass: "hover:border-rose-400/50 dark:hover:border-rose-500/50",
+            className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
+            textClass: "flex-none justify-start",
+            visualClass: "flex-1 min-h-[80px]"
         },
         {
             name: t('landing.features.cards.qualityExport.title'),
             description: t('landing.features.cards.qualityExport.description'),
             icon: Download,
             visual: <ExportVisualHero />,
-            color: "bg-indigo-600",
-            badge: t('landing.features.badges.toolkit')
+            badge: t('landing.features.badges.toolkit'),
+            iconClass: "bg-indigo-600 text-white shadow-indigo-500/30",
+            bgGlass: "bg-indigo-500/[0.03] lg:bg-indigo-500/[0.05] border-t border-slate-100 dark:border-slate-800",
+            borderClass: "hover:border-indigo-400/50 dark:hover:border-indigo-500/50",
+            className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
+            textClass: "flex-none justify-start",
+            visualClass: "flex-1 min-h-[80px]"
         }
     ]
 
-    const handleScroll = () => {
-        if (!scrollContainerRef.current) return;
-        const scrollPosition = scrollContainerRef.current.scrollLeft;
-        const width = scrollContainerRef.current.offsetWidth;
-        const index = Math.round(scrollPosition / width);
-        if (index !== activeIndex) setActiveIndex(index);
-    };
-
-    const scroll = (offset: number) => {
-        if (!scrollContainerRef.current) return;
-        scrollContainerRef.current.scrollBy({
-            left: offset,
-            behavior: 'smooth'
-        });
-    };
-
-    const scrollTo = (index: number) => {
-        if (!scrollContainerRef.current) return;
-        const width = scrollContainerRef.current.offsetWidth;
-        scrollContainerRef.current.scrollTo({
-            left: index * width,
-            behavior: 'smooth'
-        });
-    };
-
     return (
-        <section className="pt-4 pb-8 bg-slate-50/50 overflow-hidden" id="features">
+        <section className="pt-12 pb-24 bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden" id="features">
             <div className="max-w-[1400px] mx-auto px-4 md:px-12">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 lg:mb-6 gap-6">
-                    <div className="max-w-2xl">
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary tracking-widest uppercase mb-2"
-                        >
-                            {t('landing.features.tour')}
-                        </motion.div>
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl mb-1 lg:mb-2 leading-tight"
-                        >
-                            {t('landing.features.title')}
-                        </motion.h2>
-                        <p className="text-sm text-slate-500 font-medium">
-                            {t('landing.features.subtitle')}
-                        </p>
-                    </div>
-
-                    <div className="hidden md:flex items-center gap-3">
-                        <button
-                            onClick={() => scroll(-400)}
-                            className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all bg-white shadow-sm"
-                        >
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={() => scroll(400)}
-                            className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-white hover:bg-primary/90 transition-all bg-slate-900 shadow-md"
-                        >
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
-                    </div>
+                <div className="text-center mb-12 lg:mb-16">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        className="inline-flex items-center rounded-full bg-primary/10 dark:bg-primary/20 px-4 py-1.5 text-xs font-bold text-primary dark:text-blue-400 tracking-widest uppercase mb-4 ring-1 ring-inset ring-primary/20"
+                    >
+                        {t('landing.features.tour')}
+                    </motion.div>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        className="text-4xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl mb-4 leading-tight max-w-4xl mx-auto"
+                    >
+                        {t('landing.features.title')}
+                    </motion.h2>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto"
+                    >
+                        {t('landing.features.subtitle')}
+                    </motion.p>
                 </div>
 
-                <div
-                    ref={scrollContainerRef}
-                    onScroll={handleScroll}
-                    className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                    {galleryFeatures.map((feature) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 auto-rows-auto lg:grid-rows-[minmax(380px,auto)_minmax(300px,auto)]">
+                    {bentoFeatures.map((feature, i) => (
                         <motion.div
                             key={feature.name}
-                            className="min-w-full lg:min-w-[48%] snap-start px-1 lg:px-2 py-1 flex"
-                            whileHover={{ y: -3 }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                            whileHover={{ y: -4 }}
+                            className={`group bg-white dark:bg-slate-800/60 backdrop-blur-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm hover:shadow-xl overflow-hidden rounded-3xl transition-all duration-500 flex ${feature.className} ${feature.borderClass} will-change-transform`}
                         >
-                            <div className="relative group bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl overflow-hidden flex flex-col lg:grid lg:grid-cols-[0.9fr_1.1fr] transition-all duration-500 cursor-pointer w-full h-auto">
-                                {/* Text Content */}
-                                <div className="p-6 md:p-7 lg:p-8 order-2 lg:order-1 flex flex-col items-start justify-center">
-                                    <div className="flex items-center gap-3.5 mb-3 lg:mb-4">
-                                        <div className={`w-9 h-9 lg:w-11 lg:h-11 rounded-xl ${feature.color} text-white flex items-center justify-center shadow-lg shadow-${feature.color.split('-')[1]}-500/20 flex-shrink-0 group-hover:scale-105 transition-transform duration-500`}>
-                                            <feature.icon className="w-5 h-5 lg:w-6 lg:h-6" />
-                                        </div>
-                                        <div>
-                                            <div className="mb-0.5">
-                                                <span className="text-[7.5px] lg:text-[8px] font-black text-primary tracking-[0.2em] uppercase bg-primary/10 px-2 py-0.5 rounded-full">{feature.badge}</span>
-                                            </div>
-                                            <h3 className="text-lg lg:text-xl font-black text-slate-900 tracking-tighter leading-none group-hover:text-primary transition-colors duration-500">
-                                                {feature.name}
-                                            </h3>
-                                        </div>
+                            {/* Text Content */}
+                            <div className={`p-5 lg:p-6 flex flex-col z-10 ${feature.textClass}`}>
+                                <div className="flex items-center gap-3 lg:gap-4 mb-3 lg:mb-4">
+                                    <div className={`w-10 h-10 lg:w-11 lg:h-11 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-500 ${feature.iconClass}`}>
+                                        <feature.icon className="w-5 h-5" />
                                     </div>
-
-                                    <p className="text-sm lg:text-[14.5px] text-slate-500 font-medium leading-relaxed max-w-sm">
-                                        {feature.description}
-                                    </p>
-                                </div>
-
-                                {/* Immersive Visual Area - Truly Full Bleed & Adaptive */}
-                                <div
-                                    className={`order-1 lg:order-2 ${feature.color.split('-').slice(0, -1).join('-')}-500/[0.03] lg:${feature.color.split('-').slice(0, -1).join('-')}-500/[0.05] p-0 h-[220px] md:h-[240px] lg:h-auto lg:self-stretch lg:border-l border-slate-100 flex items-center justify-center overflow-hidden relative`}
-                                    role="img"
-                                    aria-label={`Visualización animada de ${feature.name}`}
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-
-                                    {/* Adaptive Mouse Perspective */}
-                                    <motion.div
-                                        className="w-full h-full flex items-center justify-center"
-                                        whileHover={{
-                                            rotateY: 12,
-                                            rotateX: -8,
-                                            scale: 1.02,
-                                        }}
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 120,
-                                            damping: 25
-                                        }}
-                                        style={{ perspective: 1200 }}
-                                    >
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            {feature.visual}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="mb-1">
+                                            <span className="inline-block text-[8px] sm:text-[9px] font-black text-primary dark:text-white tracking-[0.2em] uppercase bg-primary/10 dark:bg-primary/40 px-2 py-0.5 rounded-full truncate max-w-full">
+                                                {feature.badge}
+                                            </span>
                                         </div>
-                                    </motion.div>
+                                        <h3 className="text-lg lg:text-xl font-black text-slate-900 dark:text-white tracking-tight leading-tight group-hover:text-primary transition-colors duration-500 truncate">
+                                            {feature.name}
+                                        </h3>
+                                    </div>
                                 </div>
+                                <p className="text-sm lg:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed line-clamp-3 lg:line-clamp-4">
+                                    {feature.description}
+                                </p>
+                            </div>
+
+                            {/* Immersive Visual Area */}
+                            <div className={`relative flex items-center justify-center overflow-hidden w-full ${feature.bgGlass} ${feature.visualClass}`}>
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 dark:from-white/5 to-transparent z-0 pointer-events-none" />
+                                <motion.div
+                                    className="w-full h-full flex items-center justify-center z-10"
+                                    whileHover={{ scale: 1.05, rotateY: 5, rotateX: -5 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    style={{ perspective: 1000 }}
+                                >
+                                    {feature.visual}
+                                </motion.div>
                             </div>
                         </motion.div>
-                    ))}
-                </div>
-
-                {/* Dots Navigation */}
-                <div className="flex justify-center items-center gap-3 mt-4">
-                    {galleryFeatures.map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => scrollTo(i)}
-                            className={`transition-all duration-500 rounded-full ${i === activeIndex
-                                ? 'w-10 h-2.5 bg-primary shadow-lg shadow-primary/30'
-                                : 'w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400'
-                                }`}
-                        />
                     ))}
                 </div>
             </div>

@@ -66,28 +66,28 @@
             },
             "cards": {
                 "visualMapping": {
-                    "title": "Intelligent Visual Mapping",
-                    "description": "Visualize your Notion ecosystem as a network of interconnected nodes. Find dependencies and organize your databases with total clarity."
+                    "title": "Intelligent Database Visual Mapping",
+                    "description": "Visualize your entire Notion ecosystem as a high-fidelity network of interconnected nodes. Discover hidden dependencies, audit complex database architectures, and organize hundreds of databases with total clarity and unmatched visual detail."
                 },
                 "autoRelations": {
-                    "title": "Automatic Relations",
-                    "description": "Linka identifies and shows connections between your tables automatically, allowing you to navigate your multidimensional knowledge effortlessly."
+                    "title": "Automatic Relation Detection",
+                    "description": "Linka proactively detects and draws the connections between your tables automatically, allowing you to navigate the fabric of your multidimensional knowledge without requiring manual configuration. Simply connect your Notion environment and watch the magic unfold."
                 },
                 "privacy": {
-                    "title": "Privacy & Security",
-                    "description": "Your data is only yours. We implement robust security practices to ensure your Notion information stays private and protected."
+                    "title": "Maximum Privacy & Security by Design",
+                    "description": "Your confidential data is absolutely and exclusively yours. We implement robust enterprise-grade security practices to ensure the strategic structure of your Notion environment remains completely private, encrypted, and properly protected against third parties."
                 },
                 "sync": {
-                    "title": "On-Demand Sync",
-                    "description": "Reflect your Notion changes in seconds with a single click. No unnecessary waits to keep your graph always up to date."
+                    "title": "Lightning-Fast On-Demand Sync",
+                    "description": "Reflect your structural Notion changes in a matter of seconds with just the push of a button. Designed with an optimized performance architecture to guarantee near-zero latency, keeping the branches of your Knowledge Graph always synced and up to date."
                 },
                 "customization": {
-                    "title": "Advanced Customization",
-                    "description": "Adapt the graph to your liking. Customize colors, apply intelligent filters, and hide what you don't need to focus on what matters."
+                    "title": "Advanced Visual Customization",
+                    "description": "Adapt the graphical engine entirely to your style. Modify vibrant color schemes, apply intelligent algorithmic filters, and clear visual noise by isolating only the vertices of interest."
                 },
                 "qualityExport": {
-                    "title": "High Quality Export",
-                    "description": "Download your maps in high-fidelity PNG format, perfect for your reports, presentations, or technical documentation."
+                    "title": "High-Resolution Photographic Export",
+                    "description": "Download your architecture diagrams in ultra-high fidelity formats and transparent backgrounds. The ideal representations to boost technical prestige in your boardroom reports and executive presentations."
                 }
             }
         },
@@ -137,6 +137,24 @@
             "tagline": "Intelligent Visualization for Notion.",
             "privacy": "Privacy",
             "terms": "Terms"
+        },
+        "testimonials": {
+            "title": "What our users say",
+            "t1": {
+                "content": "Linka has completely changed how we manage our Notion projects. The node visualization is simply incredible.",
+                "author": "Carlos Rodriguez",
+                "role": "Product Manager at TechFlow"
+            },
+            "t2": {
+                "content": "Being able to see the relationships between my databases has saved me hours of unnecessary navigation. It's an essential tool.",
+                "author": "Elena Martinez",
+                "role": "Productivity Consultant"
+            },
+            "t3": {
+                "content": "The interface is clean, fast, and highly intuitive. Integrating with Notion was instantaneous. Highly recommended!",
+                "author": "David Soto",
+                "role": "Fullstack Developer"
+            }
         }
     },
     "dashboard": {
