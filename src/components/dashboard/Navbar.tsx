@@ -43,6 +43,7 @@ interface NavbarProps {
     syncStatus?: 'idle' | 'saving' | 'saved' | 'error'
     isDirty?: boolean
     onShowShortcuts?: () => void
+    onUpgrade?: () => void
 }
 
 const PROPERTY_TYPE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
@@ -88,7 +89,9 @@ export function Navbar({
     onManualSync,
     syncStatus = 'idle',
     isDirty = false,
-    onShowShortcuts
+    onShowShortcuts,
+    userPlan = 'free',
+    onUpgrade
 }: NavbarProps) {
     const navigate = useNavigate()
     const { t, i18n } = useTranslation()
@@ -480,7 +483,12 @@ export function Navbar({
                         <div className="flex flex-col items-start hidden md:flex">
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider leading-none">{t('dashboard.navbar.userLabel')}</span>
-                                <span className="bg-primary/20 text-[9px] font-black text-primary px-1.5 py-0.5 rounded-md uppercase tracking-tighter">BETA</span>
+                                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter ${userPlan === 'pro'
+                                    ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
+                                    : 'bg-primary/20 text-primary border border-primary/30'
+                                    }`}>
+                                    {userPlan === 'pro' ? 'PRO' : 'FREE'}
+                                </span>
                             </div>
                             <span className="text-xs font-bold text-gray-700 dark:text-slate-200 truncate max-w-[120px]">
                                 {user.user_metadata?.username || user.user_metadata?.full_name || user.email?.split('@')[0]}
@@ -490,6 +498,17 @@ export function Navbar({
                             {(user.user_metadata?.username?.[0] || user.user_metadata?.full_name?.[0] || user.email?.[0] || '?').toUpperCase()}
                         </div>
                     </div>
+                )}
+
+                {userPlan === 'free' && (
+                    <Button
+                        size="sm"
+                        className="h-9 px-4 rounded-xl bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 hidden sm:flex"
+                        onClick={onUpgrade}
+                    >
+                        <Activity className="w-3.5 h-3.5 mr-1.5" />
+                        {t('dashboard.pricing.getPro')}
+                    </Button>
                 )}
 
                 <Tooltip content={t('common.logout')} position="bottom">

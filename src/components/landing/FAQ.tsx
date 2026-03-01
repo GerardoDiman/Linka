@@ -36,15 +36,31 @@ export function FAQ() {
             <div className="container mx-auto px-4">
                 <div className="max-w-3xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold tracking-tight text-secondary dark:text-white sm:text-4xl">
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-3xl font-bold tracking-tight text-secondary dark:text-white sm:text-4xl"
+                        >
                             {t('landing.faq.title')}
-                        </h2>
-                        <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="mt-4 text-lg text-gray-600 dark:text-gray-400"
+                        >
                             {t('landing.faq.subtitle')}
-                        </p>
+                        </motion.p>
                     </div>
 
-                    <div className="space-y-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="space-y-4"
+                    >
                         {faqs.map((faq, index) => (
                             <div
                                 key={index}
@@ -82,7 +98,7 @@ export function FAQ() {
                                 </AnimatePresence>
                             </div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </section>

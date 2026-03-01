@@ -58,6 +58,6 @@ export const useGraphStore = create<GraphState>((set) => ({
 
     notionToken: null,
     setNotionToken: (token) => set({ notionToken: token }),
-    userPlan: 'pro',
+    userPlan: 'free',
     setUserPlan: (plan) => set({ userPlan: plan })
 }))

@@ -11,7 +11,9 @@
         "name": "Name",
         "backToList": "Back to list",
         "hide": "Hide",
-        "selection": "Selection"
+        "selection": "Selection",
+        "lightMode": "Light Mode",
+        "darkMode": "Dark Mode"
     },
     "landing": {
         "nav": {
@@ -22,7 +24,8 @@
             "getStarted": "Get Started",
             "openMenu": "Open Menu",
             "signIn": "Sign In",
-            "signUp": "Sign Up"
+            "signUp": "Sign Up",
+            "pricing": "Pricing"
         },
         "hero": {
             "badge": "Early Access",

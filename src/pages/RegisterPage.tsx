@@ -47,31 +47,9 @@ export default function RegisterPage() {
         try {
             const normalizedEmail = email.toLowerCase().trim()
 
-            // 1. Verificar si el email está en la lista de espera y aprobado mediante RPC seguro
-            const { data: status, error: rpcError } = await supabase
-                .rpc('check_waitlist_status', { email_to_check: normalizedEmail })
-
-            if (rpcError) {
-                setError(t('auth.register.errors.technical'))
-                setLoading(false)
-                return
-            }
-
-            if (!status) {
-                setError(t('auth.register.errors.notOnWaitlist'))
-                setLoading(false)
-                return
-            }
-
-            if (status !== 'approved') {
-                setError(t('auth.register.errors.notApproved'))
-                setLoading(false)
-                return
-            }
-
-            // 2. Proceder con el registro si está aprobado
+            // 1. Proceder directamente con el registro (Registro Abierto)
             const { error: signUpError } = await supabase.auth.signUp({
-                email,
+                email: normalizedEmail,
                 password,
                 options: {
                     data: {

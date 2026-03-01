@@ -299,17 +299,17 @@ const ExportVisualHero = () => (
         <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent top-1/4" />
         <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent bottom-1/4" />
 
-        <div className="relative group/file scale-90 lg:scale-110">
+        <div className="relative group/file scale-90 lg:scale-105">
             <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="w-20 h-28 lg:w-28 lg:h-36 bg-white rounded-3xl shadow-xl border border-indigo-100 flex flex-col items-center justify-center p-5 relative overflow-hidden"
+                className="w-14 h-20 lg:w-20 lg:h-28 bg-white rounded-2xl lg:rounded-3xl shadow-xl border border-indigo-100 flex flex-col items-center justify-center p-3 lg:p-4 relative overflow-hidden"
             >
-                <div className="absolute top-0 inset-x-0 h-1 bg-indigo-500/20" />
-                <FileText className="w-8 h-8 lg:w-12 lg:h-12 text-indigo-500 opacity-60 mb-3" />
-                <div className="w-full space-y-2">
-                    <div className="w-full h-1.5 bg-slate-50 rounded-full" />
-                    <div className="w-2/3 h-1.5 bg-slate-50 rounded-full" />
+                <div className="absolute top-0 inset-x-0 h-0.5 lg:h-1 bg-indigo-500/20" />
+                <FileText className="w-6 h-6 lg:w-9 lg:h-9 text-indigo-500 opacity-60 mb-2 lg:mb-3" />
+                <div className="w-full space-y-1 lg:space-y-2">
+                    <div className="w-full h-1 lg:h-1.5 bg-slate-50 rounded-full" />
+                    <div className="w-2/3 h-1 lg:h-1.5 bg-slate-50 rounded-full" />
                 </div>
             </motion.div>
             <motion.div
@@ -318,9 +318,9 @@ const ExportVisualHero = () => (
                     y: [0, 2, 0]
                 }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute -bottom-1 -right-1 bg-indigo-600 text-white p-2 lg:p-2.5 rounded-2xl shadow-xl z-10"
+                className="absolute -bottom-1 -right-1 bg-indigo-600 text-white p-1.5 lg:p-2 rounded-xl lg:rounded-2xl shadow-xl z-10"
             >
-                <Download className="w-4 h-4 lg:w-5 lg:h-5" />
+                <Download className="w-3 h-3 lg:w-4 h-4" />
             </motion.div>
         </div>
     </div>
@@ -343,8 +343,8 @@ export function Features() {
             bgGlass: "bg-blue-500/[0.03] lg:bg-blue-500/[0.05] border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800",
             borderClass: "hover:border-blue-400/50 dark:hover:border-blue-500/50",
             className: "md:col-span-2 lg:col-span-2 flex-col",
-            textClass: "flex-none justify-start",
-            visualClass: "flex-1 min-h-[160px] lg:min-h-[200px]"
+            textClass: "flex-1 justify-center",
+            visualClass: "h-[200px] lg:h-[240px]"
         },
         {
             name: t('landing.features.cards.autoRelations.title'),
@@ -356,8 +356,8 @@ export function Features() {
             bgGlass: "bg-purple-500/[0.03] lg:bg-purple-500/[0.05] border-t border-slate-100 dark:border-slate-800",
             borderClass: "hover:border-purple-400/50 dark:hover:border-purple-500/50",
             className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
-            textClass: "flex-none justify-start",
-            visualClass: "flex-1 min-h-[120px] lg:min-h-[160px]"
+            textClass: "flex-1 justify-start",
+            visualClass: "h-[160px] lg:h-[200px]"
         },
         {
             name: t('landing.features.cards.privacy.title'),
@@ -369,8 +369,8 @@ export function Features() {
             bgGlass: "bg-emerald-500/[0.03] lg:bg-emerald-500/[0.05] border-t border-slate-100 dark:border-slate-800",
             borderClass: "hover:border-emerald-400/50 dark:hover:border-emerald-500/50",
             className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
-            textClass: "flex-none justify-start",
-            visualClass: "flex-1 min-h-[120px] lg:min-h-[160px]"
+            textClass: "flex-1 justify-start",
+            visualClass: "h-[160px] lg:h-[200px]"
         },
 
         // Row 2: Medium (Left) | Small (Right Top) | Small (Right Bottom)
@@ -387,7 +387,7 @@ export function Features() {
             borderClass: "hover:border-amber-400/50 dark:hover:border-amber-500/50",
             className: "md:col-span-2 lg:col-span-2 flex-col lg:flex-row",
             textClass: "flex-none lg:w-[45%] lg:justify-center",
-            visualClass: "flex-1 lg:w-[55%] min-h-[100px] lg:min-h-0 lg:h-full"
+            visualClass: "h-[140px] lg:h-full lg:w-[55%]"
         },
         {
             name: t('landing.features.cards.customization.title'),
@@ -399,8 +399,8 @@ export function Features() {
             bgGlass: "bg-rose-500/[0.03] lg:bg-rose-500/[0.05] border-t border-slate-100 dark:border-slate-800",
             borderClass: "hover:border-rose-400/50 dark:hover:border-rose-500/50",
             className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
-            textClass: "flex-none justify-start",
-            visualClass: "flex-1 min-h-[80px]"
+            textClass: "flex-1 justify-start",
+            visualClass: "h-[180px] lg:h-[220px]"
         },
         {
             name: t('landing.features.cards.qualityExport.title'),
@@ -412,8 +412,8 @@ export function Features() {
             bgGlass: "bg-indigo-500/[0.03] lg:bg-indigo-500/[0.05] border-t border-slate-100 dark:border-slate-800",
             borderClass: "hover:border-indigo-400/50 dark:hover:border-indigo-500/50",
             className: "col-span-1 md:col-span-1 lg:col-span-1 flex-col",
-            textClass: "flex-none justify-start",
-            visualClass: "flex-1 min-h-[80px]"
+            textClass: "flex-1 justify-start",
+            visualClass: "h-[180px] lg:h-[220px]"
         }
     ]
 
@@ -424,6 +424,7 @@ export function Features() {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
                         className="inline-flex items-center rounded-full bg-primary/10 dark:bg-primary/20 px-4 py-1.5 text-xs font-bold text-primary dark:text-blue-400 tracking-widest uppercase mb-4 ring-1 ring-inset ring-primary/20"
                     >
                         {t('landing.features.tour')}
@@ -431,6 +432,7 @@ export function Features() {
                     <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
                         className="text-4xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl mb-4 leading-tight max-w-4xl mx-auto"
                     >
                         {t('landing.features.title')}
@@ -438,6 +440,7 @@ export function Features() {
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
                         className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto"
                     >
@@ -464,16 +467,16 @@ export function Features() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="mb-1">
-                                            <span className="inline-block text-[8px] sm:text-[9px] font-black text-primary dark:text-white tracking-[0.2em] uppercase bg-primary/10 dark:bg-primary/40 px-2 py-0.5 rounded-full truncate max-w-full">
+                                            <span className="inline-block text-[8px] sm:text-[9px] font-black text-primary dark:text-white tracking-[0.2em] uppercase bg-primary/10 dark:bg-primary/40 px-2 py-0.5 rounded-full max-w-full">
                                                 {feature.badge}
                                             </span>
                                         </div>
-                                        <h3 className="text-lg lg:text-xl font-black text-slate-900 dark:text-white tracking-tight leading-tight group-hover:text-primary transition-colors duration-500 truncate">
+                                        <h3 className="text-lg lg:text-xl font-black text-slate-900 dark:text-white tracking-tight leading-tight group-hover:text-primary transition-colors duration-500">
                                             {feature.name}
                                         </h3>
                                     </div>
                                 </div>
-                                <p className="text-sm lg:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed line-clamp-3 lg:line-clamp-4">
+                                <p className="text-sm lg:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                                     {feature.description}
                                 </p>
                             </div>

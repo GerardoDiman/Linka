@@ -5,14 +5,13 @@ import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { DataAnimation } from "./DataAnimation"
 import { SplitText } from "../animations/SplitText"
-import { ShinyText } from "../animations/ShinyText"
 
 export function Hero() {
     const navigate = useNavigate()
     const { t } = useTranslation()
 
     return (
-        <section className="relative isolate pt-20 pb-16 sm:pt-24 sm:pb-24 overflow-hidden bg-white dark:bg-slate-900">
+        <section className="relative isolate pt-28 pb-16 sm:pt-40 sm:pb-24 overflow-hidden bg-white dark:bg-slate-900">
             {/* ... (background elements unchanged) ... */}
             <div className="absolute inset-0 -z-10 overflow-hidden bg-white dark:bg-slate-950">
                 {/* Clean Modern Engineering Grid */}
@@ -55,20 +54,11 @@ export function Hero() {
             <div className="container mx-auto px-4 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                     className="mx-auto max-w-4xl will-change-transform"
                 >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="mb-8"
-                    >
-                        <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium ring-1 ring-inset ring-primary/20">
-                            <ShinyText text={t('landing.hero.badge')} speed={3} className="!text-primary font-bold" />
-                        </div>
-                    </motion.div>
 
                     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-6xl lg:text-7xl mb-4 lg:mb-6 leading-[1.1] lg:leading-[1.05]">
                         <SplitText
@@ -94,10 +84,7 @@ export function Hero() {
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-40 group-hover:opacity-100 transition duration-700"></div>
                             <Button
                                 size="lg"
-                                onClick={() => {
-                                    const element = document.getElementById('access');
-                                    element?.scrollIntoView({ behavior: 'smooth' });
-                                }}
+                                onClick={() => navigate("/register")}
                                 aria-label={t('landing.hero.cta')}
                                 className="relative w-full sm:w-auto h-14 px-10 text-lg rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 transition-all font-black hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.2)] active:translate-y-0"
                             >
@@ -118,8 +105,9 @@ export function Hero() {
 
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.5 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, delay: 0.2 }}
                     className="mt-16 sm:mt-24"
                 >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -176,7 +164,7 @@ export function Hero() {
                     </div>
                 </motion.div>
             </div>
-        </section>
+        </section >
     )
 }
 

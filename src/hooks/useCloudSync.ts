@@ -210,8 +210,7 @@ export function useCloudSync({
                 if (error) return
 
                 if (data?.plan_type) {
-                    // Overriding for Beta: keep it pro
-                    setUserPlan('pro')
+                    setUserPlan(data.plan_type as 'free' | 'pro')
                 }
             } catch {
                 // Handle silently

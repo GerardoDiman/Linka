@@ -4,9 +4,10 @@ import { useTranslation } from "react-i18next"
 import { Sun, Moon, LogOut } from "lucide-react"
 import { Hero } from "../components/landing/Hero"
 import { Features } from "../components/landing/Features"
+import { Pricing } from "../components/landing/Pricing"
 import { FAQ } from "../components/landing/FAQ"
 // import { Testimonials } from "../components/landing/Testimonials"
-import { AccessRequestForm } from "../components/landing/AccessRequestForm"
+// import { AccessRequestForm } from "../components/landing/AccessRequestForm"
 import { Logo } from "../components/ui/Logo"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
@@ -82,7 +83,8 @@ export default function LandingPage() {
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex lg:gap-x-12 md:gap-x-8">
                         <a href="#features" className="text-sm font-bold leading-6 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">{t('landing.nav.features')}</a>
-                        <a href="#access" className="text-sm font-bold leading-6 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">{t('landing.nav.access')}</a>
+                        <a href="#pricing" className="text-sm font-bold leading-6 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">{t('landing.nav.pricing')}</a>
+                        {/* <a href="#access" className="text-sm font-bold leading-6 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">{t('landing.nav.access')}</a> */}
                     </div>
 
                     <div className="flex lg:flex-1 lg:justify-end items-center gap-2">
@@ -166,12 +168,19 @@ export default function LandingPage() {
                             {t('landing.nav.features')}
                         </a>
                         <a
+                            href="#pricing"
+                            className="block rounded-xl px-3 py-4 text-base font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            {t('landing.nav.pricing')}
+                        </a>
+                        {/* <a
                             href="#access"
                             className="block rounded-xl px-3 py-4 text-base font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                             onClick={() => setIsMobileMenuOpen(false)}
                         >
                             {t('landing.nav.access')}
-                        </a>
+                        </a> */}
                         <div className="pt-4 pb-2 border-t border-slate-50 dark:border-slate-800 mt-2 space-y-4">
                             {!session && (
                                 <>
@@ -208,26 +217,13 @@ export default function LandingPage() {
                     <Features />
                 </motion.div>
 
+                <Pricing />
+
                 {/* <Testimonials /> */}
 
                 <FAQ />
 
-                <motion.section
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.8 }}
-                    className="py-24 bg-gray-50/50 dark:bg-slate-800/50 relative overflow-hidden"
-                    id="access"
-                >
-                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-slate-700 to-transparent" />
-                    <div className="container mx-auto px-4 relative z-10">
-                        <div className="max-w-2xl mx-auto">
-                            <AccessRequestForm />
-                        </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-slate-700 to-transparent" />
-                </motion.section>
+                {/* Access Request Section Removed for Open Registration */}
             </main>
 
             <footer className="bg-white dark:bg-slate-900 py-12 border-t border-gray-100 dark:border-slate-800">

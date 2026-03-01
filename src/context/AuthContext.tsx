@@ -8,6 +8,7 @@ interface AuthContextType {
     session: Session | null
     user: User | null
     role: string | null
+    plan: 'free' | 'pro'
     loading: boolean
     signOut: () => Promise<void>
 }
@@ -18,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [session, setSession] = useState<Session | null>(null)
     const [user, setUser] = useState<User | null>(null)
     const [role, setRole] = useState<string | null>(null)
+    const [plan, setPlan] = useState<'free' | 'pro'>('free')
     const [loading, setLoading] = useState(true)
     const loadingRef = React.useRef(loading)
 
@@ -25,23 +27,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loadingRef.current = loading
     }, [loading])
 
-    const fetchRole = async (userId: string, accessToken?: string) => {
+    const fetchProfileData = async (userId: string, accessToken?: string) => {
         try {
             // 1. Try via standard client with a timeout race
             const { data, error } = await Promise.race([
-                supabase.from('profiles').select('role').eq('id', userId).single(),
+                supabase.from('profiles').select('role, plan_type').eq('id', userId).single(),
                 new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
             ])
 
-            if (!error && data?.role) {
+            if (!error && data) {
                 setRole(data.role)
-                return data.role
+                setPlan(data.plan_type as 'free' | 'pro' || 'free')
+                return data
             }
             throw error || new Error("No data")
         } catch {
             try {
                 // Secondary fetch fallback (more reliable during client hangs)
-                const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=role`
+                const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=role,plan_type`
                 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
                 const response = await fetch(url, {
                     headers: {
@@ -53,17 +56,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (!response.ok) throw new Error(`HTTP Error ${response.status}`)
 
                 const data = await response.json()
-                if (data?.[0]?.role) {
+                if (data?.[0]) {
                     setRole(data[0].role)
-                    return data[0].role
+                    setPlan(data[0].plan_type as 'free' | 'pro' || 'free')
+                    return data[0]
                 }
             } catch (fetchErr) {
-                logger.error('❌ Role fallback failed:', fetchErr)
+                logger.error('❌ Profile fallback failed:', fetchErr)
             }
 
             // 3. Last resort default
             setRole('user')
-            return 'user'
+            setPlan('free')
+            return { role: 'user', plan_type: 'free' }
         }
     }
 
@@ -76,11 +81,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (newSession?.user) {
                     setSession(newSession)
                     setUser(newSession.user)
-                    await fetchRole(newSession.user.id, newSession.access_token)
+                    await fetchProfileData(newSession.user.id, newSession.access_token)
                 } else {
                     setSession(null)
                     setUser(null)
                     setRole(null)
+                    setPlan('free')
                 }
             } catch {
                 // Silently handle or use generic error log in production if needed
@@ -159,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return (
-        <AuthContext.Provider value={{ session, user, role, loading, signOut }}>
+        <AuthContext.Provider value={{ session, user, role, plan, loading, signOut }}>
             {children}
         </AuthContext.Provider>
     )

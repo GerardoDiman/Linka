@@ -32,6 +32,7 @@ import { OnboardingTour } from "../components/dashboard/OnboardingTour"
 import { SelectionActionBar } from "../components/dashboard/SelectionActionBar"
 import { ExportButton } from "../components/dashboard/ExportButton"
 import { Tooltip } from "../components/ui/Tooltip"
+import { PricingModal } from "../components/dashboard/PricingModal"
 import { ErrorBoundary } from "../components/ui/ErrorBoundary"
 import { transformToGraphData } from "../lib/graph"
 import { useTheme } from "../context/ThemeContext"
@@ -89,6 +90,16 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const syncedRelations = useGraphStore(state => state.syncedRelations)
     const setSyncedRelations = useGraphStore(state => state.setSyncedRelations)
     const userPlan = useGraphStore(state => state.userPlan)
+    const setUserPlan = useGraphStore(state => state.setUserPlan)
+
+    const { plan: authPlan } = useAuth()
+
+    // Sync auth plan to store
+    useEffect(() => {
+        if (authPlan) {
+            setUserPlan(authPlan)
+        }
+    }, [authPlan, setUserPlan])
 
     const onNodesChange = useCallback((changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)), [setNodes])
     const onEdgesChange = useCallback((changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)), [setEdges])
@@ -97,6 +108,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set())
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [showTour, setShowTour] = useState(false)
+    const [showPricing, setShowPricing] = useState(false)
 
     // Initialize store with demo data if empty
     useEffect(() => {
@@ -366,6 +378,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 syncStatus={cloudSync.cloudSyncStatus}
                 isDirty={isDirty}
                 onShowShortcuts={() => shortcuts.setShowShortcutsModal(true)}
+                onUpgrade={() => setShowPricing(true)}
             />
 
             <div className={`flex flex-1 overflow-hidden transition-all duration-500`}>
@@ -524,6 +537,12 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             <ShortcutsHelpModal
                 isOpen={shortcuts.showShortcutsModal}
                 onClose={() => shortcuts.setShowShortcutsModal(false)}
+            />
+
+            <PricingModal
+                isOpen={showPricing}
+                onClose={() => setShowPricing(false)}
+                currentPlan={userPlan}
             />
         </div>
     )

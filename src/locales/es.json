@@ -11,7 +11,9 @@
         "name": "Nombre",
         "backToList": "Volver al listado",
         "hide": "Ocultar",
-        "selection": "Seleccion"
+        "selection": "Seleccion",
+        "lightMode": "Modo Claro",
+        "darkMode": "Modo Oscuro"
     },
     "landing": {
         "nav": {
@@ -22,7 +24,8 @@
             "getStarted": "Empezar",
             "openMenu": "Abrir menú",
             "signIn": "Iniciar Sesión",
-            "signUp": "Registrarse"
+            "signUp": "Registrarse",
+            "pricing": "Precios"
         },
         "hero": {
             "badge": "Acceso Anticipado",
