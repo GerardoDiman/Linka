@@ -174,7 +174,6 @@
             "pro": "PRO PLAN",
             "free": "FREE PLAN",
             "tour": "Help",
-            "betaBadge": "OPEN BETA",
             "userLabel": "User",
             "filters": "Filters",
             "clear": "Clear",
@@ -280,9 +279,6 @@
             "hideCanvas": "Hide on canvas",
             "viewProps": "View properties",
             "noDbs": "No visible databases",
-            "betaTitle": "Unlimited Beta Access",
-            "betaDesc": "Thanks for being part of the beta! You have access to all colors and unlimited sync for free.",
-            "betaStatus": "BETA ACTIVE 💎",
             "viewInNotion": "View in Notion",
             "properties": "Properties",
             "info": "Information",
@@ -346,7 +342,7 @@
             "prioritySupport": "Priority support",
             "futureFeatures": "Access to future features",
             "starting": "Starting...",
-            "getPro": "Get Pro Now",
+            "getPro": "Get Pro",
             "questions": "Have questions? Contact us at support@linka.io",
             "checkoutError": "Could not initiate checkout. Please try again."
         },
@@ -413,7 +409,10 @@
             "register": "Sign up",
             "noAccess": "Don't have access yet?",
             "requestAccess": "Request Access",
-            "error": "Error signing in"
+            "error": "Error signing in",
+            "or": "Or continue with",
+            "google": "Continue with Google",
+            "notion": "Continue with Notion"
         },
         "register": {
             "title": "Create your account",
@@ -433,6 +432,7 @@
             "noAccess": "Don't have access yet?",
             "requestAccess": "Request Access",
             "success": "Registration successful! Please check your email to confirm your account.",
+            "acceptTerms": "I accept the <0>Privacy Policy</0> and the <1>Terms of Service</1>",
             "errors": {
                 "passwordMismatch": "Passwords don't match",
                 "notOnWaitlist": "This email hasn't requested access or isn't on the waitlist.",

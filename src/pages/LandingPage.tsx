@@ -12,6 +12,7 @@ import { Logo } from "../components/ui/Logo"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import { Tooltip } from "../components/ui/Tooltip"
+import { Link } from "react-router-dom"
 
 export default function LandingPage() {
     const { t, i18n } = useTranslation()
@@ -235,8 +236,8 @@ export default function LandingPage() {
                         </div>
                         <p className="text-gray-400 dark:text-slate-500 text-sm">&copy; {new Date().getFullYear()} Linka. {t('landing.footer.tagline')}</p>
                         <div className="flex gap-6">
-                            <span className="text-gray-300 dark:text-slate-600 text-sm">{t('landing.footer.privacy')}</span>
-                            <span className="text-gray-300 dark:text-slate-600 text-sm">{t('landing.footer.terms')}</span>
+                            <Link to="/privacy" className="text-gray-400 dark:text-slate-500 text-sm hover:text-primary transition-colors">{t('landing.footer.privacy')}</Link>
+                            <Link to="/terms" className="text-gray-400 dark:text-slate-500 text-sm hover:text-primary transition-colors">{t('landing.footer.terms')}</Link>
                         </div>
                     </div>
                 </div>

@@ -174,7 +174,6 @@
             "pro": "PLAN PRO",
             "free": "PLAN GRATIS",
             "tour": "Ayuda",
-            "betaBadge": "BETA ABIERTA",
             "userLabel": "Usuario",
             "filters": "Filtros",
             "clear": "Limpiar",
@@ -280,9 +279,6 @@
             "hideCanvas": "Ocultar en canvas",
             "viewProps": "Ver propiedades",
             "noDbs": "No hay bases de datos visibles",
-            "betaTitle": "Acceso Beta Ilimitado",
-            "betaDesc": "¡Gracias por ser parte de la beta! Tienes acceso a todos los colores y sincronización ilimitada gratis.",
-            "betaStatus": "BETA ACTIVA 💎",
             "viewInNotion": "Ver en Notion",
             "properties": "Propiedades",
             "info": "Información",
@@ -346,7 +342,7 @@
             "prioritySupport": "Soporte prioritario",
             "futureFeatures": "Acceso a futuras funciones",
             "starting": "Iniciando...",
-            "getPro": "Hazte Pro Ahora",
+            "getPro": "Hazte Pro",
             "questions": "¿Tienes preguntas? Contáctanos en soporte@linka.io",
             "checkoutError": "No se pudo iniciar el proceso de pago. Por favor, intenta de nuevo."
         },
@@ -413,7 +409,10 @@
             "register": "Regístrate",
             "noAccess": "¿Aún no tienes acceso?",
             "requestAccess": "Solicitar Acceso",
-            "error": "Error al iniciar sesión"
+            "error": "Error al iniciar sesión",
+            "or": "O continúa con",
+            "google": "Continuar con Google",
+            "notion": "Continuar con Notion"
         },
         "register": {
             "title": "Crea tu cuenta",
@@ -433,6 +432,7 @@
             "noAccess": "¿Aún no tienes acceso?",
             "requestAccess": "Solicitar Acceso",
             "success": "¡Registro exitoso! Por favor revisa tu email para confirmar tu cuenta.",
+            "acceptTerms": "Acepto las <0>Políticas de Privacidad</0> y los <1>Términos de Servicio</1>",
             "errors": {
                 "passwordMismatch": "Las contraseñas no coinciden",
                 "notOnWaitlist": "Este correo no ha solicitado acceso o no se encuentra en la lista de espera.",

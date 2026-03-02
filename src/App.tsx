@@ -15,6 +15,8 @@ const RecoveryPage = lazy(() => import("./pages/RecoveryPage"))
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"))
 const DashboardPage = lazy(() => import("./pages/DashboardPage"))
 const AdminPage = lazy(() => import("./pages/AdminPage"))
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"))
+const TermsPage = lazy(() => import("./pages/TermsPage"))
 
 // Page transition variants
 const pageVariants = {
@@ -123,6 +125,8 @@ function AnimatedRoutes() {
             </AdminRoute>
           }
         />
+        <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
+        <Route path="/terms" element={<PageWrapper><TermsPage /></PageWrapper>} />
       </Routes>
     </AnimatePresence>
   )

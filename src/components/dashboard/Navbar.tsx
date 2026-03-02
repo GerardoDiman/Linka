@@ -243,6 +243,17 @@ export function Navbar({
             <div className="flex items-center gap-2">
 
 
+                {userPlan === 'free' && (
+                    <Button
+                        size="sm"
+                        className="h-9 px-4 rounded-xl bg-secondary hover:bg-secondary/90 text-white font-bold shadow-lg shadow-secondary/20 transition-all hover:scale-105 active:scale-95 hidden sm:flex border border-white/10"
+                        onClick={onUpgrade}
+                    >
+                        <Activity className="w-3.5 h-3.5 mr-1.5" />
+                        {t('dashboard.pricing.getPro')}
+                    </Button>
+                )}
+
                 <div className="relative flex items-center" ref={syncPopoverRef}>
                     <Tooltip content="Notion Sync" position="bottom">
                         <Button
@@ -500,16 +511,6 @@ export function Navbar({
                     </div>
                 )}
 
-                {userPlan === 'free' && (
-                    <Button
-                        size="sm"
-                        className="h-9 px-4 rounded-xl bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 hidden sm:flex"
-                        onClick={onUpgrade}
-                    >
-                        <Activity className="w-3.5 h-3.5 mr-1.5" />
-                        {t('dashboard.pricing.getPro')}
-                    </Button>
-                )}
 
                 <Tooltip content={t('common.logout')} position="bottom">
                     <Button

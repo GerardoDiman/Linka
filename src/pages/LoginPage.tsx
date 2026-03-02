@@ -7,6 +7,8 @@ import { Input } from "../components/ui/input"
 import { Card, CardContent } from "../components/ui/card"
 import { supabase } from "../lib/supabase"
 import { Eye, EyeOff } from "lucide-react"
+import { GoogleIcon } from "../components/ui/GoogleIcon"
+import { NotionIcon } from "../components/ui/NotionIcon"
 
 export default function LoginPage() {
     const { t } = useTranslation()
@@ -33,6 +35,23 @@ export default function LoginPage() {
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : t('auth.login.error'))
         } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleOAuthLogin = async (provider: 'google' | 'notion') => {
+        setLoading(true)
+        setError(null)
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`
+                }
+            })
+            if (error) throw error
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t('auth.login.error'))
             setLoading(false)
         }
     }
@@ -92,6 +111,33 @@ export default function LoginPage() {
                             {loading ? t('auth.login.submitting') : t('auth.login.submit')}
                         </Button>
                     </form>
+
+                    <div className="mt-6 flex items-center gap-3">
+                        <div className="flex-1 h-px bg-gray-100 dark:bg-slate-700" />
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t('auth.login.or')}</span>
+                        <div className="flex-1 h-px bg-gray-100 dark:bg-slate-700" />
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-4">
+                        <Button
+                            variant="outline"
+                            className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            onClick={() => handleOAuthLogin('google')}
+                            disabled={loading}
+                        >
+                            <GoogleIcon className="w-4 h-4 mr-2" />
+                            {t('auth.login.google')}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            onClick={() => handleOAuthLogin('notion')}
+                            disabled={loading}
+                        >
+                            <NotionIcon className="w-4 h-4 mr-2" />
+                            {t('auth.login.notion')}
+                        </Button>
+                    </div>
                     <div className="mt-6 text-center text-sm space-y-2">
                         <div>
                             <span className="text-gray-500 dark:text-gray-400">{t('auth.login.noAccount')} </span>

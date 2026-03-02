@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Database, ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal, Star } from "lucide-react"
+import { Database, ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal } from "lucide-react"
 import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
 import { NotionIcon } from "../ui/NotionIcon"
@@ -243,21 +243,6 @@ export function Sidebar({
                         <p className="text-xs text-gray-400 text-center py-8 italic">{t('dashboard.sidebar.noDbs')}</p>
                     )}
 
-                    {/* Pro CTA for Free Users */}
-                    {/* Beta Access Message for all users during Beta phase */}
-                    {!isCollapsed && (
-                        <div className="mt-8 p-5 rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-primary/10 transition-colors" />
-                            <Star className="w-6 h-6 text-primary mb-3 fill-primary/20 group-hover:scale-110 transition-transform" />
-                            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2">{t('dashboard.sidebar.betaTitle')}</h4>
-                            <p className="text-[11px] text-slate-400 mb-4 leading-relaxed font-medium">
-                                {t('dashboard.sidebar.betaDesc')}
-                            </p>
-                            <div className="text-[10px] font-bold text-primary bg-primary/10 px-3 py-2 rounded-xl text-center border border-primary/10">
-                                {t('dashboard.sidebar.betaStatus')}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         )
