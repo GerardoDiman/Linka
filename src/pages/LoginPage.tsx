@@ -1,27 +1,28 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
-import { useTranslation } from "react-i18next"
+import { Link, useNavigate } from "react-router-dom"
+import { useTranslation, Trans } from "react-i18next"
 import { AuthLayout } from "../components/auth/AuthLayout"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Card, CardContent } from "../components/ui/card"
+import { Eye, EyeOff, Mail } from "lucide-react"
 import { supabase } from "../lib/supabase"
-import { Eye, EyeOff } from "lucide-react"
+import { useToast } from "../context/ToastContext"
 import { GoogleIcon } from "../components/ui/GoogleIcon"
 import { NotionIcon } from "../components/ui/NotionIcon"
 
 export default function LoginPage() {
     const { t } = useTranslation()
+    const navigate = useNavigate()
+    const { toast } = useToast()
     const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [showPassword, setShowPassword] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        setError(null)
 
         try {
             const { error } = await supabase.auth.signInWithPassword({
@@ -31,72 +32,71 @@ export default function LoginPage() {
 
             if (error) throw error
 
-            // Redirection is handled by App.tsx observing session change
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : t('auth.login.error'))
+            toast.success(t('auth.login.success'))
+            navigate("/dashboard")
+        } catch (error: any) {
+            toast.error(error.message || t('auth.login.error'))
         } finally {
             setLoading(false)
         }
     }
 
     const handleOAuthLogin = async (provider: 'google' | 'notion') => {
-        setLoading(true)
-        setError(null)
         try {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`
-                }
+                    redirectTo: `${window.location.origin}/dashboard`,
+                },
             })
             if (error) throw error
-        } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : t('auth.login.error'))
-            setLoading(false)
+        } catch (error: any) {
+            toast.error(error.message || t('auth.login.error'))
         }
     }
 
     return (
         <AuthLayout title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
-            <Card className="dark:bg-slate-800 dark:border-slate-700">
+            <Card className="border-none shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
                 <CardContent className="pt-6">
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        {error && (
-                            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg">
-                                {error}
-                            </div>
-                        )}
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300" htmlFor="email">
                                 {t('auth.login.email')}
                             </label>
-                            <Input
-                                id="email"
-                                type="email"
-                                required
-                                placeholder={t('auth.register.emailPlaceholder')}
-                                className="mt-1 dark:bg-slate-900 dark:border-slate-600 dark:text-white"
-                                value={email}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                            />
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="tu@email.com"
+                                    className="pl-10 h-11 bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
-                        <div>
+                        <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300" htmlFor="password">
                                     {t('auth.login.password')}
                                 </label>
-                                <Link to="/recovery" className="text-sm font-medium text-primary hover:text-primary/80">
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-xs font-medium text-primary hover:underline"
+                                >
                                     {t('auth.login.forgotPassword')}
                                 </Link>
                             </div>
-                            <div className="relative mt-1">
+                            <div className="relative">
                                 <Input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
-                                    required
-                                    className="pr-10 dark:bg-slate-900 dark:border-slate-600 dark:text-white"
+                                    className="h-11 bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 pr-10"
                                     value={password}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
                                 />
                                 <button
                                     type="button"
@@ -107,7 +107,7 @@ export default function LoginPage() {
                                 </button>
                             </div>
                         </div>
-                        <Button type="submit" className="w-full" disabled={loading}>
+                        <Button type="submit" className="w-full h-11" disabled={loading}>
                             {loading ? t('auth.login.submitting') : t('auth.login.submit')}
                         </Button>
                     </form>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                     <div className="mt-6 grid grid-cols-2 gap-4">
                         <Button
                             variant="outline"
-                            className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] h-11"
                             onClick={() => handleOAuthLogin('google')}
                             disabled={loading}
                         >
@@ -130,7 +130,7 @@ export default function LoginPage() {
                         </Button>
                         <Button
                             variant="outline"
-                            className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] h-11"
                             onClick={() => handleOAuthLogin('notion')}
                             disabled={loading}
                         >
@@ -138,19 +138,24 @@ export default function LoginPage() {
                             {t('auth.login.notion')}
                         </Button>
                     </div>
-                    <div className="mt-6 text-center text-sm space-y-2">
-                        <div>
-                            <span className="text-gray-500 dark:text-gray-400">{t('auth.login.noAccount')} </span>
-                            <Link to="/register" className="font-medium text-primary hover:text-primary/80">
-                                {t('auth.login.register')}
-                            </Link>
-                        </div>
-                        <div className="pt-2 border-t border-gray-100 dark:border-slate-700">
-                            <span className="text-gray-500 dark:text-gray-400 text-xs">{t('auth.login.noAccess')} </span>
-                            <Link to="/#access" className="text-xs font-medium text-primary hover:text-primary/80">
-                                {t('auth.login.requestAccess')}
-                            </Link>
-                        </div>
+
+                    <div className="mt-4 text-center">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-relaxed px-4">
+                            <Trans
+                                i18nKey="auth.login.oauthDisclaimer"
+                                components={[
+                                    <Link key="privacy" to="/privacy" className="text-primary hover:underline font-medium" />,
+                                    <Link key="terms" to="/terms" className="text-primary hover:underline font-medium" />
+                                ]}
+                            />
+                        </p>
+                    </div>
+
+                    <div className="mt-8 text-center text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">{t('auth.login.noAccount')} </span>
+                        <Link to="/register" className="font-medium text-primary hover:text-primary/80">
+                            {t('auth.login.register')}
+                        </Link>
                     </div>
                 </CardContent>
             </Card>

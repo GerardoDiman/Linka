@@ -2,21 +2,21 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")
-const PRO_PLAN_PRICE_ID = Deno.env.get("STRIPE_PRO_PRICE_ID") // User will need to set this
+const PRO_PLAN_PRICE_ID = Deno.env.get("STRIPE_PRO_PRICE_ID")
+const SITE_URL = Deno.env.get("SITE_URL") || "https://linka-web.vercel.app"
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
     // Handle CORS
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
 
     try {
-        console.log("Iniciando sesión de checkout...")
 
         const authHeader = req.headers.get('Authorization')
         if (!authHeader) {
@@ -32,14 +32,15 @@ serve(async (req) => {
         // Get the user from the JWT
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
         if (authError || !user) {
-            console.error("Error de auth:", authError)
-            throw new Error("No autorizado: Debes iniciar sesión")
+            return new Response(JSON.stringify({ error: "No autorizado: Debes iniciar sesión" }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 401,
+            })
         }
 
-        console.log(`Usuario autenticado: ${user.email} (${user.id})`)
 
-        if (!PRO_PLAN_PRICE_ID) {
-            throw new Error("STRIPE_PRO_PRICE_ID no está configurado")
+        if (!STRIPE_SECRET_KEY) {
+            throw new Error("STRIPE_SECRET_KEY no está configurado")
         }
 
         // 1. Check if user already has a customer ID in profiles
@@ -50,31 +51,38 @@ serve(async (req) => {
             .single()
 
         if (profileError) {
-            console.warn("Error buscando perfil:", profileError)
+            // If profile not found, it's not necessarily an error, just means no customer ID yet.
+            // We'll create one later if needed.
         }
 
         const customerId = profile?.stripe_customer_id
-        console.log(`Customer ID actual: ${customerId || 'Ninguno'}`)
+
+        const origin = req.headers.get("origin") || SITE_URL
 
         // 2. Prepare Stripe Checkout Session parameters
         const params = new URLSearchParams({
             "mode": "subscription",
-            "payment_method_types[0]": "card", // Updated to index format for clarity
+            "payment_method_types[0]": "card",
             "line_items[0][price]": PRO_PLAN_PRICE_ID!,
             "line_items[0][quantity]": "1",
-            "success_url": `${req.headers.get("origin")}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-            "cancel_url": `${req.headers.get("origin")}/dashboard`,
+            "automatic_tax[enabled]": "true",
+            "billing_address_collection": "required",
+            "tax_id_collection[enabled]": "true",
+            "success_url": `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+            "cancel_url": `${origin}/dashboard`,
             "client_reference_id": user.id,
             "metadata[supabase_user_id]": user.id,
         })
 
         if (customerId) {
             params.append("customer", customerId)
+            params.append("customer_update[address]", "auto")
+        } else if (user.email) {
+            params.append("customer_email", user.email)
         } else {
-            params.append("customer_email", user.email!)
+            // No email available, Stripe might still work but it's less ideal.
         }
 
-        console.log("Enviando petición a Stripe...")
 
         // 3. Create Stripe Checkout Session
         const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -89,22 +97,25 @@ serve(async (req) => {
         const result = await response.json()
 
         if (!response.ok) {
-            console.error("Error de Stripe API:", result)
-            throw new Error(result.error?.message || "Error en Stripe API")
+            return new Response(JSON.stringify({
+                error: result.error?.message || "Error en Stripe API"
+            }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 400,
+            })
         }
 
-        console.log("Sesión de Stripe creada con éxito")
 
         return new Response(JSON.stringify({ url: result.url }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })
 
-    } catch (error) {
-        console.error("Error final en la función:", error.message)
+    } catch (error: any) {
+        console.error("Error en create-checkout-session:", error.message)
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
+            status: 500,
         })
     }
 })

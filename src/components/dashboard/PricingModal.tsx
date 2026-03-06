@@ -24,12 +24,19 @@ export function PricingModal({ isOpen, onClose, currentPlan }: PricingModalProps
         try {
             const { data, error } = await supabase.functions.invoke('create-checkout-session')
 
-            if (error) throw error
+            if (error || data?.error) {
+                const errorMsg = error?.message || data?.error || "Error en el proceso de pago";
+                throw new Error(errorMsg);
+            }
+
             if (data?.url) {
                 window.location.href = data.url
             }
-        } catch (err) {
+        } catch (err: any) {
             logger.error("Error initiating checkout:", err)
+            // Show more info in console for debugging
+            if (err.context?.error) console.error("Error context:", err.context.error);
+
             toast.error(t('dashboard.pricing.checkoutError'))
         } finally {
             setLoading(false)

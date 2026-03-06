@@ -407,12 +407,11 @@
             "submitting": "Signing in...",
             "noAccount": "Don't have an account?",
             "register": "Sign up",
-            "noAccess": "Don't have access yet?",
-            "requestAccess": "Request Access",
             "error": "Error signing in",
             "or": "Or continue with",
             "google": "Continue with Google",
-            "notion": "Continue with Notion"
+            "notion": "Continue with Notion",
+            "oauthDisclaimer": "By continuing with Google or Notion, you agree to our <0>Privacy Policy</0> and <1>Terms of Service</1>"
         },
         "register": {
             "title": "Create your account",
@@ -429,8 +428,6 @@
             "submitting": "Creating account...",
             "hasAccount": "Already have an account?",
             "login": "Sign in",
-            "noAccess": "Don't have access yet?",
-            "requestAccess": "Request Access",
             "success": "Registration successful! Please check your email to confirm your account.",
             "acceptTerms": "I accept the <0>Privacy Policy</0> and the <1>Terms of Service</1>",
             "errors": {
