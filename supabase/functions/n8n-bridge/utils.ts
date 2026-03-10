@@ -88,43 +88,24 @@ export const templates = {
     <div class="btn-container"><a href="{{link}}" class="btn">Reset Password</a></div>
 </div><div class="footer"><p>&copy; 2024 Linka. Security first.</p></div></div></div></body></html>`,
 
-    waitlist_request: `
-<!DOCTYPE html>
-<html>
-<head><style>${baseStyle} .header { background-color: #d97706; }</style></head>
-<body><div class="wrapper"><div class="container">${headerHtml}<div class="content">
-    <h2>You're on the list, {{fullName}}!</h2>
-    <p>Thank you for your interest. We've received your request to join the waitlist. We'll notify you as soon as a spot becomes available.</p>
-    <p>In the meantime, stay tuned for updates!</p>
-</div><div class="footer"><p>&copy; 2024 Linka. All rights reserved.</p></div></div></div></body></html>`,
-
-    user_approval: `
-<!DOCTYPE html>
-<html>
-<head><style>${baseStyle} .header { background-color: #16a34a; } .btn { background-color: #16a34a; }</style></head>
-<body><div class="wrapper"><div class="container">${headerHtml}<div class="content">
-    <h2>You've been approved, {{fullName}}!</h2>
-    <p>Great news! Your account has been reviewed and approved. You can now access all of Linka's platform features.</p>
-    <div class="btn-container"><a href="https://linka-six.vercel.app/register" class="btn">Sign Up Now</a></div>
-</div><div class="footer"><p>&copy; 2024 Linka. Welcome aboard!</p></div></div></div></body></html>`,
-
-    user_rejected: `
-<!DOCTYPE html>
-<html>
-<head><style>${baseStyle} .header { background-color: #475569; }</style></head>
-<body><div class="wrapper"><div class="container">${headerHtml}<div class="content">
-    <h2>Update Regarding Your Request</h2>
-    <p>Hello {{fullName}}, thank you for your interest in Linka. Unfortunately, we are unable to approve your request at this time due to limited capacity.</p>
-    <p>We appreciate your understanding.</p>
-</div><div class="footer"><p>&copy; 2024 Linka. Best regards.</p></div></div></div></body></html>`,
-
     special_invitation: `
 <!DOCTYPE html>
 <html>
-<head><style>${baseStyle} .header { background-color: #4f46e5; } .btn { background-color: #4f46e5; }</style></head>
-<body><div class="wrapper"><div class="container">${headerHtml}<div class="content">
+<head><style>\${baseStyle} .header { background-color: #4f46e5; } .btn { background-color: #4f46e5; }</style></head>
+<body><div class="wrapper"><div class="container">\${headerHtml}<div class="content">
     <h2>Special Invitation!</h2>
     <p>Hello {{fullName}}, you've been selected for exclusive early access to Linka's latest features.</p>
-    <div class="btn-container"><a href="https://linka-six.vercel.app/register" class="btn">Claim Your Access</a></div>
-</div><div class="footer"><p>&copy; 2024 Linka. Exclusive Invitation.</p></div></div></div></body></html>`
+    <div class="btn-container"><a href="https://linka-studio.com/register" class="btn">Claim Your Access</a></div>
+</div><div class="footer"><p>&copy; 2024 Linka. Exclusive Invitation.</p></div></div></div></body></html>`,
+
+    welcome_social: `
+<!DOCTYPE html>
+<html>
+<head><style>${baseStyle} .header { background-color: #2563eb; } .btn { background-color: #2563eb; }</style></head>
+<body><div class="wrapper"><div class="container">${headerHtml}<div class="content">
+    <h2>¡Bienvenido a Linka, {{fullName}}!</h2>
+    <p>Estamos encantados de tenerte con nosotros. Tu cuenta ha sido creada exitosamente.</p>
+    <p>Ya puedes empezar a organizar tus datos y explorar todas las funcionalidades de la plataforma.</p>
+    <div class="btn-container"><a href="{{link}}" class="btn">Comenzar</a></div>
+</div><div class="footer"><p>&copy; 2024 Linka. Todos los derechos reservados.</p></div></div></div></body></html>`
 };

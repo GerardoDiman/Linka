@@ -1,17 +1,15 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { getCorsHeaders } from "../_shared/cors.ts"
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")
 const PRO_PLAN_PRICE_ID = Deno.env.get("STRIPE_PRO_PRICE_ID")
 const SITE_URL = Deno.env.get("SITE_URL") || "https://linka-web.vercel.app"
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
 
-serve(async (req: Request) => {
-    // Handle CORS
+Deno.serve(async (req: Request) => {
+    const corsHeaders = getCorsHeaders(req)
+
+    // Handle CORS preflight
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
@@ -68,6 +66,7 @@ serve(async (req: Request) => {
             "automatic_tax[enabled]": "true",
             "billing_address_collection": "required",
             "tax_id_collection[enabled]": "true",
+            "allow_promotion_codes": "true",
             "success_url": `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
             "cancel_url": `${origin}/dashboard`,
             "client_reference_id": user.id,

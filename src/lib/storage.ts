@@ -7,7 +7,6 @@ export const STORAGE_KEYS = {
     FILTERS: 'property-filters',
     HIDDEN_DBS: 'hidden-dbs',
     ISOLATED: 'hide-isolated',
-    NOTION_TOKEN: 'notion-token',
     ONBOARDING: 'onboarding-seen',
     CUSTOM_COLORS: 'custom-colors'
 } as const
@@ -70,7 +69,6 @@ export const saveAllToStorage = (
         filters: string[]
         hiddenDbs: string[]
         hideIsolated: boolean
-        notionToken: string | null
     }
 ): void => {
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.POSITIONS), JSON.stringify(data.positions))
@@ -78,9 +76,5 @@ export const saveAllToStorage = (
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.FILTERS), JSON.stringify(data.filters))
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(data.hiddenDbs))
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.ISOLATED), String(data.hideIsolated))
-    if (data.notionToken === null) {
-        localStorage.removeItem(getScopedKey(userId, STORAGE_KEYS.NOTION_TOKEN))
-    } else {
-        localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.NOTION_TOKEN), data.notionToken)
-    }
+    localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.ISOLATED), String(data.hideIsolated))
 }

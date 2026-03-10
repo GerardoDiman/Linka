@@ -29,8 +29,12 @@ interface GraphState {
     // Cloud state
     notionToken: string | null
     setNotionToken: (token: string | null) => void
+    isNotionConnected: boolean
+    setIsNotionConnected: (connected: boolean) => void
     userPlan: 'free' | 'pro'
     setUserPlan: (plan: 'free' | 'pro') => void
+    customColors: Record<string, string>
+    setCustomColors: (colors: Record<string, string>) => void
 }
 
 export const useGraphStore = create<GraphState>((set) => ({
@@ -58,6 +62,10 @@ export const useGraphStore = create<GraphState>((set) => ({
 
     notionToken: null,
     setNotionToken: (token) => set({ notionToken: token }),
+    isNotionConnected: false,
+    setIsNotionConnected: (connected) => set({ isNotionConnected: connected }),
     userPlan: 'free',
-    setUserPlan: (plan) => set({ userPlan: plan })
+    setUserPlan: (plan) => set({ userPlan: plan }),
+    customColors: {},
+    setCustomColors: (colors) => set({ customColors: colors })
 }))

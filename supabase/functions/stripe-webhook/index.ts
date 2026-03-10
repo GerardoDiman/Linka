@@ -1,32 +1,53 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import Stripe from "https://esm.sh/stripe@14?target=deno"
+
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    // Use the latest stable API version
+    apiVersion: "2023-10-16",
+    httpClient: Stripe.createFetchHttpClient(),
+})
 
 const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")
 
-serve(async (req) => {
+Deno.serve(async (req) => {
     const signature = req.headers.get("stripe-signature")
 
     try {
         if (!signature || !STRIPE_WEBHOOK_SECRET) {
-            throw new Error("Missing signature or webhook secret")
+            console.error("❌ Firma faltante o el secreto del webhook no está configurado")
+            return new Response(
+                JSON.stringify({ error: "Missing signature or webhook secret" }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            )
         }
 
         const body = await req.text()
-        console.log("Recibido evento de Stripe...")
 
-        // Note: For real production, use Stripe SDK to verify signature.
-        // For simplicity in this template, we'll parse the event directly.
-        // IMPORTANT: Verify the signature in the actual deployment!
-        const event = JSON.parse(body)
-        console.log(`Tipo de evento: ${event.type}`)
+        // Verificar la firma criptográfica del evento
+        let event;
+        try {
+            event = await stripe.webhooks.constructEventAsync(
+                body,
+                signature,
+                STRIPE_WEBHOOK_SECRET
+            )
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Unknown error"
+            console.error(`❌ Error de verificación de firma: ${msg}`)
+            return new Response(
+                JSON.stringify({ error: `Signature verification failed: ${msg}` }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } }
+            )
+        }
+
+        console.log(`🔔 Evento recibido: ${event.type}`)
 
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object
             const supabaseUserId = session.client_reference_id || session.metadata?.supabase_user_id
             const stripeCustomerId = session.customer
 
-            console.log(`Checkout completado para usuario Supabase: ${supabaseUserId}`)
-            console.log(`Stripe Customer ID: ${stripeCustomerId}`)
+            console.log(`🚀 Checkout completado para usuario Supabase: ${supabaseUserId}`)
 
             if (supabaseUserId) {
                 const supabaseAdmin = createClient(
@@ -34,7 +55,7 @@ serve(async (req) => {
                     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
                 )
 
-                console.log("Actualizando perfil en la base de datos...")
+                console.log("📝 Actualizando perfil en la base de datos...")
                 const { error, data } = await supabaseAdmin
                     .from('profiles')
                     .update({
@@ -46,7 +67,7 @@ serve(async (req) => {
                     .select()
 
                 if (error) {
-                    console.error("Error actualizando perfil:", error)
+                    console.error("❌ Error actualizando perfil:", error)
                     throw error
                 }
 
@@ -66,8 +87,9 @@ serve(async (req) => {
         })
 
     } catch (error) {
-        console.error("Error en webhook:", error.message)
-        return new Response(JSON.stringify({ error: error.message }), {
+        const message = error instanceof Error ? error.message : "Internal Server Error"
+        console.error("❌ Error en webhook:", message)
+        return new Response(JSON.stringify({ error: message }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
         })

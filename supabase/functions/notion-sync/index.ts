@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { getCorsHeaders } from "../_shared/cors.ts"
 
 // ─── Color palette (mirrors src/lib/colors.ts) ────────────────────────────────
 const NODE_COLORS = [
@@ -8,12 +9,57 @@ const NODE_COLORS = [
     "#F05000", "#FB790E", "#E6AC00",
 ]
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+
+// ─── Encryption Utilities ───────────────────────────────────────────────────
+
+const ENCRYPTION_KEY = Deno.env.get("NOTION_TOKEN_ENCRYPTION_KEY")
+
+async function encrypt(text: string): Promise<string> {
+    if (!ENCRYPTION_KEY) throw new Error("ENCRYPTION_KEY not configured")
+    const key = await crypto.subtle.importKey(
+        "raw",
+        Uint8Array.from(atob(ENCRYPTION_KEY), c => c.charCodeAt(0)),
+        { name: "AES-GCM" },
+        false,
+        ["encrypt"]
+    )
+    const iv = crypto.getRandomValues(new Uint8Array(12))
+    const encoded = new TextEncoder().encode(text)
+    const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded)
+
+    return JSON.stringify({
+        encrypted: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
+        iv: btoa(String.fromCharCode(...iv))
+    })
+}
+
+async function decrypt(jsonStr: string): Promise<string> {
+    if (!ENCRYPTION_KEY) throw new Error("ENCRYPTION_KEY not configured")
+    try {
+        const { encrypted, iv } = JSON.parse(jsonStr)
+        const key = await crypto.subtle.importKey(
+            "raw",
+            Uint8Array.from(atob(ENCRYPTION_KEY), c => c.charCodeAt(0)),
+            { name: "AES-GCM" },
+            false,
+            ["decrypt"]
+        )
+        const decrypted = await crypto.subtle.decrypt(
+            { name: "AES-GCM", iv: Uint8Array.from(atob(iv), c => c.charCodeAt(0)) },
+            key,
+            Uint8Array.from(atob(encrypted), c => c.charCodeAt(0))
+        )
+        return new TextDecoder().decode(decrypted)
+    } catch (e) {
+        const msg = e instanceof Error ? e.message : "Parsing or decryption failed"
+        console.error("❌ Decryption failed:", msg)
+        throw new Error("Failed to decrypt token. Please provide it again.")
+    }
 }
 
 Deno.serve(async (req: Request) => {
+    const corsHeaders = getCorsHeaders(req)
+
     // ─── CORS preflight ────────────────────────────────────────────────
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
@@ -22,7 +68,9 @@ Deno.serve(async (req: Request) => {
     try {
         // ─── Auth: validate Supabase JWT ───────────────────────────────
         const authHeader = req.headers.get('Authorization')
+
         if (!authHeader) {
+            console.error("❌ Missing Authorization header")
             throw new Error("Missing Authorization header")
         }
 
@@ -32,25 +80,79 @@ Deno.serve(async (req: Request) => {
             { global: { headers: { Authorization: authHeader } } }
         )
 
+        console.log("🔍 Validando usuario...")
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
         if (authError || !user) {
-            return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            console.error("❌ Auth error:", authError?.message || "No user found")
+            return new Response(JSON.stringify({
+                error: "Unauthorized",
+                message: authError?.message || "Invalid session"
+            }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 401,
             })
         }
+        console.log(`✅ Usuario autenticado: ${user.id}`)
 
         // ─── Parse request body ────────────────────────────────────────
-        const { notion_token } = await req.json()
-        if (!notion_token) {
-            throw new Error("Missing notion_token in request body")
+        const body = await req.json().catch(() => ({}))
+        let notionToken = body.notion_token
+
+        const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        )
+
+        if (!notionToken) {
+            // Try to find it in the DB
+            console.log("No token in request, searching in database...")
+            const { data: graphData, error: dbError } = await supabaseAdmin
+                .from('user_graph_data')
+                .select('notion_token')
+                .eq('id', user.id)
+                .single()
+
+            if (dbError || !graphData?.notion_token) {
+                console.log("No token found in database. Notion sync is disabled for this user.")
+                return new Response(JSON.stringify({
+                    databases: [],
+                    relations: [],
+                    notion_connected: false
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200,
+                })
+            }
+
+            // Decrypt it
+            try {
+                notionToken = await decrypt(graphData.notion_token)
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : "Decryption failed"
+                return new Response(JSON.stringify({ error: msg }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 400,
+                })
+            }
+        } else {
+            // New token provided, encrypt and save it
+            console.log("New token received, encrypting and saving...")
+            const encryptedToken = await encrypt(notionToken)
+            const { error: saveError } = await supabaseAdmin
+                .from('user_graph_data')
+                .upsert({ id: user.id, notion_token: encryptedToken })
+
+            if (saveError) {
+                console.error("Error saving encrypted token:", saveError)
+                // We continue anyway so the user can see their data
+            }
         }
 
         // ─── Call Notion API server-side ────────────────────────────────
         const notionResponse = await fetch('https://api.notion.com/v1/search', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${notion_token}`,
+                'Authorization': `Bearer ${notionToken}`,
                 'Notion-Version': '2022-06-28',
                 'Content-Type': 'application/json',
             },
@@ -169,7 +271,11 @@ Deno.serve(async (req: Request) => {
         })
 
         // ─── Return parsed data ────────────────────────────────────────
-        return new Response(JSON.stringify({ databases, relations }), {
+        return new Response(JSON.stringify({
+            databases,
+            relations,
+            is_synced: true
+        }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })

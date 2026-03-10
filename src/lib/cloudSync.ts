@@ -13,7 +13,6 @@ export interface CloudSyncPayload {
     filters?: string[]
     hidden_dbs?: string[]
     hide_isolated?: boolean
-    notion_token?: string | null
 }
 
 export interface CloudGraphData {
@@ -23,7 +22,6 @@ export interface CloudGraphData {
     filters: string[] | null
     hidden_dbs: string[] | null
     hide_isolated: boolean | null
-    notion_token: string | null
 }
 
 // ─── Direct fetch fallback ───────────────────────────────────────────────────
@@ -92,7 +90,6 @@ export const syncToCloud = async (userId: string, data: Omit<CloudSyncPayload, '
     if (data.filters) payload.filters = data.filters
     if (data.hidden_dbs) payload.hidden_dbs = data.hidden_dbs
     if (data.hide_isolated !== undefined) payload.hide_isolated = data.hide_isolated
-    if (data.notion_token !== undefined) payload.notion_token = data.notion_token
 
     try {
         // Short timeout to trigger REST fallback quickly if the JS client hangs
@@ -121,7 +118,7 @@ export const fetchCloudGraphData = async (userId: string, accessToken: string): 
     try {
         const { data: clientData, error } = await Promise.race([
             supabase.from('user_graph_data')
-                .select('id, positions, custom_colors, filters, hidden_dbs, hide_isolated, notion_token')
+                .select('id, positions, custom_colors, filters, hidden_dbs, hide_isolated')
                 .eq('id', userId)
                 .maybeSingle(),
             new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
@@ -135,7 +132,7 @@ export const fetchCloudGraphData = async (userId: string, accessToken: string): 
     // Attempt 2: Direct REST fetch
     if (!data) {
         try {
-            const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_graph_data?id=eq.${userId}&select=id,positions,custom_colors,filters,hidden_dbs,hide_isolated,notion_token`
+            const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_graph_data?id=eq.${userId}&select=id,positions,custom_colors,filters,hidden_dbs,hide_isolated`
             const key = import.meta.env.VITE_SUPABASE_ANON_KEY
 
             const response = await fetch(url, {

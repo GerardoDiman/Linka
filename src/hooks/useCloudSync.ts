@@ -2,7 +2,7 @@
  * Hook for cloud synchronization — fetching cloud data on mount,
  * performing manual saves, and handling Notion sync.
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Node, Edge } from 'reactflow'
 import { supabase } from '../lib/supabase'
 import { fetchCloudGraphData, syncToCloud } from '../lib/cloudSync'
@@ -20,11 +20,9 @@ import type { DatabaseNodeData } from '../types'
 interface UseCloudSyncOptions {
     session: { user: { id: string; user_metadata?: Record<string, unknown> }; access_token?: string } | null
     // Filter state
-    customColors: Record<string, string>
     selectedPropertyTypes: Set<string>
     hiddenDbIds: Set<string>
     hideIsolated: boolean
-    setCustomColors: (colors: Record<string, string>) => void
     setSelectedPropertyTypes: (types: Set<string>) => void
     setHiddenDbIds: (ids: Set<string>) => void
     setHideIsolated: (value: boolean) => void
@@ -44,11 +42,9 @@ interface UseCloudSyncOptions {
 
 export function useCloudSync({
     session,
-    customColors,
     selectedPropertyTypes,
     hiddenDbIds,
     hideIsolated,
-    setCustomColors,
     setSelectedPropertyTypes,
     setHiddenDbIds,
     setHideIsolated,
@@ -59,13 +55,18 @@ export function useCloudSync({
     toast,
     t
 }: UseCloudSyncOptions) {
-    const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+    const isSyncingRef = useRef(false)
+    const initialLoadRef = useRef<string | null>(null)
 
-    // Zustand store connections
+    const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
     const notionToken = useGraphStore(state => state.notionToken)
     const setNotionToken = useGraphStore(state => state.setNotionToken)
+    const isNotionConnected = useGraphStore(state => state.isNotionConnected)
+    const setIsNotionConnected = useGraphStore(state => state.setIsNotionConnected)
     const userPlan = useGraphStore(state => state.userPlan)
     const setUserPlan = useGraphStore(state => state.setUserPlan)
+    const customColors = useGraphStore(state => state.customColors)
+    const setCustomColors = useGraphStore(state => state.setCustomColors)
 
     // Zustand store connections
     const nodes = useGraphStore(state => state.nodes)
@@ -77,14 +78,7 @@ export function useCloudSync({
     const setSyncStatus = useGraphStore(state => state.setSyncStatus)
     const setIsDirty = useGraphStore(state => state.setIsDirty)
 
-    // ─── Initialize token on mount ──────────────────────────────────────
-
-    useEffect(() => {
-        if (session) {
-            const savedToken = localStorage.getItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN))
-            if (savedToken) setNotionToken(savedToken)
-        }
-    }, [session?.user.id, setNotionToken])
+    // Token now lives only in memory (Zustand) and is persisted encrypted in the DB.
 
     // ─── Handle Notion sync ─────────────────────────────────────────────
 
@@ -98,18 +92,25 @@ export function useCloudSync({
         },
         skipDirty: boolean = false
     ) => {
-        if (!token || !session) {
-            toast.warning(t('dashboard.errors.missingToken'))
+        if (!session) {
+            toast.warning(t('dashboard.errors.missingSession'))
             return
         }
+
+        if (isSyncingRef.current) return
+        isSyncingRef.current = true
 
         setSyncStatus('saving')
         setSelectedNode(null)
         try {
-            const data = await fetchNotionData(token, session.access_token || '')
+            const data = await fetchNotionData(token)
 
             setSyncedDbs(data.databases)
             setSyncedRelations(data.relations)
+
+            // If we got databases back, we are connected (either via new token or saved token)
+            const connected = !!data.is_synced || data.databases.length > 0
+            setIsNotionConnected(connected)
 
             const savedPositions = getSavedPositions(session.user.id)
             const currentColors = overrideState ? overrideState.custom_colors : customColors
@@ -118,10 +119,13 @@ export function useCloudSync({
                 data.databases,
                 data.relations,
                 savedPositions,
-                currentColors
+                currentColors,
+                handleSelectNode
             )
 
-            setNotionToken(token)
+            // Only set token if it's not empty (don't overwrite with empty string on reload)
+            if (token) setNotionToken(token)
+
             if (!skipDirty) setIsDirty(true)
 
             setEdges(newEdges)
@@ -144,27 +148,25 @@ export function useCloudSync({
                 }, 100)
             }
         } catch (error: unknown) {
-            console.error("❌ handleSync Error:", error)
+            console.error("❌ [CloudSync] handleSync Error:", error)
             toast.error(error instanceof Error ? error.message : t('dashboard.errors.syncError'))
         } finally {
             setSyncStatus('idle')
+            isSyncingRef.current = false
         }
-    }, [session, customColors, searchQuery, setNodes, setEdges, fitView, setSyncStatus, setSelectedNode, setSyncedDbs, setSyncedRelations, setIsDirty, runForceLayout, handleSelectNode, toast, t, setNotionToken])
+    }, [session, customColors, searchQuery, setNodes, setEdges, fitView, setSyncStatus, setSelectedNode, setSyncedDbs, setSyncedRelations, setIsDirty, runForceLayout, handleSelectNode, toast, t, setNotionToken, setIsNotionConnected])
 
     // ─── Fetch cloud data on mount ──────────────────────────────────────
 
     useEffect(() => {
-        if (!session) return
+        if (!session || initialLoadRef.current === session.user.id) return
+        initialLoadRef.current = session.user.id
 
         const loadCloudData = async () => {
             const data = await fetchCloudGraphData(session.user.id, session.access_token || '')
             if (!data) return
 
             // 1. Update localStorage
-            if (data.notion_token) {
-                localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.NOTION_TOKEN), data.notion_token)
-                setNotionToken(data.notion_token)
-            }
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.POSITIONS), JSON.stringify(data.positions || {}))
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.CUSTOM_COLORS), JSON.stringify(data.custom_colors || {}))
             localStorage.setItem(getScopedKey(session.user.id, STORAGE_KEYS.FILTERS), JSON.stringify(data.filters || []))
@@ -182,15 +184,15 @@ export function useCloudSync({
             setHideIsolated(newIsolated)
             setCustomColors(newColors)
 
-            // 3. Trigger Notion Sync if we have a token
-            if (data.notion_token) {
-                handleSync(data.notion_token, {
-                    filters: newFilters,
-                    hidden_dbs: newHidden,
-                    hide_isolated: newIsolated,
-                    custom_colors: newColors
-                }, true)
-            }
+            // 3. Trigger Notion Sync
+            // We can call handleSync with an empty token because the Edge Function
+            // will retrieve it from the database if available.
+            handleSync('', {
+                filters: newFilters,
+                hidden_dbs: newHidden,
+                hide_isolated: newIsolated,
+                custom_colors: newColors
+            }, true)
         }
         loadCloudData()
     }, [session?.user.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -217,7 +219,7 @@ export function useCloudSync({
             }
         }
         fetchPlan()
-    }, [session?.user.id]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [session?.user.id, setUserPlan]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ─── Fetch user plan on mount ───────────────────────────────────────
 
@@ -237,8 +239,7 @@ export function useCloudSync({
                 custom_colors: customColors,
                 filters: Array.from(selectedPropertyTypes),
                 hidden_dbs: Array.from(hiddenDbIds),
-                hide_isolated: hideIsolated,
-                notion_token: notionToken
+                hide_isolated: hideIsolated
             }
 
             // Persist to LocalStorage
@@ -247,8 +248,7 @@ export function useCloudSync({
                 customColors,
                 filters: Array.from(selectedPropertyTypes),
                 hiddenDbs: Array.from(hiddenDbIds),
-                hideIsolated: hideIsolated,
-                notionToken
+                hideIsolated: hideIsolated
             })
 
             // Persist to Cloud
@@ -269,6 +269,8 @@ export function useCloudSync({
         setCloudSyncStatus,
         notionToken,
         setNotionToken,
+        isNotionConnected,
+        setIsNotionConnected,
         userPlan,
         handleSync,
         handleManualSync

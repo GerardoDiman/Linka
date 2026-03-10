@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useMemo } from "react"
+import { useCallback, useState, useEffect, useMemo, useRef } from "react"
 import ReactFlow, {
     Background,
     MiniMap,
@@ -63,18 +63,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const { theme } = useTheme()
     const { session, loading } = useAuth()
     const { toast } = useToast()
+    const hasInitializedRef = useRef(false)
 
-    // ─── Demo data ──────────────────────────────────────────────────────
-
-    const localizedDemoDatabases = useMemo(() => createDemoDatabases(t), [t])
-    const localizedDemoRelations = useMemo(() => DEMO_RELATIONS, [])
-
-    const initialGraphData = useMemo(() => {
-        if (!session) return { nodes: [], edges: [] }
-        const saved = getSavedPositions(session.user.id)
-        const custom = getSavedCustomColors(session.user.id)
-        return transformToGraphData(localizedDemoDatabases, localizedDemoRelations, saved, custom)
-    }, [session, localizedDemoDatabases, localizedDemoRelations])
 
     // ─── ReactFlow & Global state ───────────────────────────────────────
 
@@ -110,16 +100,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const [showTour, setShowTour] = useState(false)
     const [showPricing, setShowPricing] = useState(false)
 
-    // Initialize store with demo data if empty
-    useEffect(() => {
-        if (nodes.length === 0 && initialGraphData.nodes.length > 0) {
-            setNodes(initialGraphData.nodes)
-            setEdges(initialGraphData.edges)
-            setSyncedDbs(localizedDemoDatabases)
-            setSyncedRelations(localizedDemoRelations)
-        }
-    }, [initialGraphData, nodes.length, setNodes, setEdges, setSyncedDbs, setSyncedRelations, localizedDemoDatabases, localizedDemoRelations])
-
     // ─── Graph filters ──────────────────────────────────────────────────
 
     const handleSelectNode = useCallback((nodeData: DatabaseNodeData) => {
@@ -139,7 +119,9 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         toggleHideIsolated,
         clearPropertyFilters,
         setCustomColors,
-        setHiddenDbIds
+        setHiddenDbIds,
+        setSelectedPropertyTypes,
+        setHideIsolated
     } = useGraphFilters({
         userId: session?.user.id ?? null,
         syncedDbs,
@@ -156,18 +138,14 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         customColors: customColors
     })
 
-    // ─── Cloud sync ─────────────────────────────────────────────────────
-
     const cloudSync = useCloudSync({
         session,
-        customColors: customColors,
         selectedPropertyTypes: selectedPropertyTypes,
         hiddenDbIds: hiddenDbIds,
         hideIsolated: hideIsolated,
-        setCustomColors: setCustomColors,
-        setSelectedPropertyTypes: clearPropertyFilters, // Note: Not directly manipulated by sync
+        setSelectedPropertyTypes: setSelectedPropertyTypes,
         setHiddenDbIds: setHiddenDbIds,
-        setHideIsolated: clearPropertyFilters, // ...
+        setHideIsolated: setHideIsolated,
         runForceLayout,
         fitView,
         handleSelectNode,
@@ -175,6 +153,54 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         toast,
         t
     })
+
+    const isNotionConnected = useGraphStore(state => state.isNotionConnected)
+
+    // ─── Demo data ──────────────────────────────────────────────────────
+
+    const localizedDemoDatabases = useMemo(() => createDemoDatabases(t), [t])
+    const localizedDemoRelations = useMemo(() => DEMO_RELATIONS, [])
+
+    const initialGraphData = useMemo(() => {
+        if (!session) return { nodes: [], edges: [] }
+        const saved = getSavedPositions(session.user.id)
+        const custom = getSavedCustomColors(session.user.id)
+        return transformToGraphData(localizedDemoDatabases, localizedDemoRelations, saved, custom, handleSelectNode)
+    }, [session, localizedDemoDatabases, localizedDemoRelations, handleSelectNode])
+
+    // ─── Initialization & Demo Data ─────────────────────────────────────
+
+    useEffect(() => {
+        if (hasInitializedRef.current) return
+
+        // If we are connected to Notion, we wait for useCloudSync to load data
+        if (isNotionConnected) return
+
+        if (initialGraphData.nodes.length > 0) {
+            hasInitializedRef.current = true
+            setSyncedDbs(localizedDemoDatabases)
+            setSyncedRelations(localizedDemoRelations)
+
+            if (nodes.length === 0) {
+                if (session) {
+                    const saved = getSavedPositions(session.user.id)
+                    const hasAllPositions = initialGraphData.nodes.every(n => saved[n.id])
+
+                    if (hasAllPositions) {
+                        setNodes(initialGraphData.nodes)
+                        setEdges(initialGraphData.edges)
+                        setTimeout(() => fitView({ padding: 0.2, duration: 800, maxZoom: 1 }), 100)
+                    } else {
+                        runForceLayout(initialGraphData.nodes, initialGraphData.edges, searchQuery)
+                    }
+                } else {
+                    setNodes(initialGraphData.nodes)
+                    setEdges(initialGraphData.edges)
+                }
+            }
+        }
+    }, [initialGraphData, nodes.length, setNodes, setEdges, setSyncedDbs, setSyncedRelations, localizedDemoDatabases, localizedDemoRelations, runForceLayout, session, searchQuery, fitView, isNotionConnected])
+
 
     // Override notionToken/userPlan for the filters visibleDbIds calculation
     // Now done directly inside useGraphFilters using cloudSync.notionToken!
@@ -219,16 +245,6 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         }
     }, [session])
 
-    // Update demo data language when it changes
-    useEffect(() => {
-        const isShowingDemo = !cloudSync.notionToken
-        if (isShowingDemo) {
-            setTimeout(() => {
-                setSyncedDbs(localizedDemoDatabases)
-                setSyncedRelations(localizedDemoRelations)
-            }, 0)
-        }
-    }, [localizedDemoDatabases, localizedDemoRelations, cloudSync.notionToken, setSyncedDbs, setSyncedRelations])
 
     // ─── Derived state ──────────────────────────────────────────────────
 
@@ -300,17 +316,21 @@ function DashboardContent({ userRole }: DashboardContentProps) {
     const handleDisconnect = useCallback(() => {
         setSyncedDbs(localizedDemoDatabases)
         setSyncedRelations(localizedDemoRelations)
-        setNodes(transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}).nodes)
-        setEdges(transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}).edges)
+        const initialGraph = transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {}, handleSelectNode)
+        setNodes(initialGraph.nodes)
+        setEdges(initialGraph.edges)
         clearPropertyFilters()
         cloudSync.setNotionToken(null)
-        const initialGraph = transformToGraphData(localizedDemoDatabases, localizedDemoRelations, {}, {})
+        useGraphStore.getState().setIsNotionConnected(false)
         runForceLayout(initialGraph.nodes, initialGraph.edges)
-    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, clearPropertyFilters, cloudSync, setSyncedDbs, setSyncedRelations])
+    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, clearPropertyFilters, cloudSync, setSyncedDbs, setSyncedRelations, handleSelectNode])
 
     // ─── Effects for visibility/search updates ──────────────────────────
 
     useEffect(() => {
+        // Don't apply visibility until we have sidebar data — otherwise all nodes get hidden
+        if (syncedDbs.length === 0) return
+
         setNodes((nds) => nds.map((node) => {
             const isVisible = visibleDbIds.has(node.id)
             return {
@@ -342,15 +362,16 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 }
             }
         }))
-    }, [searchQuery, visibleDbIds, dbTitles, setNodes, setEdges])
+    }, [searchQuery, visibleDbIds, dbTitles, setNodes, setEdges, nodes.length, syncedDbs.length])
 
     // Separate effect for fitView
     useEffect(() => {
+        if (syncedDbs.length === 0 || visibleDbIds.size === 0) return
         const timeoutId = setTimeout(() => {
             fitView({ padding: 0.2, duration: 400, maxZoom: 1 })
         }, 150)
         return () => clearTimeout(timeoutId)
-    }, [visibleDbIds, fitView])
+    }, [visibleDbIds, fitView, syncedDbs.length])
 
     // ─── Render ─────────────────────────────────────────────────────────
 
@@ -361,7 +382,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
             <Navbar
                 onSync={cloudSync.handleSync}
                 onDisconnect={handleDisconnect}
-                isSynced={!!cloudSync.notionToken}
+                isSynced={isNotionConnected}
                 loading={syncStatus === 'saving'}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -406,6 +427,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                             onNodeDragStop={onNodeDragStop}
                             onInit={() => {
                                 if (!session) return
+                                if (nodes.length === 0) return // Nodes haven't loaded yet; demo effect will handle layout
                                 const saved = getSavedPositions(session.user.id)
                                 const hasAllPositions = nodes.every(n => saved[n.id])
 

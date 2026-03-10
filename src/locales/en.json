@@ -118,24 +118,6 @@
                 "answer": "We are here to help. You can contact us directly by writing to support@linka.io or through our official channels. We respond to all queries in less than 24 hours."
             }
         },
-        "access": {
-            "title": "Request Access",
-            "subtitle": "Join the exclusive waitlist and be one of the first to experience Linka.",
-            "form": {
-                "emailLabel": "Your Best Email",
-                "emailPlaceholder": "name@example.com",
-                "commentsLabel": "What do you plan to build?",
-                "commentsPlaceholder": "Tell us a bit about your Notion ecosystem...",
-                "submit": "Join the waitlist",
-                "submitting": "Sending...",
-                "policy": "By joining, you agree to our privacy policy. We will notify you via email when we are ready to receive you."
-            },
-            "success": {
-                "title": "Request sent successfully!",
-                "desc": "Your request is under review. We will notify you by email when it's approved so you can register."
-            },
-            "error": "Error sending request"
-        },
         "footer": {
             "tagline": "Intelligent Visualization for Notion.",
             "privacy": "Privacy",
@@ -432,9 +414,6 @@
             "acceptTerms": "I accept the <0>Privacy Policy</0> and the <1>Terms of Service</1>",
             "errors": {
                 "passwordMismatch": "Passwords don't match",
-                "notOnWaitlist": "This email hasn't requested access or isn't on the waitlist.",
-                "notApproved": "Your access request hasn't been approved yet. We'll notify you by email.",
-                "technical": "A technical error occurred while verifying your access. Please contact support.",
                 "generic": "Error signing up"
             },
             "passwordRequirements": {

@@ -21,7 +21,8 @@ export function transformToGraphData(
     databases: RawDatabase[],
     relations: RawRelation[],
     savedPositions: Record<string, { x: number; y: number }> = {},
-    customColors: Record<string, string> = {}
+    customColors: Record<string, string> = {},
+    onSelect?: (nodeData: any) => void
 ) {
     const nodes: Node[] = databases.map((db) => {
         // Calculate relation counts
@@ -45,7 +46,8 @@ export function transformToGraphData(
                 lastEditedTime: db.lastEditedTime,
                 propertyCount: db.properties.length,
                 outgoingRelations: outgoingCount,
-                incomingRelations: incomingCount
+                incomingRelations: incomingCount,
+                onSelect
             }
         }
     })

@@ -1,13 +1,12 @@
 import { populateTemplate, templates } from "./utils.ts"
+import { getCorsHeaders } from "../_shared/cors.ts"
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
 
 console.log("Edge Function 'n8n-bridge' initialized and ready.");
 
 Deno.serve(async (req: Request) => {
+    const corsHeaders = getCorsHeaders(req)
+
     // Immediate handshake log
     console.log(`[${new Date().toISOString()}] New request: ${req.method} ${req.url}`);
 
@@ -46,21 +45,43 @@ Deno.serve(async (req: Request) => {
             email?: string;
         }
 
-        type WebhookPayload = AuthHookPayload & ManualPayload;
+        interface DatabaseWebhookPayload {
+            type?: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT';
+            table?: string;
+            record?: any;
+            schema?: string;
+        }
+
+        type WebhookPayload = AuthHookPayload & ManualPayload & DatabaseWebhookPayload;
 
         const body: WebhookPayload = await req.json();
         console.log("--- REQUEST BODY RECEIVED ---");
         console.log(JSON.stringify(body, null, 2));
 
-        // 1. Detect if this is a Supabase Auth Hook or a Manual call
+        // 1. Detect Context type
         const isAuthHook = body.user && (body.mailer || body.email_data || body.confirmation_url || body.otp);
+        const isDatabaseWebhook = body.table === 'profiles' && body.type === 'INSERT';
 
-        // 2. Determine Action and Template
+        // Configuration and environment variables
+        const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
+        const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
+        const envSiteUrl = Deno.env.get('SITE_URL') || "https://linka-studio.com";
+
+        // Determine Action and Template
         let action = body.action || 'user_registration';
         let templateKey: keyof typeof templates = 'user_registration';
         const rawType = body.email_data?.email_action_type || body.mailer?.otp_type || body.otc_type || body.otp_type;
 
-        if (isAuthHook) {
+        if (isDatabaseWebhook) {
+            console.log("Context: Database Webhook (profiles INSERT)");
+            action = 'user_registration';
+            templateKey = 'welcome_social';
+            // Normalize body values for subsequent logic
+            body.email = body.record?.email;
+            body.fullName = body.record?.full_name;
+            // Provide a default "Get Started" link
+            body.link = envSiteUrl + "/login";
+        } else if (isAuthHook) {
             console.log("Context: Supabase Auth Hook");
             if (rawType === 'recovery') {
                 action = 'password_recovery';
@@ -71,6 +92,7 @@ Deno.serve(async (req: Request) => {
             }
         } else {
             console.log("Context: Manual Call");
+            // Only allow existing simple actions
             if (Object.keys(templates).includes(action)) {
                 templateKey = action as keyof typeof templates;
             }
@@ -78,11 +100,6 @@ Deno.serve(async (req: Request) => {
 
         // 3. Construct and Normalize the verification/target link
         let link = body.link || body.confirmation_url || body.email_data?.confirmation_url;
-
-        // Configuration for normalization
-        const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
-        const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
-        const envSiteUrl = Deno.env.get('SITE_URL') || "https://linka-six.vercel.app";
 
         // Step 3a: Manual assembly if link is missing
         if (!link && (body.email_data?.token_hash || body.token || body.otp || body.email_data?.token)) {

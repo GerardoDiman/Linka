@@ -3,10 +3,7 @@ import logger from "./logger"
 
 export type WebhookAction =
     | "user_registration"
-    | "waitlist_request"
     | "password_recovery"
-    | "user_approval"
-    | "user_rejected"
     | "special_invitation"
 
 interface WebhookPayload {

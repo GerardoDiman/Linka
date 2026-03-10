@@ -7,7 +7,7 @@ import { Features } from "../components/landing/Features"
 import { Pricing } from "../components/landing/Pricing"
 import { FAQ } from "../components/landing/FAQ"
 // import { Testimonials } from "../components/landing/Testimonials"
-// import { AccessRequestForm } from "../components/landing/AccessRequestForm"
+// import { Testimonials } from "../components/landing/Testimonials"
 import { Logo } from "../components/ui/Logo"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
@@ -224,7 +224,6 @@ export default function LandingPage() {
 
                 <FAQ />
 
-                {/* Access Request Section Removed for Open Registration */}
             </main>
 
             <footer className="bg-white dark:bg-slate-900 py-12 border-t border-gray-100 dark:border-slate-800">

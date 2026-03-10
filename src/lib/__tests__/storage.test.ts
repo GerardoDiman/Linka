@@ -90,7 +90,6 @@ describe('storage', () => {
                 filters: ['relation'],
                 hiddenDbs: ['db-1'],
                 hideIsolated: true,
-                notionToken: 'secret_abc',
             }
 
             saveAllToStorage(USER_ID, data)
@@ -100,23 +99,17 @@ describe('storage', () => {
             expect(getSavedFilters(USER_ID)).toEqual(data.filters)
             expect(getSavedHiddenDbs(USER_ID)).toEqual(data.hiddenDbs)
             expect(getSavedHideIsolated(USER_ID)).toBe(true)
-            expect(localStorage.getItem(getScopedKey(USER_ID, STORAGE_KEYS.NOTION_TOKEN))).toBe('secret_abc')
         })
 
-        it('removes notion token when null', () => {
-            // Set a token first
-            localStorage.setItem(getScopedKey(USER_ID, STORAGE_KEYS.NOTION_TOKEN), 'secret_old')
-
+        it('removes hideIsolated flag correctly', () => {
             saveAllToStorage(USER_ID, {
                 positions: {},
                 customColors: {},
                 filters: [],
                 hiddenDbs: [],
                 hideIsolated: false,
-                notionToken: null,
             })
-
-            expect(localStorage.getItem(getScopedKey(USER_ID, STORAGE_KEYS.NOTION_TOKEN))).toBeNull()
+            expect(getSavedHideIsolated(USER_ID)).toBe(false)
         })
     })
 })

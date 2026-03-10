@@ -28,7 +28,7 @@ describe('fetchNotionData', () => {
 
         // Dynamic import to capture the module's SUPABASE_URL
         const { fetchNotionData } = await import('../notion')
-        await fetchNotionData('notion_token_123', 'sb_access_token_456')
+        await fetchNotionData('notion_token_123')
 
         expect(globalThis.fetch).toHaveBeenCalledTimes(1)
         const [url, options] = vi.mocked(globalThis.fetch).mock.calls[0]
@@ -38,7 +38,7 @@ describe('fetchNotionData', () => {
         // Verify it hits the notion-sync endpoint
         expect(url).toContain('/functions/v1/notion-sync')
         expect(opts.method).toBe('POST')
-        expect(headers['Authorization']).toBe('Bearer sb_access_token_456')
+        // expect(headers['Authorization']).toBe('Bearer sb_access_token_456') // Authorization is handled by the client now
         expect(headers['Content-Type']).toBe('application/json')
         expect(JSON.parse(opts.body as string)).toEqual({ notion_token: 'notion_token_123' })
     })
@@ -54,7 +54,7 @@ describe('fetchNotionData', () => {
         })
 
         const { fetchNotionData } = await import('../notion')
-        const result = await fetchNotionData('token', 'access_token')
+        const result = await fetchNotionData('token')
         expect(result.databases).toEqual(mockData.databases)
         expect(result.relations).toEqual(mockData.relations)
     })
@@ -66,7 +66,7 @@ describe('fetchNotionData', () => {
         })
 
         const { fetchNotionData } = await import('../notion')
-        const result = await fetchNotionData('token', 'access_token')
+        const result = await fetchNotionData('token')
         expect(result.databases).toEqual([])
         expect(result.relations).toEqual([])
     })
@@ -80,7 +80,7 @@ describe('fetchNotionData', () => {
         })
 
         const { fetchNotionData } = await import('../notion')
-        await expect(fetchNotionData('bad_token', 'access'))
+        await expect(fetchNotionData('bad_token'))
             .rejects.toThrow('Invalid token')
     })
 
@@ -93,7 +93,7 @@ describe('fetchNotionData', () => {
         })
 
         const { fetchNotionData } = await import('../notion')
-        await expect(fetchNotionData('token', 'access'))
+        await expect(fetchNotionData('token'))
             .rejects.toThrow('Error de sincronización (500): Server crashed')
     })
 
@@ -101,7 +101,7 @@ describe('fetchNotionData', () => {
         globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
         const { fetchNotionData } = await import('../notion')
-        await expect(fetchNotionData('token', 'access'))
+        await expect(fetchNotionData('token'))
             .rejects.toThrow('Network error')
     })
 })

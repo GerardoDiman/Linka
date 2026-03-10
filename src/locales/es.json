@@ -118,24 +118,6 @@
                 "answer": "Estamos aquí para ayudarte. Puedes contactarnos directamente escribiendo a soporte@linka.io o a través de nuestros canales oficiales. Respondemos a todas las consultas en menos de 24 horas."
             }
         },
-        "access": {
-            "title": "Solicitar Acceso",
-            "subtitle": "Únete a la lista de espera exclusiva y sé de los primeros en experimentar Linka.",
-            "form": {
-                "emailLabel": "Tu Mejor Email",
-                "emailPlaceholder": "nombre@ejemplo.com",
-                "commentsLabel": "¿Qué planeas construir?",
-                "commentsPlaceholder": "Cuéntanos un poco sobre tu ecosistema de Notion...",
-                "submit": "Unirme a la lista de espera",
-                "submitting": "Enviando...",
-                "policy": "Al unirte, aceptas nuestra política de privacidad. Te notificaremos vía email cuando estemos listos para recibirte."
-            },
-            "success": {
-                "title": "¡Solicitud enviada con éxito!",
-                "desc": "Tu solicitud está en revisión. Te notificaremos por correo cuando sea aprobada para que puedas registrarte."
-            },
-            "error": "Error al enviar la solicitud"
-        },
         "footer": {
             "tagline": "Visualización Inteligente para Notion.",
             "privacy": "Privacidad",
@@ -432,9 +414,6 @@
             "acceptTerms": "Acepto las <0>Políticas de Privacidad</0> y los <1>Términos de Servicio</1>",
             "errors": {
                 "passwordMismatch": "Las contraseñas no coinciden",
-                "notOnWaitlist": "Este correo no ha solicitado acceso o no se encuentra en la lista de espera.",
-                "notApproved": "Tu solicitud de acceso aún no ha sido aprobada. Te avisaremos por correo.",
-                "technical": "Ocurrió un error técnico al verificar tu acceso. Por favor contacta a soporte.",
                 "generic": "Error al registrarse"
             },
             "passwordRequirements": {

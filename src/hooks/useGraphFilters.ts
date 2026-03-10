@@ -37,18 +37,28 @@ export function useGraphFilters({
     const [hideIsolated, setHideIsolated] = useState(
         () => userId ? getSavedHideIsolated(userId) : false
     )
-    const [customColors, setCustomColors] = useState<Record<string, string>>(
-        () => userId ? getSavedCustomColors(userId) : {}
-    )
+    const customColors = useGraphStore(state => state.customColors)
+    const setCustomColors = useGraphStore(state => state.setCustomColors)
+
+    // Initial load of custom colors if not already set in store
+    useMemo(() => {
+        if (userId && Object.keys(customColors).length === 0) {
+            const saved = getSavedCustomColors(userId)
+            if (Object.keys(saved).length > 0) {
+                setCustomColors(saved)
+            }
+        }
+    }, [userId, customColors, setCustomColors])
     const isDirty = useGraphStore(state => state.isDirty)
     const setIsDirty = useGraphStore(state => state.setIsDirty)
-    const notionToken = useGraphStore(state => state.notionToken)
+    const isNotionConnected = useGraphStore(state => state.isNotionConnected)
     const userPlan = useGraphStore(state => state.userPlan)
 
     // Derived state: visible database IDs based on all active filters
     const visibleDbIds = useMemo(() => {
         let filtered = syncedDbs
-        const isDemo = !notionToken
+        // A database is "demo" if its ID is one of '1' through '8'
+        const isDemo = filtered.length > 0 && filtered.every(db => ['1', '2', '3', '4', '5', '6', '7', '8'].includes(db.id))
 
         // Apply 4-DB limit for Free users (ONLY on real data)
         if (!isDemo && userPlan === 'free' && filtered.length > 4) {
@@ -76,7 +86,7 @@ export function useGraphFilters({
         }
 
         return new Set(filtered.map(db => db.id))
-    }, [syncedDbs, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncedRelations, userPlan, notionToken])
+    }, [syncedDbs, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncedRelations, userPlan, isNotionConnected])
 
     const togglePropertyType = useCallback((type: string) => {
         setSelectedPropertyTypes(prev => {
