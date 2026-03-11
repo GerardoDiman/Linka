@@ -1,3 +1,4 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { populateTemplate, templates } from "./utils.ts"
 import { getCorsHeaders } from "../_shared/cors.ts"
 
@@ -62,8 +63,62 @@ Deno.serve(async (req: Request) => {
         const isAuthHook = body.user && (body.mailer || body.email_data || body.confirmation_url || body.otp);
         const isDatabaseWebhook = body.table === 'profiles' && body.type === 'INSERT';
 
+        // 2. Authentication & Authorization for Manual Calls
+        const supabaseUrl = Deno.env.get('SUPABASE_URL') || "";
+        const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || "";
+        const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || "";
+        const authHeader = req.headers.get('Authorization');
+
+        if (!isAuthHook && !isDatabaseWebhook) {
+            console.log("Context: Manual Call - Verifying authentication...");
+            
+            if (!authHeader) {
+                console.warn("Manual call without Authorization header rejected.");
+                return new Response(JSON.stringify({ error: "No autorizado: Sin cabecera de autenticación" }), {
+                    status: 401,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+
+            const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+                global: { headers: { Authorization: authHeader } }
+            });
+
+            const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+            if (authError || !user) {
+                console.warn("Authentication failed for manual call:", authError?.message);
+                return new Response(JSON.stringify({ error: "No autorizado: Sesión inválida" }), {
+                    status: 401,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+
+            // Authorization: Check for admin role
+            const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+            const { data: profile, error: profileError } = await supabaseAdmin
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError || profile?.role !== 'admin') {
+                console.warn(`User ${user.id} attempted admin action without permission.`);
+                return new Response(JSON.stringify({ error: "Prohibido: Se requieren permisos de administrador" }), {
+                    status: 403,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+            console.log(`Admin user authenticated: ${user.email} (${user.id})`);
+        }
+
         // Configuration and environment variables
-        const projectRef = Deno.env.get('SUPABASE_PROJECT_ID') || "gnuedinkyheevdkfyujm";
+        const projectRef = Deno.env.get('SUPABASE_PROJECT_ID');
+        if (!projectRef && (isAuthHook || !body.link)) {
+            // Need projectRef to construct auth links
+            throw new Error("SUPABASE_PROJECT_ID not configured");
+        }
+        
         const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;
         const envSiteUrl = Deno.env.get('SITE_URL') || "https://linka-studio.com";
 
@@ -91,7 +146,7 @@ Deno.serve(async (req: Request) => {
                 templateKey = 'user_registration';
             }
         } else {
-            console.log("Context: Manual Call");
+            console.log("Context: Manual Call Verified");
             // Only allow existing simple actions
             if (Object.keys(templates).includes(action)) {
                 templateKey = action as keyof typeof templates;
@@ -180,11 +235,18 @@ Deno.serve(async (req: Request) => {
             link: link,
             htmlBody,
             timestamp: new Date().toISOString(),
-            source: isAuthHook ? 'supabase_auth_hook' : 'manual_call',
+            source: isAuthHook ? 'supabase_auth_hook' : (isDatabaseWebhook ? 'database_webhook' : 'manual_call'),
             raw_event: rawType
         };
 
-        const n8nUrl = Deno.env.get('N8N_WEBHOOK_URL') || "https://n8n-n8n.fxkgvm.easypanel.host/webhook/7ab667dd-f501-4b8e-8924-a666e7202fae";
+        const n8nUrl = Deno.env.get('N8N_WEBHOOK_URL');
+        if (!n8nUrl) {
+            console.error("N8N_WEBHOOK_URL not configured");
+            return new Response(JSON.stringify({ error: "N8N delivery skipped: URL not configured" }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200, // Return 200 to acknowledge receipt even if delivery is skipped locally
+            });
+        }
 
         console.log(`Dispatching to n8n: ${action}`);
 
@@ -227,3 +289,4 @@ Deno.serve(async (req: Request) => {
         });
     }
 });
+

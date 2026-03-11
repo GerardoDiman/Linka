@@ -345,8 +345,6 @@ export function Navbar({
                     )}
                 </div>
 
-
-
                 <Tooltip content={
                     syncStatus === 'saving' ? t('dashboard.navbar.cloudSync.saving') :
                         syncStatus === 'saved' ? t('dashboard.navbar.cloudSync.saved') :
@@ -391,6 +389,19 @@ export function Navbar({
                         </Button>
                     </Tooltip>
 
+                    {userRole?.toLowerCase() === 'admin' && (
+                        <Tooltip content={t('dashboard.navbar.admin')} position="bottom">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 ml-2 rounded-xl text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all border border-primary/20 bg-primary/5 shadow-sm"
+                                onClick={() => navigate('/admin')}
+                            >
+                                <ShieldCheck size={20} />
+                            </Button>
+                        </Tooltip>
+                    )}
+
                     {showSettingsPopover && (
                         <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
                             <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 py-2">
@@ -426,6 +437,7 @@ export function Navbar({
                                 </div>
                                 <span className="text-sm font-medium">{t('dashboard.settings.helpTour')}</span>
                             </button>
+
 
                             <div className="h-px bg-gray-100 dark:bg-slate-800 my-2" />
 
@@ -463,24 +475,6 @@ export function Navbar({
                                 </div>
                             </button>
 
-                            {/* Admin Panel - only for admins */}
-                            {userRole === 'admin' && (
-                                <>
-                                    <div className="h-px bg-gray-100 dark:bg-slate-800 my-2" />
-                                    <button
-                                        onClick={() => {
-                                            navigate('/admin')
-                                            setShowSettingsPopover(false)
-                                        }}
-                                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-left"
-                                    >
-                                        <div className="p-1.5 rounded-lg bg-primary/10">
-                                            <ShieldCheck size={16} />
-                                        </div>
-                                        <span className="text-sm font-medium">{t('dashboard.settings.admin')}</span>
-                                    </button>
-                                </>
-                            )}
                         </div>
                     )}
                 </div>

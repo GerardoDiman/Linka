@@ -38,6 +38,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!error && data) {
                 setRole(data.role)
                 setPlan(data.plan_type as 'free' | 'pro' || 'free')
+                
+                // Track activity
+                supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', userId).then()
+                
                 return data
             }
             throw error || new Error("No data")

@@ -53,7 +53,8 @@ export const useToast = () => {
     if (!context) {
         throw new Error('useToast must be used within a ToastProvider');
     }
-    return {
+    
+    return React.useMemo(() => ({
         toasts: context.toasts,
         removeToast: context.removeToast,
         toast: {
@@ -62,5 +63,5 @@ export const useToast = () => {
             info: (msg: string, dur?: number) => context.showToast(msg, 'info', dur),
             warning: (msg: string, dur?: number) => context.showToast(msg, 'warning', dur),
         }
-    };
+    }), [context]);
 };

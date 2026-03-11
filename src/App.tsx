@@ -6,6 +6,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext"
 import { ToastProvider } from "./context/ToastContext"
 import { ToastContainer } from "./components/ui/Toast"
 import { ErrorBoundary } from "./components/ui/ErrorBoundary"
+import { Shield } from "lucide-react"
+import { Button } from "./components/ui/button"
 
 // Lazy loaded pages for code splitting
 const LandingPage = lazy(() => import("./pages/LandingPage"))
@@ -77,8 +79,20 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   if (!session) {
     return <Navigate to="/login" replace />
   }
-  if (role !== 'admin') {
-    return <Navigate to="/dashboard" replace />
+  if (role?.toLowerCase() !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+        <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-red-100 dark:border-red-900/30">
+          <Shield className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Acceso Denegado</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">No tienes permisos para acceder a esta sección.</p>
+          <Button onClick={() => window.location.href = '/dashboard'}>
+            Volver al Dashboard
+          </Button>
+          <p className="mt-4 text-[10px] text-gray-400">Rol detectado: {role || 'null'}</p>
+        </div>
+      </div>
+    )
   }
   return <>{children}</>
 }
