@@ -40,7 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setPlan(data.plan_type as 'free' | 'pro' || 'free')
                 
                 // Track activity
-                supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', userId).then()
+                supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', userId).then(({ error: updateErr }) => {
+                    if (updateErr) console.warn('Failed to update last_active_at:', updateErr.message)
+                })
                 
                 return data
             }

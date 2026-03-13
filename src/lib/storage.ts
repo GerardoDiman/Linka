@@ -76,5 +76,4 @@ export const saveAllToStorage = (
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.FILTERS), JSON.stringify(data.filters))
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.HIDDEN_DBS), JSON.stringify(data.hiddenDbs))
     localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.ISOLATED), String(data.hideIsolated))
-    localStorage.setItem(getScopedKey(userId, STORAGE_KEYS.ISOLATED), String(data.hideIsolated))
 }

@@ -91,8 +91,8 @@ export const templates = {
     special_invitation: `
 <!DOCTYPE html>
 <html>
-<head><style>\${baseStyle} .header { background-color: #4f46e5; } .btn { background-color: #4f46e5; }</style></head>
-<body><div class="wrapper"><div class="container">\${headerHtml}<div class="content">
+<head><style>${baseStyle} .header { background-color: #4f46e5; } .btn { background-color: #4f46e5; }</style></head>
+<body><div class="wrapper"><div class="container">${headerHtml}<div class="content">
     <h2>Special Invitation!</h2>
     <p>Hello {{fullName}}, you've been selected for exclusive early access to Linka's latest features.</p>
     <div class="btn-container"><a href="https://linka-studio.com/register" class="btn">Claim Your Access</a></div>

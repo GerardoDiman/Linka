@@ -110,9 +110,10 @@ Deno.serve(async (req: Request) => {
             status: 200,
         })
 
-    } catch (error: any) {
-        console.error("Error en create-checkout-session:", error.message)
-        return new Response(JSON.stringify({ error: error.message }), {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Internal Server Error"
+        console.error("Error en create-checkout-session:", message)
+        return new Response(JSON.stringify({ error: message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 500,
         })

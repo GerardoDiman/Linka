@@ -1,6 +1,7 @@
 /**
- * Conditional logger utility for development vs production
- * Only logs in development mode to keep production console clean
+ * Conditional logger utility for development vs production.
+ * - log, info, debug: only in development (keeps production console clean)
+ * - warn, error: ALWAYS logged (critical for production observability)
  */
 
 const isDev = import.meta.env.DEV
@@ -13,10 +14,10 @@ export const logger = {
         if (isDev) console.info(...args)
     },
     warn: (...args: unknown[]) => {
-        if (isDev) console.warn(...args)
+        console.warn(...args)
     },
     error: (...args: unknown[]) => {
-        if (isDev) console.error(...args)
+        console.error(...args)
     },
     debug: (...args: unknown[]) => {
         if (isDev) console.debug(...args)

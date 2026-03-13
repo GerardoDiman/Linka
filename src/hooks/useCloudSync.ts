@@ -105,6 +105,13 @@ export function useCloudSync({
         try {
             const data = await fetchNotionData(token)
 
+            // If no databases returned and no token was provided (auto-reload),
+            // don't overwrite existing data — the user isn't connected to Notion.
+            if (data.databases.length === 0 && !token && !data.is_synced) {
+                setIsNotionConnected(false)
+                return
+            }
+
             setSyncedDbs(data.databases)
             setSyncedRelations(data.relations)
 

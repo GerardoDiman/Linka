@@ -148,39 +148,55 @@ Deno.serve(async (req: Request) => {
             }
         }
 
-        // ─── Call Notion API server-side ────────────────────────────────
-        const notionResponse = await fetch('https://api.notion.com/v1/search', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${notionToken}`,
-                'Notion-Version': '2022-06-28',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        // ─── Call Notion API server-side (with pagination) ────────────────
+        const allResults: any[] = []
+        let hasMore = true
+        let nextCursor: string | undefined = undefined
+        const MAX_DATABASES = 1000 // Safety limit
+
+        while (hasMore && allResults.length < MAX_DATABASES) {
+            const searchBody: Record<string, unknown> = {
                 filter: { value: 'database', property: 'object' },
                 page_size: 100
-            })
-        })
-
-        if (!notionResponse.ok) {
-            const errorData = await notionResponse.json().catch(() => ({}))
-
-            if (notionResponse.status === 401) {
-                return new Response(JSON.stringify({
-                    error: "Token inválido. Por favor verifica tu token de integración."
-                }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                    status: 401,
-                })
+            }
+            if (nextCursor) {
+                searchBody.start_cursor = nextCursor
             }
 
-            const message = errorData.message || notionResponse.statusText
-            throw new Error(`Notion API error (${notionResponse.status}): ${message}`)
+            const notionResponse = await fetch('https://api.notion.com/v1/search', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${notionToken}`,
+                    'Notion-Version': '2022-06-28',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(searchBody)
+            })
+
+            if (!notionResponse.ok) {
+                const errorData = await notionResponse.json().catch(() => ({}))
+
+                if (notionResponse.status === 401) {
+                    return new Response(JSON.stringify({
+                        error: "Token inválido. Por favor verifica tu token de integración."
+                    }), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: 401,
+                    })
+                }
+
+                const message = errorData.message || notionResponse.statusText
+                throw new Error(`Notion API error (${notionResponse.status}): ${message}`)
+            }
+
+            const data = await notionResponse.json()
+            allResults.push(...(data.results || []))
+            hasMore = !!data.has_more
+            nextCursor = data.next_cursor || undefined
         }
 
         // ─── Parse Notion response ─────────────────────────────────────
-        const data = await notionResponse.json()
-        const results = data.results || []
+        const results = allResults
 
         interface ParsedDatabase {
             id: string

@@ -1,4 +1,5 @@
 import type { Node, Edge } from "reactflow"
+import type { DatabaseNodeData } from "../types"
 
 export interface RawDatabase {
     id: string
@@ -22,12 +23,19 @@ export function transformToGraphData(
     relations: RawRelation[],
     savedPositions: Record<string, { x: number; y: number }> = {},
     customColors: Record<string, string> = {},
-    onSelect?: (nodeData: any) => void
+    onSelect?: (nodeData: DatabaseNodeData) => void
 ) {
+    // Pre-compute relation counts in O(n) instead of O(n*m)
+    const outgoingMap = new Map<string, number>()
+    const incomingMap = new Map<string, number>()
+    for (const r of relations) {
+        outgoingMap.set(r.source, (outgoingMap.get(r.source) || 0) + 1)
+        incomingMap.set(r.target, (incomingMap.get(r.target) || 0) + 1)
+    }
+
     const nodes: Node[] = databases.map((db) => {
-        // Calculate relation counts
-        const outgoingCount = relations.filter(r => r.source === db.id).length
-        const incomingCount = relations.filter(r => r.target === db.id).length
+        const outgoingCount = outgoingMap.get(db.id) || 0
+        const incomingCount = incomingMap.get(db.id) || 0
 
         const savedPos = savedPositions[db.id]
         const finalColor = customColors[db.id] || db.color
@@ -56,7 +64,7 @@ export function transformToGraphData(
         const sourceDb = databases.find(db => db.id === rel.source)
         const color = customColors[rel.source] || sourceDb?.color || '#2986B2'
         return {
-            id: `e-${index}-${Math.random().toString(36).substr(2, 9)}`,
+            id: `e-${rel.source}-${rel.target}-${rel.label || index}`,
             source: rel.source,
             target: rel.target,
             animated: true,

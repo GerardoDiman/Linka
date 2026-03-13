@@ -34,8 +34,9 @@ export default function LoginPage() {
 
             toast.success(t('auth.login.success'))
             navigate("/dashboard")
-        } catch (error: any) {
-            toast.error(error.message || t('auth.login.error'))
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : t('auth.login.error')
+            toast.error(message)
         } finally {
             setLoading(false)
         }
@@ -50,8 +51,9 @@ export default function LoginPage() {
                 },
             })
             if (error) throw error
-        } catch (error: any) {
-            toast.error(error.message || t('auth.login.error'))
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : t('auth.login.error')
+            toast.error(message)
         }
     }
 

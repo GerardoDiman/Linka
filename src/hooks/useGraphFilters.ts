@@ -2,7 +2,7 @@
  * Hook for managing graph filter state — property type filters, hidden DBs,
  * isolated-node filter, custom colors, and the derived visibleDbIds set.
  */
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useGraphStore } from '../stores/useGraphStore'
 import type { RawRelation } from '../lib/graph'
 import {
@@ -41,14 +41,15 @@ export function useGraphFilters({
     const setCustomColors = useGraphStore(state => state.setCustomColors)
 
     // Initial load of custom colors if not already set in store
-    useMemo(() => {
+    useEffect(() => {
         if (userId && Object.keys(customColors).length === 0) {
             const saved = getSavedCustomColors(userId)
             if (Object.keys(saved).length > 0) {
                 setCustomColors(saved)
             }
         }
-    }, [userId, customColors, setCustomColors])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userId])
     const isDirty = useGraphStore(state => state.isDirty)
     const setIsDirty = useGraphStore(state => state.setIsDirty)
     const isNotionConnected = useGraphStore(state => state.isNotionConnected)

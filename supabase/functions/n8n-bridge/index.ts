@@ -16,9 +16,13 @@ Deno.serve(async (req: Request) => {
     }
 
     try {
-        // Log headers for debugging
-        const headers = Object.fromEntries(req.headers.entries());
-        console.log("Headers:", JSON.stringify(headers, null, 2));
+        // Log safe headers for debugging (omit Authorization to protect JWT tokens)
+        const safeHeaders = {
+            'content-type': req.headers.get('content-type'),
+            'user-agent': req.headers.get('user-agent'),
+            'origin': req.headers.get('origin'),
+        };
+        console.log("Headers (safe):", JSON.stringify(safeHeaders, null, 2));
 
         interface AuthHookPayload {
             user?: {
@@ -57,7 +61,13 @@ Deno.serve(async (req: Request) => {
 
         const body: WebhookPayload = await req.json();
         console.log("--- REQUEST BODY RECEIVED ---");
-        console.log(JSON.stringify(body, null, 2));
+        console.log(JSON.stringify({
+            action: body.action,
+            source: body.type ? 'database_webhook' : (body.user ? 'auth_hook' : 'manual'),
+            table: body.table,
+            hasEmail: !!body.email,
+            hasUser: !!body.user,
+        }, null, 2));
 
         // 1. Detect Context type
         const isAuthHook = body.user && (body.mailer || body.email_data || body.confirmation_url || body.otp);

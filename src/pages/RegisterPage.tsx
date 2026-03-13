@@ -69,8 +69,9 @@ export default function RegisterPage() {
 
             toast.success(t('auth.register.success'))
             navigate("/login")
-        } catch (err: any) {
-            setError(err.message || t('auth.login.error'))
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : t('auth.login.error')
+            setError(message)
         } finally {
             setLoading(false)
         }
@@ -85,8 +86,9 @@ export default function RegisterPage() {
                 },
             })
             if (error) throw error
-        } catch (error: any) {
-            toast.error(error.message || t('auth.login.error'))
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : t('auth.login.error')
+            toast.error(message)
         }
     }
 
