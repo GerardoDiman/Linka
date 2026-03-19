@@ -46,6 +46,7 @@ export function useNodeInteractions({
     const setIsDirty = useGraphStore(state => state.setIsDirty)
     const setSyncedDbs = useGraphStore(state => state.setSyncedDbs)
     const setSyncedRelations = useGraphStore(state => state.setSyncedRelations)
+    const setIsNotionConnected = useGraphStore(state => state.setIsNotionConnected)
 
     const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set())
 
@@ -114,9 +115,9 @@ export function useNodeInteractions({
         setEdges(initialGraph.edges)
         clearPropertyFilters()
         cloudSync.setNotionToken(null)
-        useGraphStore.getState().setIsNotionConnected(false)
+        setIsNotionConnected(false)
         runForceLayout(initialGraph.nodes, initialGraph.edges)
-    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, clearPropertyFilters, cloudSync, setSyncedDbs, setSyncedRelations, handleSelectNode])
+    }, [localizedDemoDatabases, localizedDemoRelations, runForceLayout, setNodes, setEdges, clearPropertyFilters, cloudSync, setSyncedDbs, setSyncedRelations, handleSelectNode, setIsNotionConnected])
 
     return {
         selectedNodeIds,

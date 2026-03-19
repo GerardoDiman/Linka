@@ -52,7 +52,6 @@ export function useGraphFilters({
     }, [userId])
     const isDirty = useGraphStore(state => state.isDirty)
     const setIsDirty = useGraphStore(state => state.setIsDirty)
-    const isNotionConnected = useGraphStore(state => state.isNotionConnected)
     const userPlan = useGraphStore(state => state.userPlan)
 
     // Derived state: visible database IDs based on all active filters
@@ -87,7 +86,7 @@ export function useGraphFilters({
         }
 
         return new Set(filtered.map(db => db.id))
-    }, [syncedDbs, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncedRelations, userPlan, isNotionConnected])
+    }, [syncedDbs, selectedPropertyTypes, hiddenDbIds, hideIsolated, syncedRelations, userPlan])
 
     const togglePropertyType = useCallback((type: string) => {
         setSelectedPropertyTypes(prev => {

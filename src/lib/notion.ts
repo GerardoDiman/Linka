@@ -14,12 +14,11 @@ export async function fetchNotionData(
 
         if (error) {
             logger.error("Notion sync error details:", error)
-            const message = error.message || "Error al sincronizar con Notion"
-            throw new Error(message)
+            throw new Error(error.message || "NOTION_SYNC_ERROR")
         }
 
         if (!data) {
-            throw new Error("No se recibió respuesta de la sincronización")
+            throw new Error("NOTION_NO_RESPONSE")
         }
 
         return {

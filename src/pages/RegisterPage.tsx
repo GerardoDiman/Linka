@@ -11,6 +11,13 @@ import { useToast } from "../context/ToastContext"
 import { GoogleIcon } from "../components/ui/GoogleIcon"
 import { NotionIcon } from "../components/ui/NotionIcon"
 
+// Module-level constant — no re-creation per render (DRY, referential stability)
+const PASSWORD_REQUIREMENTS = [
+    { regex: /.{8,}/, labelKey: 'auth.register.passwordRequirements.minLength' },
+    { regex: /[A-Z]/, labelKey: 'auth.register.passwordRequirements.uppercase' },
+    { regex: /[0-9]/, labelKey: 'auth.register.passwordRequirements.number' },
+] as const
+
 export default function RegisterPage() {
     const { t } = useTranslation()
     const navigate = useNavigate()
@@ -27,14 +34,9 @@ export default function RegisterPage() {
 
     // Password validation
     const [isPasswordValid, setIsPasswordValid] = useState(false)
-    const passwordRequirements = [
-        { regex: /.{8,}/, label: 'Al menos 8 caracteres' },
-        { regex: /[A-Z]/, label: 'Al menos una mayúscula' },
-        { regex: /[0-9]/, label: 'Al menos un número' },
-    ]
 
     useEffect(() => {
-        setIsPasswordValid(passwordRequirements.every(req => req.regex.test(password)))
+        setIsPasswordValid(PASSWORD_REQUIREMENTS.every(req => req.regex.test(password)))
     }, [password])
 
     const handleSignUp = async (e: React.FormEvent) => {
@@ -179,7 +181,7 @@ export default function RegisterPage() {
                             </div>
 
                             <div className="grid grid-cols-1 gap-1.5 mt-2">
-                                {passwordRequirements.map((req, i) => (
+                                {PASSWORD_REQUIREMENTS.map((req, i) => (
                                     <div key={i} className="flex items-center gap-2 text-[11px]">
                                         {req.regex.test(password) ? (
                                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -187,7 +189,7 @@ export default function RegisterPage() {
                                             <Circle className="w-3.5 h-3.5 text-gray-300 dark:text-slate-600" />
                                         )}
                                         <span className={req.regex.test(password) ? "text-emerald-500 font-medium" : "text-gray-500"}>
-                                            {req.label}
+                                            {t(req.labelKey)}
                                         </span>
                                     </div>
                                 ))}

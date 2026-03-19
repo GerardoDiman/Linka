@@ -148,6 +148,12 @@ function DashboardContent({ userRole }: DashboardContentProps) {
         return map
     }, [syncedDbs])
 
+    const activeColor = useMemo(() => {
+        if (interactions.selectedNodeIds.size !== 1) return undefined
+        const id = Array.from(interactions.selectedNodeIds)[0]
+        return customColors[id] || nodes.find(n => n.id === id)?.data?.color
+    }, [interactions.selectedNodeIds, customColors, nodes])
+
     // ─── Visibility / search effect ─────────────────────────────────────
 
     const setEdges = useGraphStore(state => state.setEdges)
@@ -247,6 +253,8 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                     if (session.user.user_metadata?.has_seen_onboarding !== true) {
                         supabase.auth.updateUser({
                             data: { has_seen_onboarding: true }
+                        }).then(({ error }) => {
+                            if (error) console.warn('Failed to persist onboarding state:', error.message)
                         })
                     }
                 }}
@@ -258,7 +266,7 @@ function DashboardContent({ userRole }: DashboardContentProps) {
                 onBatchHide={interactions.handleBatchHide}
                 userPlan={userPlan}
                 isSidebarCollapsed={isSidebarCollapsed}
-                activeColor={interactions.selectedNodeIds.size === 1 ? customColors[Array.from(interactions.selectedNodeIds)[0]] || nodes.find(n => n.id === Array.from(interactions.selectedNodeIds)[0])?.data?.color : undefined}
+                activeColor={activeColor}
             />
 
             <ShortcutsHelpModal

@@ -11,6 +11,7 @@ import ReactFlow, {
     type Connection,
     type Edge,
     type Node,
+    type NodeProps,
     useReactFlow,
     Panel,
     applyNodeChanges,
@@ -24,14 +25,14 @@ import { useGraphStore } from '../../stores/useGraphStore'
 import { ExportButton } from './ExportButton'
 import { Tooltip } from '../ui/Tooltip'
 import { getSavedPositions } from '../../lib/storage'
-import 'reactflow/dist/style.css'
+import type { DatabaseNodeData } from '../../types'
 
 interface GraphCanvasProps {
     session: { user: { id: string } } | null
     theme: string
     syncStatus: string
     searchQuery: string
-    nodeTypes: Record<string, React.ComponentType<any>>
+    nodeTypes: Record<string, React.ComponentType<NodeProps<DatabaseNodeData>>>
     onConnect: (params: Connection | Edge) => void
     onNodeDragStop: () => void
     handleResetLayout: () => void
@@ -68,6 +69,19 @@ export function GraphCanvas({
         [setEdges]
     )
 
+    const handleInit = useCallback(() => {
+        if (!session) return
+        if (nodes.length === 0) return
+        const saved = getSavedPositions(session.user.id)
+        const hasAllPositions = nodes.every(n => saved[n.id])
+
+        if (hasAllPositions) {
+            setTimeout(() => fitView({ padding: 0.2, duration: 800, maxZoom: 1 }), 100)
+        } else {
+            runForceLayout(nodes, edges, searchQuery)
+        }
+    }, [session, nodes, edges, searchQuery, fitView, runForceLayout])
+
     return (
         <div id="dashboard-canvas" className="flex-1 h-full relative">
             <ReactFlow
@@ -77,18 +91,7 @@ export function GraphCanvas({
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onNodeDragStop={onNodeDragStop}
-                onInit={() => {
-                    if (!session) return
-                    if (nodes.length === 0) return
-                    const saved = getSavedPositions(session.user.id)
-                    const hasAllPositions = nodes.every(n => saved[n.id])
-
-                    if (hasAllPositions) {
-                        setTimeout(() => fitView({ padding: 0.2, duration: 800, maxZoom: 1 }), 100)
-                    } else {
-                        runForceLayout(nodes, edges, searchQuery)
-                    }
-                }}
+                onInit={handleInit}
                 nodeTypes={nodeTypes}
                 fitView
                 fitViewOptions={{ padding: 0.2, maxZoom: 1 }}

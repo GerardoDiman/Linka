@@ -8,6 +8,7 @@ import { ToastContainer } from "./components/ui/Toast"
 import { ErrorBoundary } from "./components/ui/ErrorBoundary"
 import { Shield } from "lucide-react"
 import { Button } from "./components/ui/button"
+import { useTranslation } from "react-i18next"
 
 // Lazy loaded pages for code splitting
 const LandingPage = lazy(() => import("./pages/LandingPage"))
@@ -50,11 +51,12 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 
 // Loading spinner for Suspense fallback
 function LoadingSpinner() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
       <div className="flex flex-col items-center gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">Cargando...</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">{t('common.loading')}</p>
       </div>
     </div>
   )
@@ -73,6 +75,7 @@ function ProtectedRoute({ children }: { children: (role: string | null) => React
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { session, role, loading } = useAuth()
+  const { t } = useTranslation()
 
   if (loading) return <LoadingSpinner />
 
@@ -84,12 +87,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
         <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-red-100 dark:border-red-900/30">
           <Shield className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Acceso Denegado</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">No tienes permisos para acceder a esta sección.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('common.accessDenied.title')}</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">{t('common.accessDenied.description')}</p>
           <Button onClick={() => window.location.href = '/dashboard'}>
-            Volver al Dashboard
+            {t('common.accessDenied.backToDashboard')}
           </Button>
-          <p className="mt-4 text-[10px] text-gray-400">Rol detectado: {role || 'null'}</p>
+          <p className="mt-4 text-[10px] text-gray-400">{t('common.accessDenied.roleDetected')}: {role || 'null'}</p>
         </div>
       </div>
     )

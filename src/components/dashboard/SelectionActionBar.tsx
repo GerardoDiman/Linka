@@ -69,6 +69,7 @@ export function SelectionActionBar({
                             {PRESET_COLORS.map((color) => (
                                 <Tooltip key={color} content={isFree ? t('dashboard.selection.proFeature') : t('dashboard.selection.changeColor')}>
                                     <button
+                                        aria-label={`${t('dashboard.selection.changeColor')}: ${color}`}
                                         onClick={(e) => {
                                             if (isFree) {
                                                 e.stopPropagation()

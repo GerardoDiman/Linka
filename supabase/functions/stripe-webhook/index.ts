@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
 
     try {
         if (!signature || !STRIPE_WEBHOOK_SECRET) {
-            console.error("❌ Firma faltante o el secreto del webhook no está configurado")
+            console.error("Missing signature or webhook secret not configured")
             return new Response(
                 JSON.stringify({ error: "Missing signature or webhook secret" }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
         const body = await req.text()
 
-        // Verificar la firma criptográfica del evento
+        // Verify the cryptographic signature of the event
         let event;
         try {
             event = await stripe.webhooks.constructEventAsync(
@@ -33,21 +33,21 @@ Deno.serve(async (req) => {
             )
         } catch (err) {
             const msg = err instanceof Error ? err.message : "Unknown error"
-            console.error(`❌ Error de verificación de firma: ${msg}`)
+            console.error(`Signature verification error: ${msg}`)
             return new Response(
                 JSON.stringify({ error: `Signature verification failed: ${msg}` }),
                 { status: 400, headers: { 'Content-Type': 'application/json' } }
             )
         }
 
-        console.log(`🔔 Evento recibido: ${event.type}`)
+        console.log(`Event received: ${event.type}`)
 
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object
             const supabaseUserId = session.client_reference_id || session.metadata?.supabase_user_id
             const stripeCustomerId = session.customer
 
-            console.log(`🚀 Checkout completado para usuario Supabase: ${supabaseUserId}`)
+            console.log(`Checkout completed for Supabase user: ${supabaseUserId}`)
 
             if (supabaseUserId) {
                 const supabaseAdmin = createClient(
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
                     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
                 )
 
-                console.log("📝 Actualizando perfil en la base de datos...")
+                console.log("Updating profile in database...")
                 const { error, data } = await supabaseAdmin
                     .from('profiles')
                     .update({
@@ -67,17 +67,17 @@ Deno.serve(async (req) => {
                     .select()
 
                 if (error) {
-                    console.error("❌ Error actualizando perfil:", error)
+                    console.error("Error updating profile:", error)
                     throw error
                 }
 
                 if (data && data.length > 0) {
-                    console.log(`✅ Usuario ${supabaseUserId} actualizado con éxito a PRO`)
+                    console.log(`User ${supabaseUserId} successfully upgraded to PRO`)
                 } else {
-                    console.warn(`⚠️ No se encontró el perfil para el usuario ${supabaseUserId}`)
+                    console.warn(`Profile not found for user ${supabaseUserId}`)
                 }
             } else {
-                console.warn("⚠️ No se encontró supabaseUserId en el evento de Stripe")
+                console.warn("supabaseUserId not found in Stripe event")
             }
         }
 
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     } catch (error) {
         const message = error instanceof Error ? error.message : "Internal Server Error"
-        console.error("❌ Error en webhook:", message)
+        console.error("Webhook error:", message)
         return new Response(JSON.stringify({ error: message }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },

@@ -2,6 +2,7 @@ import React, { Component, type ReactNode } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from './card'
 import { Button } from './button'
 import { AlertTriangle, RefreshCcw } from 'lucide-react'
+import i18n from '../../i18n'
 
 interface Props {
     children?: ReactNode
@@ -27,8 +28,6 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     private handleReset = () => {
-        // Optionally clear local storage if it's a corrupted state issue
-        // localStorage.removeItem('linka_graph_positions_...') 
         window.location.reload()
     }
 
@@ -42,12 +41,12 @@ export class ErrorBoundary extends Component<Props, State> {
                                 <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
                             </div>
                             <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
-                                Algo salió mal
+                                {i18n.t('common.errorBoundary.title')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
-                                Ocurrió un error inesperado en la aplicación. Nuestro equipo técnico ha sido notificado (en teoría 😉).
+                                {i18n.t('common.errorBoundary.description')}
                             </p>
 
                             {this.state.error && (
@@ -61,7 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
                                 className="w-full flex justify-center items-center gap-2"
                             >
                                 <RefreshCcw className="w-4 h-4" />
-                                Recargar página
+                                {i18n.t('common.errorBoundary.reload')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -72,3 +71,4 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.children
     }
 }
+

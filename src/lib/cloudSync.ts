@@ -66,8 +66,8 @@ export const syncViaFetch = async (payload: CloudSyncPayload, token: string): Pr
                     throw new Error("Could not refresh session")
                 }
             } catch {
-                logger.error("❌ Emergency refresh failed. Needs manual login.")
-                throw new Error("Tu sesión ha expirado. Por favor cierra sesión y vuelve a entrar.")
+                logger.error("Emergency refresh failed. Needs manual login.")
+                throw new Error("SESSION_EXPIRED")
             }
         }
     }
@@ -103,7 +103,7 @@ export const syncToCloud = async (userId: string, data: Omit<CloudSyncPayload, '
         try {
             await syncViaFetch(payload, token || '')
         } catch (fetchErr: unknown) {
-            logger.error("❌ Falló tanto el cliente como el fallback:", fetchErr instanceof Error ? fetchErr.message : fetchErr)
+            logger.error("Cloud sync failed (client + fallback):", fetchErr instanceof Error ? fetchErr.message : fetchErr)
             throw fetchErr
         }
     }

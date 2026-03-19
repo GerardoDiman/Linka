@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
-import { Database, ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal } from "lucide-react"
+import { ChevronLeft, Tag, Info, ExternalLink, ArrowUpAZ, ArrowDownAZ, SlidersHorizontal } from "lucide-react"
 import { useClickOutside } from "../../hooks/useClickOutside"
 import { Tooltip } from "../ui/Tooltip"
 import { NotionIcon } from "../ui/NotionIcon"
+import { DatabaseIcon } from "../ui/DatabaseIcon"
 import { useTranslation } from "react-i18next"
 import type { DatabaseInfo, DatabaseNodeData } from "../../types"
 
-// NotionIcon is now imported from ../ui/NotionIcon
 
 interface SidebarProps {
     databases?: DatabaseInfo[]
@@ -164,11 +164,6 @@ export function Sidebar({
                                     } ${db.isHidden ? 'bg-gray-50/50 dark:bg-slate-800/20' : ''}`}
                                 onClick={() => {
                                     if (!db.isHidden) {
-                                        // Handle selection if needed
-                                    }
-                                }}
-                                onDoubleClick={() => {
-                                    if (!db.isHidden) {
                                         onFocusNode?.(db.id)
                                     }
                                 }}
@@ -184,17 +179,7 @@ export function Sidebar({
                                                 }`}
                                         >
                                             <div className="relative group/icon">
-                                                {db.icon ? (
-                                                    <div className="w-5 h-5 flex items-center justify-center text-lg">
-                                                        {db.icon.startsWith('http') ? (
-                                                            <img src={db.icon} alt="" className="w-4 h-4 object-contain" />
-                                                        ) : (
-                                                            <span>{db.icon}</span>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <Database className="h-3.5 w-3.5 flex-shrink-0" style={{ color: db.color }} />
-                                                )}
+                                                <DatabaseIcon icon={db.icon} color={db.color} size="sm" />
                                             </div>
                                         </button>
                                     </Tooltip>
@@ -284,13 +269,7 @@ export function Sidebar({
                                 style={{ backgroundColor: `${selectedNode?.color}20`, color: selectedNode?.color }}
                             >
                                 {selectedNode?.icon ? (
-                                    <div className="w-5 h-5 flex items-center justify-center text-lg">
-                                        {selectedNode.icon.startsWith('http') ? (
-                                            <img src={selectedNode.icon} alt="" className="w-5 h-5 object-contain" />
-                                        ) : (
-                                            <span>{selectedNode.icon}</span>
-                                        )}
-                                    </div>
+                                    <DatabaseIcon icon={selectedNode.icon} size="lg" />
                                 ) : (
                                     <NotionIcon className="w-5 h-5" />
                                 )}

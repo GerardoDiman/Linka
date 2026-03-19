@@ -13,7 +13,18 @@
         "hide": "Hide",
         "selection": "Selection",
         "lightMode": "Light Mode",
-        "darkMode": "Dark Mode"
+        "darkMode": "Dark Mode",
+        "errorBoundary": {
+            "title": "Something went wrong",
+            "description": "An unexpected error occurred in the application. Our team has been notified.",
+            "reload": "Reload page"
+        },
+        "accessDenied": {
+            "title": "Access Denied",
+            "description": "You don't have permissions to access this section.",
+            "backToDashboard": "Back to Dashboard",
+            "roleDetected": "Detected role"
+        }
     },
     "landing": {
         "nav": {

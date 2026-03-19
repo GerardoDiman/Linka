@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
         interface DatabaseWebhookPayload {
             type?: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT';
             table?: string;
-            record?: any;
+            record?: { email?: string; full_name?: string; [key: string]: unknown };
             schema?: string;
         }
 
@@ -84,7 +84,7 @@ Deno.serve(async (req: Request) => {
             
             if (!authHeader) {
                 console.warn("Manual call without Authorization header rejected.");
-                return new Response(JSON.stringify({ error: "No autorizado: Sin cabecera de autenticación" }), {
+                return new Response(JSON.stringify({ error: "Unauthorized: Missing Authorization header" }), {
                     status: 401,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 });
@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
 
             if (authError || !user) {
                 console.warn("Authentication failed for manual call:", authError?.message);
-                return new Response(JSON.stringify({ error: "No autorizado: Sesión inválida" }), {
+                return new Response(JSON.stringify({ error: "Unauthorized: Invalid session" }), {
                     status: 401,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 });
@@ -114,7 +114,7 @@ Deno.serve(async (req: Request) => {
 
             if (profileError || profile?.role !== 'admin') {
                 console.warn(`User ${user.id} attempted admin action without permission.`);
-                return new Response(JSON.stringify({ error: "Prohibido: Se requieren permisos de administrador" }), {
+                return new Response(JSON.stringify({ error: "Forbidden: Admin permissions required" }), {
                     status: 403,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 });

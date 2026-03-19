@@ -99,7 +99,7 @@ export function Tooltip({ children, content, position = "top", delay = 0.7 }: To
     )
 
     return (
-        <div ref={containerRef} className="relative flex items-center" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
+        <div ref={containerRef} className="relative flex items-center" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown} onFocus={handleMouseEnter} onBlur={handleMouseLeave}>
             {children}
             {typeof document !== 'undefined' && createPortal(tooltipContent, document.body)}
         </div>

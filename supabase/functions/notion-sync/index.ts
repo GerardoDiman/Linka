@@ -52,7 +52,7 @@ async function decrypt(jsonStr: string): Promise<string> {
         return new TextDecoder().decode(decrypted)
     } catch (e) {
         const msg = e instanceof Error ? e.message : "Parsing or decryption failed"
-        console.error("❌ Decryption failed:", msg)
+        console.error("Decryption failed:", msg)
         throw new Error("Failed to decrypt token. Please provide it again.")
     }
 }
@@ -70,7 +70,7 @@ Deno.serve(async (req: Request) => {
         const authHeader = req.headers.get('Authorization')
 
         if (!authHeader) {
-            console.error("❌ Missing Authorization header")
+            console.error("Missing Authorization header")
             throw new Error("Missing Authorization header")
         }
 
@@ -80,10 +80,10 @@ Deno.serve(async (req: Request) => {
             { global: { headers: { Authorization: authHeader } } }
         )
 
-        console.log("🔍 Validando usuario...")
+        console.log("Validating user...")
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
         if (authError || !user) {
-            console.error("❌ Auth error:", authError?.message || "No user found")
+            console.error("Auth error:", authError?.message || "No user found")
             return new Response(JSON.stringify({
                 error: "Unauthorized",
                 message: authError?.message || "Invalid session"
@@ -92,7 +92,7 @@ Deno.serve(async (req: Request) => {
                 status: 401,
             })
         }
-        console.log(`✅ Usuario autenticado: ${user.id}`)
+        console.log(`User authenticated: ${user.id}`)
 
         // ─── Parse request body ────────────────────────────────────────
         const body = await req.json().catch(() => ({}))
@@ -178,7 +178,7 @@ Deno.serve(async (req: Request) => {
 
                 if (notionResponse.status === 401) {
                     return new Response(JSON.stringify({
-                        error: "Token inválido. Por favor verifica tu token de integración."
+                        error: "Invalid token. Please verify your integration token."
                     }), {
                         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                         status: 401,
@@ -247,7 +247,7 @@ Deno.serve(async (req: Request) => {
         }
 
         results.forEach((db: NotionDatabase, index: number) => {
-            const title = db.title?.[0]?.plain_text || "Sin título"
+            const title = db.title?.[0]?.plain_text || "Untitled"
 
             const properties = Object.entries(db.properties).map(([name, prop]) => ({
                 name,

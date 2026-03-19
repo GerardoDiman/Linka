@@ -3,7 +3,7 @@ import { getCorsHeaders } from "../_shared/cors.ts"
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")
 const PRO_PLAN_PRICE_ID = Deno.env.get("STRIPE_PRO_PRICE_ID")
-const SITE_URL = Deno.env.get("SITE_URL") || "https://linka-web.vercel.app"
+const SITE_URL = Deno.env.get("SITE_URL") || "https://linka-studio.com"
 
 
 Deno.serve(async (req: Request) => {
@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
 
         const authHeader = req.headers.get('Authorization')
         if (!authHeader) {
-            throw new Error("Sin cabecera de autorización")
+            throw new Error("Missing Authorization header")
         }
 
         const supabaseClient = createClient(
@@ -30,7 +30,7 @@ Deno.serve(async (req: Request) => {
         // Get the user from the JWT
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
         if (authError || !user) {
-            return new Response(JSON.stringify({ error: "No autorizado: Debes iniciar sesión" }), {
+            return new Response(JSON.stringify({ error: "Unauthorized: Please sign in" }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 401,
             })
@@ -38,7 +38,7 @@ Deno.serve(async (req: Request) => {
 
 
         if (!STRIPE_SECRET_KEY) {
-            throw new Error("STRIPE_SECRET_KEY no está configurado")
+            throw new Error("STRIPE_SECRET_KEY not configured")
         }
 
         // 1. Check if user already has a customer ID in profiles
@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
 
         if (!response.ok) {
             return new Response(JSON.stringify({
-                error: result.error?.message || "Error en Stripe API"
+                error: result.error?.message || "Stripe API error"
             }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 400,
@@ -112,7 +112,7 @@ Deno.serve(async (req: Request) => {
 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Internal Server Error"
-        console.error("Error en create-checkout-session:", message)
+        console.error("Error in create-checkout-session:", message)
         return new Response(JSON.stringify({ error: message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 500,

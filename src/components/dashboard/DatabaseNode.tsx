@@ -1,6 +1,7 @@
 import { Handle, Position } from "reactflow"
-import { ExternalLink, Database, Calendar, Clock, ArrowUpRight, ArrowDownLeft, List, Check } from "lucide-react"
+import { ExternalLink, Calendar, Clock, ArrowUpRight, ArrowDownLeft, List, Check } from "lucide-react"
 import { Tooltip } from "../ui/Tooltip"
+import { DatabaseIcon } from "../ui/DatabaseIcon"
 import { useTranslation } from "react-i18next"
 import type { DatabaseNodeData } from "../../types"
 
@@ -48,17 +49,7 @@ export function DatabaseNode({ data, selected }: { data: DatabaseNodeData, selec
                             className="p-1.5 rounded-lg"
                             style={{ backgroundColor: `${data.color}20`, color: data.color }}
                         >
-                            {data.icon ? (
-                                <div className="w-[18px] h-[18px] flex items-center justify-center text-sm">
-                                    {data.icon.startsWith('http') ? (
-                                        <img src={data.icon} alt="" className="w-full h-full object-contain" />
-                                    ) : (
-                                        <span>{data.icon}</span>
-                                    )}
-                                </div>
-                            ) : (
-                                <Database size={18} />
-                            )}
+                            <DatabaseIcon icon={data.icon} color={data.color} size="md" />
                         </div>
                         <span className="font-bold text-gray-800 dark:text-gray-200 text-lg">{data.label}</span>
                     </div>
@@ -112,6 +103,7 @@ export function DatabaseNode({ data, selected }: { data: DatabaseNodeData, selec
                 </div>
 
                 <button
+                    aria-label={`${t('dashboard.node.viewProperties')}: ${data.label}`}
                     onClick={(e) => {
                         e.stopPropagation();
                         data.onSelect?.(data);

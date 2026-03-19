@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronRight, ChevronLeft, X, HelpCircle, CheckCircle2 } from "lucide-react"
 import { Button } from "../ui/button"
@@ -22,7 +22,7 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
     const [currentStep, setCurrentStep] = useState(0)
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
 
-    const STEPS: Step[] = [
+    const STEPS = useMemo<Step[]>(() => [
         {
             targetId: "navbar-logo",
             title: t('dashboard.tour.steps.intro.title'),
@@ -77,7 +77,7 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
             content: t('dashboard.tour.steps.theme.content'),
             position: "bottom"
         }
-    ]
+    ], [t])
 
     const step = STEPS[currentStep]
 
@@ -89,6 +89,16 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen])
+
+    // Dismiss tour with Escape key
+    useEffect(() => {
+        if (!isOpen) return
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose()
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [isOpen, onClose])
 
     useEffect(() => {
         if (!isOpen) return
@@ -152,7 +162,7 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
     }
 
     return (
-        <div className="fixed inset-0 z-[100] pointer-events-none">
+        <div className="fixed inset-0 z-[100] pointer-events-none" role="dialog" aria-label={t('dashboard.tour.stepXofY', { current: currentStep + 1, total: STEPS.length })} aria-modal="true">
             {/* Dark Overlay with Hole (Spotlight) */}
             <AnimatePresence>
                 {targetRect && (

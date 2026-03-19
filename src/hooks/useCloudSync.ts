@@ -155,7 +155,7 @@ export function useCloudSync({
                 }, 100)
             }
         } catch (error: unknown) {
-            console.error("❌ [CloudSync] handleSync Error:", error)
+            console.error("[CloudSync] handleSync Error:", error)
             toast.error(error instanceof Error ? error.message : t('dashboard.errors.syncError'))
         } finally {
             setSyncStatus('idle')
@@ -205,6 +205,9 @@ export function useCloudSync({
     }, [session?.user.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ─── Fetch user plan on mount ───────────────────────────────────────
+    // NOTE: AuthContext also fetches plan via fetchProfileData, but it may
+    // not have resolved by the time cloud sync runs. This ensures we always
+    // have the correct plan_type before applying the 4-DB free-tier limit.
 
     useEffect(() => {
         if (!session) return
@@ -228,7 +231,7 @@ export function useCloudSync({
         fetchPlan()
     }, [session?.user.id, setUserPlan]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ─── Fetch user plan on mount ───────────────────────────────────────
+    // ─── Manual sync handler ─────────────────────────────────────────────
 
     const handleManualSync = useCallback(async () => {
         if (!session) return
@@ -269,7 +272,7 @@ export function useCloudSync({
             setCloudSyncStatus('error')
             setTimeout(() => setCloudSyncStatus('idle'), 5000)
         }
-    }, [session, nodes, customColors, selectedPropertyTypes, hiddenDbIds, hideIsolated, notionToken, setIsDirty, setNotionToken])
+    }, [session, nodes, customColors, selectedPropertyTypes, hiddenDbIds, hideIsolated, setIsDirty])
 
     return {
         cloudSyncStatus,

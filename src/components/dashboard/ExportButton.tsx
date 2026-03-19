@@ -88,7 +88,7 @@ export function ExportButton() {
             // Reduce quality for very large graphs
             if (contentWidth * contentHeight > 25000000 && pixelRatio > 2) {
                 pixelRatio = 2
-                logger.warn('⚠️ Gráfico muy grande, reduciendo calidad a High')
+                logger.warn('Graph too large, reducing quality to High')
             }
 
             const bgColor = getBgColor(selectedBg)
@@ -145,7 +145,7 @@ export function ExportButton() {
                 throw new Error('PNG export failed')
             }
         } catch (err) {
-            logger.error('❌ Error en exportación:', err)
+            logger.error('Export error:', err)
 
             // Ultra-safe fallback: Capture visible area only
             try {
