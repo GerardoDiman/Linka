@@ -442,6 +442,7 @@
             "submit": "Send link",
             "submitting": "Sending...",
             "success": "Email sent! Check your inbox.",
+            "oauthHint": "If you signed up with Google or Notion, please use that method to log in instead of resetting your password.",
             "back": "Back",
             "backToLogin": "Back to login",
             "error": "Error sending email"

@@ -43,6 +43,9 @@ export default function RecoveryPage() {
                             <div className="text-green-600 dark:text-green-400 font-medium">
                                 {t('auth.recovery.success')}
                             </div>
+                            <div className="p-3 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-lg">
+                                {t('auth.recovery.oauthHint')}
+                            </div>
                             <Link to="/login">
                                 <Button variant="outline" className="w-full dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700">
                                     {t('auth.recovery.backToLogin')}

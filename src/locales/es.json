@@ -442,6 +442,7 @@
             "submit": "Enviar enlace",
             "submitting": "Enviando...",
             "success": "¡Correo enviado! Revisa tu bandeja de entrada.",
+            "oauthHint": "Si te registraste con Google o Notion, usa ese método para iniciar sesión en lugar de restablecer tu contraseña.",
             "back": "Volver",
             "backToLogin": "Volver al inicio de sesión",
             "error": "Error al enviar el correo"

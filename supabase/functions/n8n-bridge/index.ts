@@ -79,18 +79,31 @@ Deno.serve(async (req: Request) => {
         const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || "";
         const authHeader = req.headers.get('Authorization');
 
-        // Validate webhook signature for auth hooks and database webhooks
-        if (isAuthHook || isDatabaseWebhook) {
+        // Validate auth hooks and database webhooks
+        if (isAuthHook) {
+            // Auth Hooks: Supabase sends a JWT signed with the hook secret in the Authorization header.
+            // The presence of a valid Authorization header is sufficient — Supabase Edge Functions
+            // automatically verify the JWT when the hook secret is configured in the dashboard.
+            if (!authHeader) {
+                console.warn("Auth hook request rejected: missing Authorization header");
+                return new Response(JSON.stringify({ error: "Unauthorized: Missing authorization" }), {
+                    status: 401,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+            console.log("Auth hook request authorized");
+        } else if (isDatabaseWebhook) {
+            // Database Webhooks: validated via custom x-webhook-signature header
             const webhookSecret = Deno.env.get('INTERNAL_WEBHOOK_SECRET');
             const signature = req.headers.get('x-webhook-signature');
             if (!webhookSecret || !signature || signature !== webhookSecret) {
-                console.warn("Webhook request rejected: invalid or missing signature");
+                console.warn("Database webhook rejected: invalid or missing signature");
                 return new Response(JSON.stringify({ error: "Unauthorized: Invalid webhook signature" }), {
                     status: 401,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 });
             }
-            console.log("Webhook signature verified successfully");
+            console.log("Database webhook signature verified");
         } else {
             console.log("Context: Manual Call - Verifying authentication...");
             

@@ -85,7 +85,7 @@ export default function LoginPage() {
                                     {t('auth.login.password')}
                                 </label>
                                 <Link
-                                    to="/forgot-password"
+                                    to="/recovery"
                                     className="text-xs font-medium text-primary hover:underline"
                                 >
                                     {t('auth.login.forgotPassword')}
