@@ -92,7 +92,7 @@ Deno.serve(async (req: Request) => {
                 status: 401,
             })
         }
-        console.log(`User authenticated: ${user.id}`)
+        console.log(`User authenticated: ${user.id.substring(0, 8)}...`)
 
         // ─── Parse request body ────────────────────────────────────────
         const body = await req.json().catch(() => ({}))

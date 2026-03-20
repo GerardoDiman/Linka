@@ -12,10 +12,12 @@ create table if not exists public.profiles (
 -- 2. Habilitar Row Level Security (RLS) en profiles (buena práctica)
 alter table public.profiles enable row level security;
 
--- Política para que cualquiera pueda ver perfiles (o restringir según necesidad)
-create policy "Public profiles are viewable by everyone"
+-- Política: los usuarios solo pueden ver su propio perfil
+-- IMPORTANTE: Ejecutar primero en Supabase:
+--   DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+create policy "Users can view own profile"
 on public.profiles for select
-using ( true );
+using ( auth.uid() = id );
 
 -- Política para que los usuarios puedan actualizar su propio perfil
 create policy "Users can update own profile"

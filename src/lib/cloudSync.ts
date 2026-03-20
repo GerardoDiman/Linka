@@ -2,6 +2,7 @@
  * Cloud synchronization utilities for persisting graph state to Supabase.
  */
 import { supabase } from './supabase'
+import { withTimeout } from './withTimeout'
 import logger from './logger'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -55,10 +56,11 @@ export const syncViaFetch = async (payload: CloudSyncPayload, token: string): Pr
         const errorData = await response.json().catch(() => ({}))
         if (errorData.message?.includes('expired') || errorData.code === 'PGRST303') {
             try {
-                const { data: { session } } = await Promise.race([
+                const { data: { session } } = await withTimeout(
                     supabase.auth.refreshSession(),
-                    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
-                ])
+                    3000,
+                    'Session refresh'
+                )
 
                 if (session?.access_token) {
                     response = await sendRequest(session.access_token)
@@ -93,10 +95,11 @@ export const syncToCloud = async (userId: string, data: Omit<CloudSyncPayload, '
 
     try {
         // Short timeout to trigger REST fallback quickly if the JS client hangs
-        const { error } = await Promise.race([
+        const { error } = await withTimeout(
             supabase.from('user_graph_data').upsert(payload),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT_CLIENT")), 4000))
-        ])
+            4000,
+            'Cloud sync upsert'
+        )
 
         if (error) throw error
     } catch {
@@ -116,13 +119,14 @@ export const fetchCloudGraphData = async (userId: string, accessToken: string): 
 
     // Attempt 1: Supabase JS client
     try {
-        const { data: clientData, error } = await Promise.race([
+        const { data: clientData, error } = await withTimeout(
             supabase.from('user_graph_data')
                 .select('id, positions, custom_colors, filters, hidden_dbs, hide_isolated')
                 .eq('id', userId)
                 .maybeSingle(),
-            new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
-        ])
+            3000,
+            'Cloud data fetch'
+        )
 
         if (!error) data = clientData
     } catch {

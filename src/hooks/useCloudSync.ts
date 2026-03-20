@@ -4,7 +4,6 @@
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Node, Edge } from 'reactflow'
-import { supabase } from '../lib/supabase'
 import { fetchCloudGraphData, syncToCloud } from '../lib/cloudSync'
 import { useGraphStore } from '../stores/useGraphStore'
 import {
@@ -64,7 +63,6 @@ export function useCloudSync({
     const isNotionConnected = useGraphStore(state => state.isNotionConnected)
     const setIsNotionConnected = useGraphStore(state => state.setIsNotionConnected)
     const userPlan = useGraphStore(state => state.userPlan)
-    const setUserPlan = useGraphStore(state => state.setUserPlan)
     const customColors = useGraphStore(state => state.customColors)
     const setCustomColors = useGraphStore(state => state.setCustomColors)
 
@@ -165,6 +163,21 @@ export function useCloudSync({
 
     // ─── Fetch cloud data on mount ──────────────────────────────────────
 
+    // Use refs to avoid re-triggering the mount effect when callbacks change
+    const handleSyncRef = useRef(handleSync)
+    useEffect(() => { handleSyncRef.current = handleSync }, [handleSync])
+
+    const setSelectedPropertyTypesRef = useRef(setSelectedPropertyTypes)
+    const setHiddenDbIdsRef = useRef(setHiddenDbIds)
+    const setHideIsolatedRef = useRef(setHideIsolated)
+    const setCustomColorsRef = useRef(setCustomColors)
+    useEffect(() => {
+        setSelectedPropertyTypesRef.current = setSelectedPropertyTypes
+        setHiddenDbIdsRef.current = setHiddenDbIds
+        setHideIsolatedRef.current = setHideIsolated
+        setCustomColorsRef.current = setCustomColors
+    }, [setSelectedPropertyTypes, setHiddenDbIds, setHideIsolated, setCustomColors])
+
     useEffect(() => {
         if (!session || initialLoadRef.current === session.user.id) return
         initialLoadRef.current = session.user.id
@@ -186,15 +199,15 @@ export function useCloudSync({
             const newIsolated = data.hide_isolated || false
             const newColors = data.custom_colors || {}
 
-            setSelectedPropertyTypes(newFilters)
-            setHiddenDbIds(newHidden)
-            setHideIsolated(newIsolated)
-            setCustomColors(newColors)
+            setSelectedPropertyTypesRef.current(newFilters)
+            setHiddenDbIdsRef.current(newHidden)
+            setHideIsolatedRef.current(newIsolated)
+            setCustomColorsRef.current(newColors)
 
             // 3. Trigger Notion Sync
             // We can call handleSync with an empty token because the Edge Function
             // will retrieve it from the database if available.
-            handleSync('', {
+            handleSyncRef.current('', {
                 filters: newFilters,
                 hidden_dbs: newHidden,
                 hide_isolated: newIsolated,
@@ -202,34 +215,11 @@ export function useCloudSync({
             }, true)
         }
         loadCloudData()
-    }, [session?.user.id]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [session])
 
-    // ─── Fetch user plan on mount ───────────────────────────────────────
-    // NOTE: AuthContext also fetches plan via fetchProfileData, but it may
-    // not have resolved by the time cloud sync runs. This ensures we always
-    // have the correct plan_type before applying the 4-DB free-tier limit.
-
-    useEffect(() => {
-        if (!session) return
-        const fetchPlan = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('plan_type')
-                    .eq('id', session.user.id)
-                    .maybeSingle()
-
-                if (error) return
-
-                if (data?.plan_type) {
-                    setUserPlan(data.plan_type as 'free' | 'pro')
-                }
-            } catch {
-                // Handle silently
-            }
-        }
-        fetchPlan()
-    }, [session?.user.id, setUserPlan]) // eslint-disable-line react-hooks/exhaustive-deps
+    // NOTE: plan_type is fetched by AuthContext via fetchProfileData and synced
+    // to the Zustand store by DashboardPage (authPlan → setUserPlan).
+    // No duplicate fetch needed here.
 
     // ─── Manual sync handler ─────────────────────────────────────────────
 

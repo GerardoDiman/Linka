@@ -55,7 +55,8 @@ Deno.serve(async (req: Request) => {
 
         const customerId = profile?.stripe_customer_id
 
-        const origin = req.headers.get("origin") || SITE_URL
+        // Always use configured SITE_URL to prevent open redirect via Origin header
+        const origin = SITE_URL
 
         // 2. Prepare Stripe Checkout Session parameters
         const params = new URLSearchParams({

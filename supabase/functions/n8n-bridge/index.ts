@@ -73,13 +73,25 @@ Deno.serve(async (req: Request) => {
         const isAuthHook = body.user && (body.mailer || body.email_data || body.confirmation_url || body.otp);
         const isDatabaseWebhook = body.table === 'profiles' && body.type === 'INSERT';
 
-        // 2. Authentication & Authorization for Manual Calls
+        // 2. Authentication & Authorization
         const supabaseUrl = Deno.env.get('SUPABASE_URL') || "";
         const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || "";
         const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || "";
         const authHeader = req.headers.get('Authorization');
 
-        if (!isAuthHook && !isDatabaseWebhook) {
+        // Validate webhook signature for auth hooks and database webhooks
+        if (isAuthHook || isDatabaseWebhook) {
+            const webhookSecret = Deno.env.get('INTERNAL_WEBHOOK_SECRET');
+            const signature = req.headers.get('x-webhook-signature');
+            if (!webhookSecret || !signature || signature !== webhookSecret) {
+                console.warn("Webhook request rejected: invalid or missing signature");
+                return new Response(JSON.stringify({ error: "Unauthorized: Invalid webhook signature" }), {
+                    status: 401,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+            console.log("Webhook signature verified successfully");
+        } else {
             console.log("Context: Manual Call - Verifying authentication...");
             
             if (!authHeader) {
@@ -113,20 +125,20 @@ Deno.serve(async (req: Request) => {
                 .single();
 
             if (profileError || profile?.role !== 'admin') {
-                console.warn(`User ${user.id} attempted admin action without permission.`);
+                console.warn(`User ${user.id.substring(0, 8)}... attempted admin action without permission.`);
                 return new Response(JSON.stringify({ error: "Forbidden: Admin permissions required" }), {
                     status: 403,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 });
             }
-            console.log(`Admin user authenticated: ${user.email} (${user.id})`);
+            console.log(`Admin user authenticated: ${user.id.substring(0, 8)}...`);
         }
 
         // Configuration and environment variables
-        const projectRef = Deno.env.get('SUPABASE_PROJECT_ID');
+        const projectRef = Deno.env.get('PROJECT_REF_ID');
         if (!projectRef && (isAuthHook || !body.link)) {
             // Need projectRef to construct auth links
-            throw new Error("SUPABASE_PROJECT_ID not configured");
+            throw new Error("PROJECT_REF_ID not configured");
         }
         
         const supabaseAuthUrl = `https://${projectRef}.supabase.co/auth/v1`;

@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { withTimeout } from '../lib/withTimeout'
 import logger from '../lib/logger'
 
 interface AuthContextType {
@@ -29,11 +30,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfileData = async (userId: string, accessToken?: string) => {
         try {
-            // 1. Try via standard client with a timeout race
-            const { data, error } = await Promise.race([
+            // 1. Try via standard client with a timeout
+            const { data, error } = await withTimeout(
                 supabase.from('profiles').select('role, plan_type').eq('id', userId).single(),
-                new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 3000))
-            ])
+                3000,
+                'Profile fetch'
+            )
 
             if (!error && data) {
                 setRole(data.role)
@@ -94,8 +96,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setRole(null)
                     setPlan('free')
                 }
-            } catch {
-                // Silently handle or use generic error log in production if needed
+            } catch (err) {
+                logger.error('Auth state change failed:', err)
             } finally {
                 if (mounted) {
                     setLoading(false)
@@ -107,7 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 const { data: { session } } = await supabase.auth.getSession()
                 await handleAuthChange(session)
-            } catch {
+            } catch (err) {
+                logger.error('Auth initialization failed:', err)
                 if (mounted) setLoading(false)
             }
         }
@@ -164,10 +167,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await supabase.auth.signOut()
         } catch (err) {
             logger.error('Sign out error:', err)
-        } finally {
-            // Force a hard reload if the SPA state is sticky
-            window.location.href = '/';
         }
+
+        // Navigate to home — only reload as a last resort
+        window.location.href = '/';
     }
 
     return (

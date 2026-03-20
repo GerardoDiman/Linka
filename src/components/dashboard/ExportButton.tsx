@@ -1,6 +1,4 @@
 import { Download, Image as ImageIcon, Palette, Code, Copy, Check } from "lucide-react"
-import { toBlob } from "html-to-image"
-import download from "downloadjs"
 import { Tooltip } from "../ui/Tooltip"
 import logger from "../../lib/logger"
 import { useState } from "react"
@@ -59,6 +57,10 @@ export function ExportButton() {
 
         const viewport = document.querySelector('.react-flow__viewport') as HTMLElement
         if (!viewport) return
+
+        // Dynamic imports to reduce initial bundle size
+        const { toBlob } = await import("html-to-image")
+        const { default: download } = await import("downloadjs")
 
         const quality = selectedQuality
         setIsExporting(true)
@@ -247,7 +249,8 @@ export function ExportButton() {
         setTimeout(() => setMermaidCopied(false), 2000)
     }
 
-    const handleDownloadMermaid = () => {
+    const handleDownloadMermaid = async () => {
+        const { default: download } = await import("downloadjs")
         const mermaid = generateMermaid()
         const blob = new Blob([mermaid], { type: 'text/plain' })
         download(blob, `linka-graph-${new Date().getTime()}.mmd`)

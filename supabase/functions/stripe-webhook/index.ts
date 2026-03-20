@@ -47,13 +47,28 @@ Deno.serve(async (req) => {
             const supabaseUserId = session.client_reference_id || session.metadata?.supabase_user_id
             const stripeCustomerId = session.customer
 
-            console.log(`Checkout completed for Supabase user: ${supabaseUserId}`)
+            console.log(`Checkout completed for user: ${supabaseUserId?.substring(0, 8)}...`)
 
             if (supabaseUserId) {
                 const supabaseAdmin = createClient(
                     Deno.env.get('SUPABASE_URL') ?? '',
                     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
                 )
+
+                // Idempotency check: skip if already processed
+                const { data: existing } = await supabaseAdmin
+                    .from('profiles')
+                    .select('plan_type, stripe_customer_id')
+                    .eq('id', supabaseUserId)
+                    .single()
+
+                if (existing?.plan_type === 'pro' && existing?.stripe_customer_id === stripeCustomerId) {
+                    console.log('Webhook already processed, skipping duplicate')
+                    return new Response(JSON.stringify({ received: true, skipped: true }), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' },
+                    })
+                }
 
                 console.log("Updating profile in database...")
                 const { error, data } = await supabaseAdmin
@@ -72,9 +87,9 @@ Deno.serve(async (req) => {
                 }
 
                 if (data && data.length > 0) {
-                    console.log(`User ${supabaseUserId} successfully upgraded to PRO`)
+                    console.log(`User ${supabaseUserId?.substring(0, 8)}... successfully upgraded to PRO`)
                 } else {
-                    console.warn(`Profile not found for user ${supabaseUserId}`)
+                    console.warn(`Profile not found for user ${supabaseUserId?.substring(0, 8)}...`)
                 }
             } else {
                 console.warn("supabaseUserId not found in Stripe event")
