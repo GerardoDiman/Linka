@@ -199,7 +199,7 @@ Deno.serve(async (req: Request) => {
                 q.set('token', h);
             }
             q.set('type', rawType || 'signup');
-            q.set('redirect_to', envSiteUrl + "/login");
+            q.set('redirect_to', envSiteUrl + (rawType === 'recovery' ? '/reset-password' : '/login'));
             link = `${supabaseAuthUrl}/verify?${q.toString()}`;
         }
 
